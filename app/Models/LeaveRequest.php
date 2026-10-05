@@ -16,6 +16,11 @@ class LeaveRequest extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new OrganizationScope());
+    }
+
     protected $fillable = [
         'number',
         'employee_id',

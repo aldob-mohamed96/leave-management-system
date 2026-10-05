@@ -16,6 +16,11 @@ class Organization extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new OrganizationScope());
+    }
+
     protected $fillable = [
         'parent_id',
         'type',

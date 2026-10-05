@@ -15,6 +15,11 @@ class Employee extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new OrganizationScope());
+    }
+
     protected $fillable = [
         'organization_id',
         'user_id',
@@ -101,7 +106,7 @@ class Employee extends Model
      * Get the leave balance for a specific type and year.
      * Returns null if no balance record exists yet.
      */
-    public function balanceFor(int $leaveTypeId, int $year = null): ?LeaveBalance
+    public function balanceFor(int $leaveTypeId, ?int $year = null): ?LeaveBalance
     {
         return $this->leaveBalances()
             ->where('leave_type_id', $leaveTypeId)
