@@ -4,7 +4,6 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Imports\EmployeesImport;
-use App\Imports\EmployeesImportResult;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -42,23 +41,20 @@ class ListEmployees extends ListRecords
 
                     Excel::import($import, $path);
 
-                    // Build typed result from import
                     $errors       = $import->getErrors();
                     $errorCount   = count($errors);
                     $successCount = $import->getSuccessCount();
 
-                    $result = new EmployeesImportResult($successCount, $errors);
-
-                    if (! $result->hasErrors()) {
+                    if ($errorCount === 0) {
                         Notification::make()
                             ->success()
-                            ->title("تم استيراد {$result->successCount} موظف بنجاح")
+                            ->title("تم استيراد {$successCount} موظف بنجاح")
                             ->send();
                     } else {
                         Notification::make()
                             ->warning()
-                            ->title("تم الاستيراد: {$result->successCount} موظف ناجح، {$errorCount} خطأ")
-                            ->body(implode("\n", array_slice($result->errors, 0, 5)))
+                            ->title("تم الاستيراد: {$successCount} موظف ناجح، {$errorCount} خطأ")
+                            ->body(implode("\n", array_slice($errors, 0, 5)))
                             ->persistent()
                             ->send();
                     }
