@@ -36,3 +36,14 @@ Route::get('/leave-export', function (\Illuminate\Http\Request $request) {
         'leave-requests.xlsx'
     );
 })->middleware('auth')->name('leave.export');
+
+// Authenticated report PDF download route
+Route::get('/report-pdf', function (\Illuminate\Http\Request $request) {
+    $filters = $request->only(['status', 'organization_id', 'leave_type_id', 'from', 'to']);
+    $content = app(\App\Services\ReportPdfService::class)->generateSummary($filters);
+    return response()->streamDownload(
+        fn () => print($content),
+        'report.pdf',
+        ['Content-Type' => 'application/pdf']
+    );
+})->middleware('auth')->name('report.pdf.download');
