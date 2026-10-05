@@ -200,6 +200,14 @@ class ViewLeaveRequest extends ViewRecord
                         Notification::make()->danger()->title($e->getMessage())->send();
                     }
                 }),
+
+            // Download PDF
+            Action::make('downloadPdf')
+                ->label('تحميل PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->url(fn(): string => route('leave.pdf.download', ['number' => $this->getRecord()->number]))
+                ->openUrlInNewTab(),
         ];
     }
 }

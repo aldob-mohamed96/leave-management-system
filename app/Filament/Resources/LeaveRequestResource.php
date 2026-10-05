@@ -535,7 +535,13 @@ class LeaveRequestResource extends Resource
                 Tables\Actions\BulkAction::make('export')
                     ->label('تصدير')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn() => null), // placeholder
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): \Symfony\Component\HttpFoundation\BinaryFileResponse {
+                        $ids = $records->pluck('id')->toArray();
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\LeaveRequestsExport(['ids' => $ids]),
+                            'leave-requests.xlsx'
+                        );
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }

@@ -99,6 +99,7 @@ class LeaveRequestNotification extends Notification
             'rejected'  => "تم رفض طلب الإجازة — {$this->leaveRequest->number}",
             'returned'  => "طلب إجازة مُعاد للتعديل — {$this->leaveRequest->number}",
             'cancelled' => "تم إلغاء طلب الإجازة — {$this->leaveRequest->number}",
+            'overdue'   => "طلب إجازة متأخر يحتاج إجراءً — {$this->leaveRequest->number}",
             default     => "إشعار طلب إجازة — {$this->leaveRequest->number}",
         };
     }

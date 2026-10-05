@@ -17,6 +17,13 @@ class ListLeaveRequests extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+
+            Actions\Action::make('exportAll')
+                ->label('تصدير Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->url(route('leave.export'))
+                ->openUrlInNewTab(),
         ];
     }
 }
