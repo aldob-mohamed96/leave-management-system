@@ -1,0 +1,525 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\LeaveStatus;
+use App\Enums\StepStatus;
+use App\Exceptions\LeaveRequestException;
+use App\Models\Employee;
+use App\Models\LeaveBalance;
+use App\Models\LeaveRequest;
+use App\Models\LeaveRequestStep;
+use App\Models\LeaveType;
+use App\Models\User;
+use App\Models\WorkflowConfiguration;
+use App\Notifications\LeaveRequestNotification;
+use App\Rules\Leave\CasualBeforeRegularRule;
+use App\Rules\Leave\MaxDaysPerRequestRule;
+use App\Rules\Leave\NoOverlapRule;
+use App\Rules\Leave\SufficientBalanceRule;
+use App\Rules\Leave\WorkingDaysRule;
+use App\Services\DTO\CreateLeaveRequestResult;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
+class LeaveRequestService
+{
+    public function __construct(
+        private readonly LeaveBalanceService $balanceService,
+    ) {}
+
+    // -------------------------------------------------------------------------
+    // Create (Draft)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Validate and create a draft leave request.
+     * Returns a DTO with the request + any non-blocking warnings.
+     *
+     * @param  array<string, mixed>  $data  Must contain: employee_id, leave_type_id,
+     *                                       start_date, end_date, days, (optional) reason,
+     *                                       written_at, substitute_employee_id
+     * @throws ValidationException
+     */
+    public function create(array $data, User $createdBy): CreateLeaveRequestResult
+    {
+        $employee  = Employee::withoutGlobalScopes()->findOrFail($data['employee_id']);
+        $leaveType = LeaveType::findOrFail($data['leave_type_id']);
+        $year      = now()->year;
+
+        $warnings = [];
+
+        // ---- Working days calculation ----
+        $workingDaysRule = new WorkingDaysRule();
+        $workingDaysRule->setData($data);
+        $workingDaysRule->validate('days', $data['days'] ?? 0, fn($msg) => null);
+        if ($workingDaysRule->calculatedDays > 0) {
+            $data['days'] = $workingDaysRule->calculatedDays;
+        }
+
+        // ---- Sufficient balance ----
+        $balanceRule = new SufficientBalanceRule($employee, $leaveType, $year);
+        $balanceRule->validate('days', $data['days'], fn($msg) => throw ValidationException::withMessages(['days' => $msg]));
+        if ($balanceRule->warning) {
+            $warnings[] = $balanceRule->warning;
+        }
+
+        // ---- No overlap ----
+        $overlapMessages = [];
+        $noOverlapRule = new NoOverlapRule($employee->id);
+        $noOverlapRule->setData($data);
+        $noOverlapRule->validate('days', $data['days'], function ($msg) use (&$overlapMessages) {
+            $overlapMessages[] = $msg;
+        });
+        if (! empty($overlapMessages)) {
+            throw ValidationException::withMessages(['start_date' => $overlapMessages]);
+        }
+
+        // ---- Max days per request ----
+        $maxDaysMessages = [];
+        $maxRule = new MaxDaysPerRequestRule($leaveType);
+        $maxRule->validate('days', $data['days'], function ($msg) use (&$maxDaysMessages) {
+            $maxDaysMessages[] = $msg;
+        });
+        if (! empty($maxDaysMessages)) {
+            throw ValidationException::withMessages(['days' => $maxDaysMessages]);
+        }
+
+        // ---- Casual before regular ----
+        $casualRule = new CasualBeforeRegularRule($employee, $leaveType, $year);
+        $casualRule->validate('days', $data['days'], fn($msg) => null);
+        if ($casualRule->warning) {
+            $warnings[] = $casualRule->warning;
+        }
+
+        // ---- Persist ----
+        $request = DB::transaction(function () use ($data, $createdBy, $employee) {
+            return LeaveRequest::create([
+                'employee_id'           => $employee->id,
+                'organization_id'       => $employee->organization_id,
+                'leave_type_id'         => $data['leave_type_id'],
+                'substitute_employee_id' => $data['substitute_employee_id'] ?? null,
+                'start_date'            => $data['start_date'],
+                'end_date'              => $data['end_date'],
+                'days'                  => $data['days'],
+                'written_at'            => $data['written_at'] ?? null,
+                'reason'                => $data['reason'] ?? null,
+                'status'                => LeaveStatus::DRAFT,
+                'created_by'            => $createdBy->id,
+            ]);
+        });
+
+        return new CreateLeaveRequestResult($request->fresh(), $warnings);
+    }
+
+    // -------------------------------------------------------------------------
+    // Submit
+    // -------------------------------------------------------------------------
+
+    /**
+     * Transition a draft/returned request to SUBMITTED and create workflow steps.
+     *
+     * @throws LeaveRequestException
+     */
+    public function submit(LeaveRequest $request, User $submittedBy): LeaveRequest
+    {
+        if (! in_array($request->status, [LeaveStatus::DRAFT, LeaveStatus::RETURNED])) {
+            throw LeaveRequestException::invalidTransition($request->status, LeaveStatus::SUBMITTED);
+        }
+
+        return DB::transaction(function () use ($request, $submittedBy) {
+            // Delete any stale steps from a previous submission
+            $request->steps()->delete();
+
+            // Snapshot current balance
+            $leaveType = $request->leaveType;
+            $balance   = $this->balanceService->getOrCreateBalance(
+                $request->employee,
+                $leaveType,
+                now()->year
+            );
+
+            $request->balance_entitled  = $balance->entitled;
+            $request->balance_used      = $balance->used;
+            $request->balance_remaining = $balance->remaining;
+
+            // Build workflow steps from configuration
+            $stages = WorkflowConfiguration::where('organization_id', $request->organization_id)
+                ->where('is_active', true)
+                ->orderBy('step_order')
+                ->get();
+
+            if ($stages->isEmpty()) {
+                throw LeaveRequestException::noWorkflowConfigured($request->organization_id);
+            }
+
+            foreach ($stages as $stage) {
+                LeaveRequestStep::create([
+                    'leave_request_id' => $request->id,
+                    'step_order'       => $stage->step_order,
+                    'stage'            => $stage->stage_name,
+                    'status'           => StepStatus::PENDING,
+                ]);
+            }
+
+            $firstStage = $stages->first();
+            $request->status        = LeaveStatus::SUBMITTED;
+            $request->current_stage = $firstStage->stage_name;
+            $request->save();
+
+            // Notify relevant users (best-effort)
+            $this->notifySubmitted($request);
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Approve a Step
+    // -------------------------------------------------------------------------
+
+    /**
+     * Record an approval decision on a workflow step.
+     * Advances the request to the next stage or marks it fully approved.
+     *
+     * @throws LeaveRequestException
+     */
+    public function approve(
+        LeaveRequest $request,
+        LeaveRequestStep $step,
+        User $actedBy,
+        ?string $note = null
+    ): LeaveRequest {
+        $this->guardStepAction($request, $step);
+
+        return DB::transaction(function () use ($request, $step, $actedBy, $note) {
+            // Mark this step approved
+            $step->update([
+                'status'   => StepStatus::APPROVED,
+                'acted_by' => $actedBy->id,
+                'acted_at' => now(),
+                'note'     => $note,
+            ]);
+
+            // Count approvals in this stage
+            $stepsInStage = LeaveRequestStep::where('leave_request_id', $request->id)
+                ->where('stage', $step->stage)
+                ->get();
+
+            $approvedCount = $stepsInStage->where('status', StepStatus::APPROVED)->count();
+            $totalCount    = $stepsInStage->count();
+
+            // Get the approval rule for this stage
+            $wfConfig = WorkflowConfiguration::where('organization_id', $request->organization_id)
+                ->where('stage_name', $step->stage)
+                ->where('is_active', true)
+                ->first();
+
+            $approvalRule = $wfConfig?->approval_rule ?? \App\Enums\ApprovalRule::ANY;
+
+            if (! $approvalRule->isStageApproved($approvedCount, $totalCount)) {
+                // Not enough approvals yet — just save and wait
+                return $request->fresh();
+            }
+
+            // Stage approved — skip any remaining pending steps in this stage
+            LeaveRequestStep::where('leave_request_id', $request->id)
+                ->where('stage', $step->stage)
+                ->where('status', StepStatus::PENDING)
+                ->update(['status' => StepStatus::SKIPPED->value, 'acted_at' => now()]);
+
+            // Find next active stage
+            $nextStage = WorkflowConfiguration::where('organization_id', $request->organization_id)
+                ->where('is_active', true)
+                ->where('step_order', '>', $wfConfig?->step_order ?? $step->step_order)
+                ->orderBy('step_order')
+                ->first();
+
+            if ($nextStage) {
+                // Advance to next stage
+                LeaveRequestStep::firstOrCreate([
+                    'leave_request_id' => $request->id,
+                    'step_order'       => $nextStage->step_order,
+                ], [
+                    'stage'  => $nextStage->stage_name,
+                    'status' => StepStatus::PENDING,
+                ]);
+
+                $request->status        = LeaveStatus::IN_REVIEW;
+                $request->current_stage = $nextStage->stage_name;
+                $request->save();
+
+                $this->notifyNextStage($request, $nextStage->stage_name);
+            } else {
+                // Final approval
+                $request->status        = LeaveStatus::APPROVED;
+                $request->current_stage = null;
+                $request->decided_by    = $actedBy->id;
+                $request->save();
+
+                // Deduct balance only if leave type requires it
+                if ($request->leaveType->deducts_balance) {
+                    $balance = $this->balanceService->getOrCreateBalance(
+                        $request->employee,
+                        $request->leaveType,
+                        now()->year
+                    );
+                    $this->balanceService->deduct($balance, (float) $request->days, $request, $actedBy);
+                }
+
+                $this->notifyApproved($request);
+            }
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Reject
+    // -------------------------------------------------------------------------
+
+    /**
+     * Reject the request. A reason is mandatory.
+     *
+     * @throws LeaveRequestException
+     */
+    public function reject(
+        LeaveRequest $request,
+        LeaveRequestStep $step,
+        User $actedBy,
+        string $reason
+    ): LeaveRequest {
+        if (empty(trim($reason))) {
+            throw new LeaveRequestException('سبب الرفض مطلوب ولا يمكن أن يكون فارغاً.');
+        }
+
+        $this->guardStepAction($request, $step);
+
+        return DB::transaction(function () use ($request, $step, $actedBy, $reason) {
+            $step->update([
+                'status'   => StepStatus::REJECTED,
+                'acted_by' => $actedBy->id,
+                'acted_at' => now(),
+                'note'     => $reason,
+            ]);
+
+            // Skip all remaining pending steps
+            LeaveRequestStep::where('leave_request_id', $request->id)
+                ->where('status', StepStatus::PENDING)
+                ->update(['status' => StepStatus::SKIPPED->value, 'acted_at' => now()]);
+
+            $request->status           = LeaveStatus::REJECTED;
+            $request->rejection_reason = $reason;
+            $request->current_stage    = null;
+            $request->decided_by       = $actedBy->id;
+            $request->save();
+
+            $this->notifyRejected($request, $reason);
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Return for Edits
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return the request to the employee for corrections.
+     * Note: method named 'returnRequest' because 'return' is a PHP reserved word.
+     *
+     * @throws LeaveRequestException
+     */
+    public function returnRequest(
+        LeaveRequest $request,
+        LeaveRequestStep $step,
+        User $actedBy,
+        string $note
+    ): LeaveRequest {
+        $this->guardStepAction($request, $step);
+
+        return DB::transaction(function () use ($request, $step, $actedBy, $note) {
+            $step->update([
+                'status'   => StepStatus::RETURNED,
+                'acted_by' => $actedBy->id,
+                'acted_at' => now(),
+                'note'     => $note,
+            ]);
+
+            LeaveRequestStep::where('leave_request_id', $request->id)
+                ->where('status', StepStatus::PENDING)
+                ->update(['status' => StepStatus::SKIPPED->value, 'acted_at' => now()]);
+
+            $request->status        = LeaveStatus::RETURNED;
+            $request->current_stage = null;
+            $request->save();
+
+            $this->notifyReturned($request, $note);
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Cancel
+    // -------------------------------------------------------------------------
+
+    /**
+     * Cancel a request. If it was previously approved, refunds the balance.
+     *
+     * @throws LeaveRequestException
+     */
+    public function cancel(LeaveRequest $request, User $cancelledBy): LeaveRequest
+    {
+        if (! $request->status->canBeCancelled()) {
+            throw LeaveRequestException::invalidTransition($request->status, LeaveStatus::CANCELLED);
+        }
+
+        return DB::transaction(function () use ($request, $cancelledBy) {
+            $wasApproved = $request->status === LeaveStatus::APPROVED;
+
+            LeaveRequestStep::where('leave_request_id', $request->id)
+                ->where('status', StepStatus::PENDING)
+                ->update(['status' => StepStatus::SKIPPED->value, 'acted_at' => now()]);
+
+            $request->status        = LeaveStatus::CANCELLED;
+            $request->current_stage = null;
+            $request->save();
+
+            if ($wasApproved && $request->leaveType->deducts_balance) {
+                $balance = $this->balanceService->getOrCreateBalance(
+                    $request->employee,
+                    $request->leaveType,
+                    now()->year
+                );
+                $this->balanceService->refund($balance, (float) $request->days, $request, $cancelledBy);
+            }
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Guards
+    // -------------------------------------------------------------------------
+
+    private function guardStepAction(LeaveRequest $request, LeaveRequestStep $step): void
+    {
+        $validStatuses = [LeaveStatus::SUBMITTED, LeaveStatus::IN_REVIEW];
+
+        if (! in_array($request->status, $validStatuses)) {
+            throw LeaveRequestException::invalidTransition(
+                $request->status,
+                LeaveStatus::IN_REVIEW,
+                'الطلب لا يقبل إجراءات الاعتماد في حالته الحالية.'
+            );
+        }
+
+        if ($step->status !== StepStatus::PENDING) {
+            throw new LeaveRequestException('هذه المرحلة تمت معالجتها مسبقاً ولا يمكن تعديلها.');
+        }
+
+        if ($step->stage !== $request->current_stage) {
+            throw new LeaveRequestException('هذه المرحلة ليست المرحلة النشطة حالياً.');
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Notifications (best-effort, never break the main flow)
+    // -------------------------------------------------------------------------
+
+    private function notifySubmitted(LeaveRequest $request): void
+    {
+        try {
+            $users = $this->getUsersForStage($request, $request->current_stage);
+            foreach ($users as $user) {
+                $user->notify(new LeaveRequestNotification(
+                    $request,
+                    'submitted',
+                    "طلب إجازة جديد بانتظار مراجعتك — رقم {$request->number}"
+                ));
+            }
+        } catch (\Throwable) {
+            // Notifications never break the workflow
+        }
+    }
+
+    private function notifyNextStage(LeaveRequest $request, string $stageName): void
+    {
+        try {
+            $users = $this->getUsersForStage($request, $stageName);
+            foreach ($users as $user) {
+                $user->notify(new LeaveRequestNotification(
+                    $request,
+                    'submitted',
+                    "طلب إجازة في انتظار رأيكم — رقم {$request->number}"
+                ));
+            }
+        } catch (\Throwable) {}
+    }
+
+    private function notifyApproved(LeaveRequest $request): void
+    {
+        try {
+            $request->createdBy?->notify(new LeaveRequestNotification(
+                $request,
+                'approved',
+                "تمت الموافقة على طلب الإجازة رقم {$request->number}"
+            ));
+        } catch (\Throwable) {}
+    }
+
+    private function notifyRejected(LeaveRequest $request, string $reason): void
+    {
+        try {
+            $request->createdBy?->notify(new LeaveRequestNotification(
+                $request,
+                'rejected',
+                "تم رفض طلب الإجازة رقم {$request->number}. السبب: {$reason}"
+            ));
+        } catch (\Throwable) {}
+    }
+
+    private function notifyReturned(LeaveRequest $request, string $note): void
+    {
+        try {
+            $request->createdBy?->notify(new LeaveRequestNotification(
+                $request,
+                'returned',
+                "أُعيد طلب الإجازة رقم {$request->number} للتعديل. ملاحظة: {$note}"
+            ));
+        } catch (\Throwable) {}
+    }
+
+    /**
+     * Find users who should receive notifications for a given stage.
+     * Looks up users with the required_role defined in WorkflowConfiguration.
+     */
+    private function getUsersForStage(LeaveRequest $request, ?string $stageName): iterable
+    {
+        if (! $stageName) {
+            return [];
+        }
+
+        $wfConfig = WorkflowConfiguration::where('organization_id', $request->organization_id)
+            ->where('stage_name', $stageName)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $wfConfig || ! $wfConfig->required_role) {
+            return [];
+        }
+
+        setPermissionsTeamId($request->organization_id);
+
+        $users = \App\Models\User::where('organization_id', $request->organization_id)
+            ->where('is_active', true)
+            ->get()
+            ->filter(fn($u) => $u->hasRole($wfConfig->required_role));
+
+        setPermissionsTeamId(null);
+
+        return $users;
+    }
+}

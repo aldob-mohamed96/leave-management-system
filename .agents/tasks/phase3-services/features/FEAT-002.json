@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Catalog resources: OrganizationResource, UserResource, EmployeeResource (with BalanceBadge component), LeaveTypeResource, HolidayResource. These are simpler CRUD/list resources that do not touch LeaveRequestService. Independent of FEAT-003 but depends on FEAT-001 (policies must exist).",
+  "status": "pending",
+  "steps": [
+    "1. Create app/Filament/Components/BalanceBadge.php as a Filament ViewComponent (extends \\Filament\\Components\\Component or a plain class with a render() method). It receives an Employee model, loads leaveBalances for the current year via $employee->leaveBalances()->with('leaveType')->currentYear()->get(), and renders a badge per leave type showing 'المتبقي: X من Y'. Create the Blade view at resources/views/filament/components/balance-badge.blade.php.",
+
+    "2. Create app/Filament/Resources/OrganizationResource.php with navigationGroup('المؤسسات والمستخدمون'), navigationIcon('heroicon-o-building-office-2'), navigationLabel('المؤسسات'). Table columns: id, name, code, type (using OrganizationType::class labels), parent->name as 'الجهة الأم', is_active (IconColumn). Form fields: TextInput name (required), TextInput code (required), Select type (OrganizationType enum options), Select parent_id (Organization::withoutGlobalScopes() options, nullable), Toggle is_active. Filters: SelectFilter on type, TernaryFilter on is_active. Actions: standard EditAction, DeleteAction (soft delete — use forceDelete only from a separate action if needed). Do NOT add a global scope bypass on the resource — let OrganizationScope apply (scoped to current user's org subtree). Policy: OrganizationPolicy. Include Pages\\ListOrganizations, Pages\\CreateOrganization, Pages\\EditOrganization as inner Page classes.",
+
+    "3. Create app/Filament/Resources/UserResource.php with navigationGroup('المؤسسات والمستخدمون'), navigationLabel('المستخدمون'), navigationIcon('heroicon-o-user-circle'). Table columns: name, email, organization->name, is_active (IconColumn), roles list (formatted from $record->getRoleNames()). Form fields: TextInput name (required), TextInput email (required, unique rule excluding current record), TextInput password (nullable on edit, hashed), Select organization_id (Organization::withoutGlobalScopes() options with search), Toggle is_active, CheckboxList or Select roles (using Spatie roles for the selected organization — load roles via Role::where('organization_id', $record->organization_id)->pluck('name', 'name') in a reactive afterStateUpdated). Filters: TernaryFilter is_active, SelectFilter organization_id. Policy: UserPolicy. Pages: ListUsers, CreateUser, EditUser.",
+
+    "4. Create app/Filament/Resources/EmployeeResource.php with navigationGroup('الموظفون'), navigationLabel('الموظفون'), navigationIcon('heroicon-o-identification'). Table columns: employee_code, full_name, job_title, entitlement_grade (using EntitlementGrade::label()), organization->name, is_active (IconColumn), and a custom ViewColumn that renders the BalanceBadge component. Form fields: TextInput employee_code, TextInput full_name (required), TextInput job_title, Select organization_id (withoutGlobalScopes), Select entitlement_grade (EntitlementGrade enum options with yearlyDays hint in label), Select user_id (nullable, User options), DatePicker birth_date, DatePicker hire_date, DatePicker work_start_date, TextInput phone, Toggle is_active. Filters: SelectFilter organization_id, SelectFilter entitlement_grade, TernaryFilter is_active. Policy: EmployeePolicy. Pages: ListEmployees, CreateEmployee, EditEmployee.",
+
+    "5. Create app/Filament/Resources/LeaveTypeResource.php with navigationGroup('الإعدادات'), navigationLabel('أنواع الإجازات'), navigationIcon('heroicon-o-document-text'). Table columns: code, name, deducts_balance (IconColumn), yearly_entitlement, max_days_per_request, is_active (IconColumn). Form fields: TextInput code (required, unique), TextInput name (required), Toggle deducts_balance, TextInput yearly_entitlement (numeric), TextInput max_days_per_request (integer), Toggle is_active. No policy class needed — gate-protect via can('manage_organization'). Pages: ListLeaveTypes, CreateLeaveType, EditLeaveType.",
+
+    "6. Create app/Filament/Resources/HolidayResource.php with navigationGroup('الإعدادات'), navigationLabel('الإجازات الرسمية'), navigationIcon('heroicon-o-calendar'). Table columns: date (DateColumn formatted 'Y-m-d'), name, and a computed column showing day-of-week in Arabic. Form fields: DatePicker date (required), TextInput name (required). Default sort: date ascending. Pages: ListHolidays, CreateHoliday, EditHoliday."
+  ],
+  "acceptance_criteria": [
+    "php artisan route:list | grep filament shows routes for organizations, users, employees, leave-types, holidays",
+    "php artisan test --stop-on-failure passes",
+    "BalanceBadge view file exists at resources/views/filament/components/balance-badge.blade.php",
+    "All five Resource files exist under app/Filament/Resources/"
+  ],
+  "verification": [
+    "php artisan config:clear && php artisan route:clear",
+    "php artisan route:list | grep filament",
+    "php artisan test --stop-on-failure"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

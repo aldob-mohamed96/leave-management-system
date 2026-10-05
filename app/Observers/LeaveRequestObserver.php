@@ -56,7 +56,8 @@ class LeaveRequestObserver
             return;
         }
 
-        $old = LeaveStatus::from($request->getOriginal('status'))->label();
+        $raw = $request->getOriginal('status');
+        $old = ($raw instanceof LeaveStatus ? $raw : LeaveStatus::from($raw))->label();
         $new = $request->status->label();
 
         Log::info("[LeaveRequest] #{$request->number} | {$old} → {$new}", [

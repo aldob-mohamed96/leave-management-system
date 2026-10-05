@@ -59,8 +59,9 @@ describe('LeaveStatus', function () {
         expect(LeaveStatus::SUBMITTED->canBeCancelled())->toBeTrue();
         expect(LeaveStatus::IN_REVIEW->canBeCancelled())->toBeTrue();
         expect(LeaveStatus::RETURNED->canBeCancelled())->toBeTrue();
-        expect(LeaveStatus::APPROVED->canBeCancelled())->toBeFalse();
+        expect(LeaveStatus::APPROVED->canBeCancelled())->toBeTrue();  // approved can be cancelled (refunds balance)
         expect(LeaveStatus::REJECTED->canBeCancelled())->toBeFalse();
+        expect(LeaveStatus::CANCELLED->canBeCancelled())->toBeFalse();
     });
 
     it('identifies editable statuses', function () {

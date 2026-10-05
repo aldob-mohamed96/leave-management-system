@@ -24,6 +24,14 @@ class LeaveRequestException extends \RuntimeException
     }
 
     /**
+     * Factory: no workflow configuration found for an organization.
+     */
+    public static function noWorkflowConfigured(int $organizationId): self
+    {
+        return new self("لم يتم إعداد مسار الاعتماد للمؤسسة رقم {$organizationId}. يرجى مراجعة إعدادات سير العمل.");
+    }
+
+    /**
      * Factory: insufficient leave balance.
      */
     public static function insufficientBalance(
@@ -31,12 +39,14 @@ class LeaveRequestException extends \RuntimeException
         float $requested,
         ?string $detail = null
     ): self {
-        $message = "الرصيد المتبقي ({$remaining} يوم) أقل من المطلوب ({$requested} يوم)";
-
+        $message = sprintf(
+            'الرصيد المتبقي (%.1f يوم) أقل من المطلوب (%.1f يوم)',
+            $remaining,
+            $requested
+        );
         if ($detail !== null) {
             $message .= " — {$detail}";
         }
-
         return new self($message);
     }
 }

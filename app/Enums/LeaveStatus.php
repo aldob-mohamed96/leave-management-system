@@ -47,7 +47,7 @@ enum LeaveStatus: string
     /** States that allow the request to be cancelled */
     public function canBeCancelled(): bool
     {
-        return in_array($this, [self::DRAFT, self::SUBMITTED, self::IN_REVIEW, self::RETURNED]);
+        return in_array($this, [self::DRAFT, self::SUBMITTED, self::IN_REVIEW, self::RETURNED, self::APPROVED]);
     }
 
     /** States that allow the request to be edited */

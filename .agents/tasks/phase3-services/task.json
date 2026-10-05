@@ -1,0 +1,7 @@
+{
+  "task_id": "task-phase3-filament-admin",
+  "task_description": "Implement Phase 3 of the Leave Management System: a full Filament 3.x admin panel with Arabic RTL UI, organization scoping, policies, and resources for Organizations, Users, Employees, LeaveRequests, LeaveTypes, and Holidays. LeaveRequestResource integrates the existing LeaveRequestService and LeaveBalanceService.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

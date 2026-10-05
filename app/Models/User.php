@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,7 +13,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable, HasRoles, LogsActivity;
 
@@ -109,5 +111,33 @@ class User extends Authenticatable
     {
         $this->setOrganizationTeam();
         return $this->hasPermissionTo('approve_leave_request');
+    }
+
+    // -------------------------------------------------------------------------
+    // Filament Panel Access
+    // -------------------------------------------------------------------------
+
+    /**
+     * تحديد ما إذا كان المستخدم مسموحاً له بالدخول إلى لوحة الإدارة.
+     * يجب استدعاء setOrganizationTeam() أولاً لضمان صحة فحص الأدوار في Spatie Teams.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if (! $this->is_active) {
+            return false;
+        }
+
+        $this->setOrganizationTeam();
+
+        return $this->hasRole([
+                'مدير المديرية',
+                'وكيل المديرية',
+                'مدير الإدارة',
+                'مسؤول الإجازات',
+                'كاتب الإدارة',
+                'مدير مدرسة',
+                'وكيل مدرسة',
+            ])
+            || $this->hasPermissionTo('manage_organization');
     }
 }
