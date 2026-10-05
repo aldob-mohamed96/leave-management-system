@@ -19,8 +19,12 @@ class LeaveRequestPdfService
             $qrCode = QrCode::format('svg')
                 ->size(80)
                 ->generate(route('leave.verify', ['number' => $request->number]));
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             // QR generation failure is non-fatal — PDF will render without QR
+            \Illuminate\Support\Facades\Log::warning('[LeaveRequestPdfService] QR code generation failed.', [
+                'number' => $request->number,
+                'error'  => $e->getMessage(),
+            ]);
         }
 
         // Convert days to Arabic words
@@ -37,15 +41,23 @@ class LeaveRequestPdfService
 
     /**
      * Convert an integer number of days to Arabic words.
+     * Examples: 1 → يوم واحد, 2 → يومان, 21 → واحد وعشرون يوماً, 45 → خمسة وأربعون يوماً
      */
     private function daysToArabicWords(int $days): string
     {
-        $ones = [
+        // Full phrases for 1–19 (standalone — not used in compound numbers)
+        $standalone = [
             '', 'يوم واحد', 'يومان', 'ثلاثة أيام', 'أربعة أيام', 'خمسة أيام',
             'ستة أيام', 'سبعة أيام', 'ثمانية أيام', 'تسعة أيام', 'عشرة أيام',
             'أحد عشر يوماً', 'اثنا عشر يوماً', 'ثلاثة عشر يوماً', 'أربعة عشر يوماً',
             'خمسة عشر يوماً', 'ستة عشر يوماً', 'سبعة عشر يوماً', 'ثمانية عشر يوماً',
             'تسعة عشر يوماً',
+        ];
+
+        // Unit words for use in compound numbers (without "أيام" suffix)
+        $units = [
+            '', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة',
+            'ستة', 'سبعة', 'ثمانية', 'تسعة',
         ];
 
         $tens = [
@@ -58,7 +70,7 @@ class LeaveRequestPdfService
         }
 
         if ($days < 20) {
-            return $ones[$days];
+            return $standalone[$days];
         }
 
         if ($days < 100) {
@@ -69,7 +81,9 @@ class LeaveRequestPdfService
                 return $tens[$ten] . ' يوماً';
             }
 
-            return $ones[$rest] . ' و' . $tens[$ten];
+            // Arabic grammar: units + و + tens + يوماً
+            // e.g. 25 → "خمسة وعشرون يوماً"
+            return $units[$rest] . ' و' . $tens[$ten] . ' يوماً';
         }
 
         return "{$days} يوماً";

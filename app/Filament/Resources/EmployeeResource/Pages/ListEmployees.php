@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Imports\EmployeesImport;
+use App\Imports\EmployeesImportResult;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -36,24 +37,29 @@ class ListEmployees extends ListRecords
                         ->directory('imports/employees'),
                 ])
                 ->action(function (array $data): void {
-                    $path = storage_path('app/' . $data['file']);
+                    $path   = storage_path('app/' . $data['file']);
                     $import = new EmployeesImport();
 
                     Excel::import($import, $path);
 
-                    $errors = $import->getErrors();
-                    $errorCount = count($errors);
+                    // Build typed result from import
+                    $errors       = $import->getErrors();
+                    $errorCount   = count($errors);
+                    $successCount = $import->getSuccessCount();
 
-                    if ($errorCount === 0) {
+                    $result = new EmployeesImportResult($successCount, $errors);
+
+                    if (! $result->hasErrors()) {
                         Notification::make()
                             ->success()
-                            ->title('تم الاستيراد بنجاح')
+                            ->title("تم استيراد {$result->successCount} موظف بنجاح")
                             ->send();
                     } else {
                         Notification::make()
                             ->warning()
-                            ->title("تم الاستيراد مع {$errorCount} خطأ")
-                            ->body(implode("\n", array_slice($errors, 0, 5)))
+                            ->title("تم الاستيراد: {$result->successCount} موظف ناجح، {$errorCount} خطأ")
+                            ->body(implode("\n", array_slice($result->errors, 0, 5)))
+                            ->persistent()
                             ->send();
                     }
                 }),

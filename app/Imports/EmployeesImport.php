@@ -16,6 +16,7 @@ use Throwable;
 class EmployeesImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, SkipsOnError, SkipsOnFailure
 {
     public array $errors = [];
+    private int $successCount = 0;
 
     /**
      * Map each spreadsheet row to an Employee model instance.
@@ -27,14 +28,14 @@ class EmployeesImport implements ToModel, WithHeadingRow, WithValidation, WithBa
             ->first();
 
         if (! $org) {
-            // Org not found — belt-and-suspenders (validation should catch this first)
             return null;
         }
 
-        // Safely parse entitlement_grade — pass null if blank to avoid cast errors
         $entitlementGrade = isset($row['entitlement_grade']) && $row['entitlement_grade'] !== ''
             ? $row['entitlement_grade']
             : null;
+
+        $this->successCount++;
 
         return new Employee([
             'organization_id'   => $org->id,
@@ -92,6 +93,11 @@ class EmployeesImport implements ToModel, WithHeadingRow, WithValidation, WithBa
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    public function getSuccessCount(): int
+    {
+        return $this->successCount;
     }
 
     /**
