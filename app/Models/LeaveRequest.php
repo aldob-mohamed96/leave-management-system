@@ -195,9 +195,6 @@ class LeaveRequest extends Model
         return $query->whereIn('status', [
             LeaveStatus::SUBMITTED->value,
             LeaveStatus::IN_REVIEW->value,
-        ])->where(function ($q) use ($days) {
-            $q->where('submitted_at', '<', now()->subDays($days))
-              ->orWhereNull('submitted_at');
-        });
+        ])->where('submitted_at', '<', now()->subDays($days));
     }
 }

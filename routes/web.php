@@ -16,6 +16,10 @@ Route::get('/leave-pdf/{number}', function (string $number) {
     $leaveRequest = \App\Models\LeaveRequest::withoutGlobalScopes()
         ->where('number', $number)
         ->firstOrFail();
+
+    // Enforce per-record authorization — only users with 'view' permission on this record
+    \Illuminate\Support\Facades\Gate::authorize('view', $leaveRequest);
+
     $content = app(\App\Services\LeaveRequestPdfService::class)->generate($leaveRequest);
     return response()->streamDownload(
         fn() => print($content),
