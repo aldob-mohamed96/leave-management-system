@@ -16,6 +16,7 @@ use App\Policies\OrganizationPolicy;
 use App\Policies\UserPolicy;
 use App\Services\LeaveBalanceService;
 use App\Services\LeaveRequestService;
+use App\Services\ReportPdfService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(LeaveBalanceService::class);
         $this->app->singleton(LeaveRequestService::class);
+        $this->app->singleton(\App\Services\DashboardStatsService::class);
+        $this->app->singleton(ReportPdfService::class);
     }
 
     /**

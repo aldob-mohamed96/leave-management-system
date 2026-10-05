@@ -2,69 +2,100 @@
 
 namespace App\Services;
 
+use App\Enums\LeaveStatus;
 use App\Models\LeaveRequest;
+use App\Models\LeaveType;
+use App\Models\Organization;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Collection;
 
 class ReportPdfService
 {
+    public function __construct(
+        private readonly DashboardStatsService $statsService,
+    ) {}
+
     /**
-     * Generate a PDF summary report binary string for the given filters.
+     * Generate a summary report PDF binary.
      *
      * @param  array{
-     *     status?: string,
-     *     organization_id?: int,
-     *     leave_type_id?: int,
-     *     date_range?: array{from?: string, to?: string}
+     *   from?: string,
+     *   to?: string,
+     *   organization_id?: int,
+     *   leave_type_id?: int,
+     *   status?: string,
      * } $filters
-     * @return string  PDF binary string
      */
-    public function generateSummary(array $filters): string
+    public function generateSummary(array $filters = []): string
     {
-        $requests = LeaveRequest::withoutGlobalScopes()
-            ->with(['employee.organization', 'leaveType'])
-            ->when($filters['status'] ?? null,
-                fn($q, $v) => $q->where('status', $v))
-            ->when($filters['organization_id'] ?? null,
-                fn($q, $v) => $q->where('organization_id', $v))
-            ->when($filters['leave_type_id'] ?? null,
-                fn($q, $v) => $q->where('leave_type_id', $v))
-            ->when($filters['date_range']['from'] ?? null,
-                fn($q, $v) => $q->whereDate('start_date', '>=', $v))
-            ->when($filters['date_range']['to'] ?? null,
-                fn($q, $v) => $q->whereDate('start_date', '<=', $v))
-            ->get();
+        $data = $this->buildReportData($filters);
 
-        $total = $requests->count();
+        $pdf = Pdf::loadView('pdf.report-summary', $data)
+            ->setPaper('a4', 'portrait');
 
-        // Status breakdown: count and percentage per status
-        $statusBreakdown = $requests
-            ->groupBy(fn($r) => $r->status->value)
-            ->map(fn($group, $statusValue) => [
-                'status'     => $statusValue,
-                'label'      => $group->first()->status->label(),
-                'count'      => $group->count(),
-                'percentage' => $total > 0 ? round($group->count() / $total * 100, 1) : 0.0,
-            ])
-            ->values()
-            ->toArray();
+        return $pdf->output();
+    }
 
-        // Top 10 employees by total days taken
-        $topEmployees = $requests
+    private function buildReportData(array $filters): array
+    {
+        $query = LeaveRequest::withoutGlobalScopes()
+            ->with(['employee.organization', 'leaveType']);
+
+        if (! empty($filters['from'])) {
+            $query->where('start_date', '>=', $filters['from']);
+        }
+        if (! empty($filters['to'])) {
+            $query->where('end_date', '<=', $filters['to']);
+        }
+        if (! empty($filters['organization_id'])) {
+            $org = Organization::withoutGlobalScopes()->find($filters['organization_id']);
+            if ($org) {
+                $query->whereIn('organization_id', $org->subtreeIds());
+            }
+        }
+        if (! empty($filters['leave_type_id'])) {
+            $query->where('leave_type_id', $filters['leave_type_id']);
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $requests = $query->get();
+
+        // Status breakdown
+        $statusBreakdown = collect(LeaveStatus::cases())->map(fn($s) => [
+            'label' => $s->label(),
+            'count' => $requests->where('status', $s)->count(),
+        ])->filter(fn($r) => $r['count'] > 0)->values();
+
+        // Top 10 employees by days taken
+        $topTakers = $requests
+            ->where('status', LeaveStatus::APPROVED)
             ->groupBy('employee_id')
-            ->map(function ($group) {
-                $first = $group->first();
-                return [
-                    'name'       => $first->employee?->full_name ?? '—',
-                    'school'     => $first->employee?->organization?->name ?? '—',
-                    'total_days' => $group->sum(fn($r) => (float) $r->days),
-                ];
-            })
+            ->map(fn($group) => [
+                'name'       => $group->first()->employee?->full_name ?? '—',
+                'school'     => $group->first()->employee?->organization?->name ?? '—',
+                'total_days' => $group->sum('days'),
+                'count'      => $group->count(),
+            ])
             ->sortByDesc('total_days')
-            ->values()
             ->take(10)
-            ->toArray();
+            ->values();
 
-        return Pdf::loadView('pdf.report-summary', compact('filters', 'statusBreakdown', 'topEmployees'))
-            ->output();
+        $org = ! empty($filters['organization_id'])
+            ? Organization::withoutGlobalScopes()->find($filters['organization_id'])
+            : null;
+
+        return [
+            'filters'         => $filters,
+            'orgName'         => $org?->name ?? 'جميع المؤسسات',
+            'generatedAt'     => now()->format('Y/m/d H:i'),
+            'totalRequests'   => $requests->count(),
+            'statusBreakdown' => $statusBreakdown,
+            'topTakers'       => $topTakers,
+            'leaveTypeName'   => ! empty($filters['leave_type_id'])
+                ? LeaveType::find($filters['leave_type_id'])?->name
+                : null,
+        ];
     }
 }

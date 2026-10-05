@@ -1,146 +1,102 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>تقرير الإجازات</title>
+<meta charset="UTF-8">
+<title>تقرير الإجازات</title>
+<style>
+  body { font-family: DejaVu Sans, Arial, sans-serif; direction: rtl; text-align: right; font-size: 11px; color: #1a1a1a; margin: 20px; }
+  h1 { font-size: 18px; text-align: center; color: #1e3a5f; border-bottom: 2px solid #1e3a5f; padding-bottom: 8px; }
+  h2 { font-size: 13px; color: #1e3a5f; margin-top: 20px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  .meta { background: #f5f7fa; padding: 10px; border-radius: 4px; margin-bottom: 16px; }
+  .meta table { width: 100%; }
+  .meta td { padding: 3px 8px; }
+  .meta td:first-child { font-weight: bold; width: 30%; }
+  table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.data th { background: #1e3a5f; color: #fff; padding: 7px; text-align: right; font-size: 11px; }
+  table.data td { padding: 6px 7px; border-bottom: 1px solid #e0e0e0; }
+  table.data tr:nth-child(even) { background: #f8f9fb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+  .footer { margin-top: 30px; font-size: 9px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 8px; }
+</style>
 </head>
 <body>
-<div style="font-family: DejaVu Sans, serif; direction: rtl; font-size: 12px; color: #111; margin: 0; padding: 10px 20px;">
 
-    {{-- ===== HEADER ===== --}}
-    <div style="text-align: center; border-bottom: 2px solid #1e3a5f; padding-bottom: 12px; margin-bottom: 16px;">
-        <div style="font-size: 14px; color: #555; margin-bottom: 4px;">وزارة التربية والتعليم</div>
-        <div style="font-size: 18px; font-weight: bold; color: #1e3a5f; margin-bottom: 4px;">تقرير الإجازات</div>
-        <div style="font-size: 11px; color: #777;">تاريخ الإصدار: <strong>{{ now()->format('Y/m/d H:i') }}</strong></div>
-    </div>
+<h1>تقرير نظام إجازات مديرية الأقصر التعليمية</h1>
 
-    {{-- ===== FILTER SUMMARY ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            معايير التصفية المطبّقة
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold; width: 25%;">الفترة الزمنية</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; width: 75%;">
-                    @if(!empty($filters['date_range']['from']) || !empty($filters['date_range']['to']))
-                        {{ $filters['date_range']['from'] ?? '—' }}
-                        @if(!empty($filters['date_range']['from']) && !empty($filters['date_range']['to']))
-                             &larr; 
-                        @endif
-                        {{ $filters['date_range']['to'] ?? '' }}
-                    @else
-                        جميع التواريخ
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">الحالة</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">
-                    @if(!empty($filters['status']))
-                        {{ \App\Enums\LeaveStatus::from($filters['status'])->label() }}
-                    @else
-                        جميع الحالات
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">المؤسسة</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">
-                    @if(!empty($filters['organization_id']))
-                        {{ \App\Models\Organization::withoutGlobalScopes()->find($filters['organization_id'])?->name ?? $filters['organization_id'] }}
-                    @else
-                        جميع المؤسسات
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">نوع الإجازة</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">
-                    @if(!empty($filters['leave_type_id']))
-                        {{ \App\Models\LeaveType::find($filters['leave_type_id'])?->name ?? $filters['leave_type_id'] }}
-                    @else
-                        جميع الأنواع
-                    @endif
-                </td>
-            </tr>
-        </table>
-    </div>
+{{-- Filter Summary --}}
+<div class="meta">
+  <table>
+    <tr>
+      <td>المؤسسة:</td>
+      <td>{{ $orgName }}</td>
+      <td>تاريخ التقرير:</td>
+      <td>{{ $generatedAt }}</td>
+    </tr>
+    <tr>
+      <td>نوع الإجازة:</td>
+      <td>{{ $leaveTypeName ?? 'الكل' }}</td>
+      <td>إجمالي الطلبات:</td>
+      <td><strong>{{ $totalRequests }}</strong></td>
+    </tr>
+    @if(!empty($filters['from']) || !empty($filters['to']))
+    <tr>
+      <td>الفترة:</td>
+      <td colspan="3">{{ $filters['from'] ?? '—' }} إلى {{ $filters['to'] ?? '—' }}</td>
+    </tr>
+    @endif
+  </table>
+</div>
 
-    {{-- ===== STATUS BREAKDOWN ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            توزيع الطلبات حسب الحالة
-        </div>
-        @if(count($statusBreakdown) > 0)
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 50%;">الحالة</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">العدد</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">النسبة %</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($statusBreakdown as $index => $row)
-                <tr style="{{ $index % 2 === 0 ? 'background: #ffffff;' : 'background: #f8f9fa;' }}">
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $row['label'] }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; text-align: center;">{{ $row['count'] }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; text-align: center;">{{ $row['percentage'] }}%</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-        <div style="padding: 10px; color: #666; font-size: 11px;">لا توجد بيانات.</div>
-        @endif
-    </div>
+{{-- Status Breakdown --}}
+<h2>توزيع الطلبات حسب الحالة</h2>
+<table class="data">
+  <thead>
+    <tr>
+      <th>الحالة</th>
+      <th>عدد الطلبات</th>
+      <th>النسبة %</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach($statusBreakdown as $row)
+    <tr>
+      <td>{{ $row['label'] }}</td>
+      <td>{{ $row['count'] }}</td>
+      <td>{{ $totalRequests > 0 ? number_format($row['count'] / $totalRequests * 100, 1) : '0.0' }}%</td>
+    </tr>
+    @endforeach
+  </tbody>
+</table>
 
-    {{-- ===== TOP 10 EMPLOYEES ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            أكثر 10 موظفين استهلاكاً للإجازات
-        </div>
-        @if(count($topEmployees) > 0)
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 8%;">الترتيب</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 40%;">اسم الموظف</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 36%;">المدرسة</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 16%;">إجمالي الأيام</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($topEmployees as $index => $emp)
-                <tr style="{{ $index % 2 === 0 ? 'background: #ffffff;' : 'background: #f8f9fa;' }}">
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; text-align: center;">{{ $index + 1 }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $emp['name'] }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $emp['school'] }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; text-align: center;">{{ $emp['total_days'] }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-        <div style="padding: 10px; color: #666; font-size: 11px;">لا توجد بيانات.</div>
-        @endif
-    </div>
+{{-- Top 10 Leave Takers --}}
+@if($topTakers->count() > 0)
+<h2>أعلى 10 موظفين في استهلاك الإجازة المعتمدة</h2>
+<table class="data">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>اسم الموظف</th>
+      <th>المدرسة</th>
+      <th>إجمالي الأيام</th>
+      <th>عدد الطلبات</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach($topTakers as $idx => $emp)
+    <tr>
+      <td>{{ $idx + 1 }}</td>
+      <td>{{ $emp['name'] }}</td>
+      <td>{{ $emp['school'] }}</td>
+      <td><strong>{{ number_format($emp['total_days'], 1) }}</strong></td>
+      <td>{{ $emp['count'] }}</td>
+    </tr>
+    @endforeach
+  </tbody>
+</table>
+@endif
 
-    {{-- ===== FOOTER ===== --}}
-    <div style="border-top: 1px solid #ccc; padding-top: 10px; margin-top: 16px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-            <tr>
-                <td style="text-align: right; vertical-align: middle;">
-                    <div style="color: #666;">صدر بواسطة النظام &mdash; تاريخ الطباعة: {{ now()->format('Y/m/d H:i') }}</div>
-                </td>
-                <td style="text-align: left; vertical-align: middle;">
-                    <div style="color: #666;">صفحة 1</div>
-                </td>
-            </tr>
-        </table>
-    </div>
-
+<div class="footer">
+  صدر عن نظام إدارة الإجازات — مديرية الأقصر التعليمية &mdash; {{ $generatedAt }}
 </div>
 </body>
 </html>

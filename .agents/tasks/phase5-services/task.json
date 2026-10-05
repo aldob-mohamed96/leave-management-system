@@ -1,0 +1,7 @@
+{
+  "task_id": "task-phase5-dashboards-reports",
+  "task_description": "Implement Phase 5 of the Laravel 11 Leave Management System: DashboardStatsService, ReportPdfService, 9 Filament dashboard widgets (school/administration/directorate levels), custom Dashboard page, ReportsPage with filter form and export actions, and 7 Pest feature tests.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
