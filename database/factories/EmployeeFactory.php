@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EntitlementGrade;
 use App\Models\Employee;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -71,6 +72,7 @@ class EmployeeFactory extends Factory
             'full_name'        => "{$firstName} {$fatherName} {$lastName}",
             'job_title'        => $this->faker->randomElement(self::$jobTitles),
             'grade'            => $this->faker->randomElement(self::$grades),
+            'entitlement_grade' => $this->faker->randomElement(EntitlementGrade::cases()),
             'birth_date'       => $this->faker->dateTimeBetween('-55 years', '-25 years'),
             'hire_date'        => $hireDate,
             'work_start_date'  => $workStartDate,
@@ -104,6 +106,19 @@ class EmployeeFactory extends Factory
     {
         return $this->state(fn() => [
             'job_title' => $this->faker->randomElement(['ناظر', 'وكيل مدرسة']),
+        ]);
+    }
+
+    public function withGrade(EntitlementGrade $grade): static
+    {
+        return $this->state(fn() => ['entitlement_grade' => $grade]);
+    }
+
+    public function over50(): static
+    {
+        return $this->state(fn() => [
+            'birth_date'        => $this->faker->dateTimeBetween('-60 years', '-51 years'),
+            'entitlement_grade' => EntitlementGrade::ADMIN_OVER_50,
         ]);
     }
 }

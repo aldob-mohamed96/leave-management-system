@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EntitlementGrade;
 use App\Models\Scopes\OrganizationScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ class Employee extends Model
         'full_name',
         'job_title',
         'grade',
+        'entitlement_grade',
         'birth_date',
         'hire_date',
         'work_start_date',
@@ -35,10 +37,11 @@ class Employee extends Model
     ];
 
     protected $casts = [
-        'birth_date'      => 'date',
-        'hire_date'       => 'date',
-        'work_start_date' => 'date',
-        'is_active'       => 'boolean',
+        'birth_date'        => 'date',
+        'hire_date'         => 'date',
+        'work_start_date'   => 'date',
+        'is_active'         => 'boolean',
+        'entitlement_grade' => EntitlementGrade::class,
     ];
 
     // -------------------------------------------------------------------------
@@ -122,5 +125,19 @@ class Employee extends Model
             ->where('start_date', '<=', $date)
             ->where('end_date', '>=', $date)
             ->exists();
+    }
+
+    /**
+     * Calculate yearly entitlement for regular leave based on entitlement_grade and age.
+     * Falls back to 28 days if grade is not set.
+     */
+    public function regularLeaveEntitlement(): int
+    {
+        // Rule: employees over 50 get 50 days regardless of grade
+        if ($this->birth_date && $this->birth_date->age >= 50) {
+            return EntitlementGrade::ADMIN_OVER_50->yearlyDays();
+        }
+
+        return $this->entitlement_grade?->yearlyDays() ?? 28;
     }
 }

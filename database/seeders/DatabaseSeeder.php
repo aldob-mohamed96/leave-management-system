@@ -100,18 +100,34 @@ class DatabaseSeeder extends Seeder
 
         // ------------------------------------------------------------------
         // 6. Opening leave balances for current year
+        //    Regular leave entitlement is calculated from entitlement_grade
         // ------------------------------------------------------------------
         $year = now()->year;
         $balanceCount = 0;
 
         foreach ($employees as $employee) {
             foreach ($leaveTypes as $leaveType) {
+                // For regular leave, use the grade-based entitlement
+                $entitled = match($leaveType->code) {
+                    'regular' => $employee->regularLeaveEntitlement(),
+                    default   => $leaveType->yearly_entitlement,
+                };
+
+                // Only create balance records for leave types that have a yearly entitlement
+                if ($entitled == 0 && ! $leaveType->deducts_balance) {
+                    // Event-based leaves (maternity, hajj, etc.) don't need annual balance rows
+                    // They are tracked per-request, not per-year
+                    continue;
+                }
+
                 LeaveBalance::create([
                     'employee_id'   => $employee->id,
                     'leave_type_id' => $leaveType->id,
                     'year'          => $year,
-                    'entitled'      => $leaveType->yearly_entitlement,
-                    'carried_over'  => $leaveType->deducts_balance ? rand(0, 5) : 0,
+                    'entitled'      => $entitled,
+                    'carried_over'  => ($leaveType->deducts_balance && $leaveType->code !== 'casual')
+                        ? rand(0, 5)
+                        : 0,
                     'used'          => 0,
                 ]);
                 $balanceCount++;
