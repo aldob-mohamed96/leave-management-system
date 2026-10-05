@@ -130,14 +130,20 @@ class Employee extends Model
     /**
      * Calculate yearly entitlement for regular leave based on entitlement_grade and age.
      * Falls back to 28 days if grade is not set.
+     * When a grade IS assigned and the employee is over 50, the age rule overrides the grade.
      */
     public function regularLeaveEntitlement(): int
     {
-        // Rule: employees over 50 get 50 days regardless of grade
+        // No grade assigned → default 28 days (age rule does not apply)
+        if ($this->entitlement_grade === null) {
+            return 28;
+        }
+
+        // Grade assigned + employee over 50 → override to 50 days
         if ($this->birth_date && $this->birth_date->age >= 50) {
             return EntitlementGrade::ADMIN_OVER_50->yearlyDays();
         }
 
-        return $this->entitlement_grade?->yearlyDays() ?? 28;
+        return $this->entitlement_grade->yearlyDays();
     }
 }
