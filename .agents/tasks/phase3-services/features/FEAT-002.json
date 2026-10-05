@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Catalog resources: OrganizationResource, UserResource, EmployeeResource (with BalanceBadge component), LeaveTypeResource, HolidayResource. These are simpler CRUD/list resources that do not touch LeaveRequestService. Independent of FEAT-003 but depends on FEAT-001 (policies must exist).",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "1. Create app/Filament/Components/BalanceBadge.php as a Filament ViewComponent (extends \\Filament\\Components\\Component or a plain class with a render() method). It receives an Employee model, loads leaveBalances for the current year via $employee->leaveBalances()->with('leaveType')->currentYear()->get(), and renders a badge per leave type showing 'المتبقي: X من Y'. Create the Blade view at resources/views/filament/components/balance-badge.blade.php.",
 
@@ -28,5 +28,5 @@
     "php artisan test --stop-on-failure"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "1) Filament ViewColumn uses a Blade view at resources/views/filament/columns/balance-badge.blade.php; $getRecord() returns the Employee model in that view. The BalanceBadge PHP class at app/Filament/Components/BalanceBadge.php provides a static render() helper that can also be called directly from Infolists. 2) UserResource roles are loaded reactively via Role::where('team_id', $orgId) — Spatie Permission stores the team FK as 'team_id' in the roles table when teams mode is enabled. Role sync is handled in afterCreate()/afterSave() on the respective Page classes with setPermissionsTeamId() called first. 3) LeaveTypeResource and HolidayResource use static canViewAny/canCreate/canEdit/canDelete overrides calling Gate::allows('manage_organization') — no separate Policy class needed. 4) For FEAT-003 (LeaveRequestResource): the LeaveRequestPolicy is already registered. Use Organization::withoutGlobalScopes() for org selects. Use LeaveStatus enum's label() and color() methods for status badges. The service is bound as singleton: app(LeaveRequestService::class). The approval/reject/return/cancel actions will need custom Filament Actions that call the service methods."
 }
