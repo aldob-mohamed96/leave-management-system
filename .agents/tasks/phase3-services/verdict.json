@@ -1,0 +1,9 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    "Draft edit bypasses service validation: EditLeaveRequest::handleRecordUpdate() calls $record->update() for both DRAFT and RETURNED status. DRAFT edits should route through LeaveRequestService::create() (or a dedicated update method) to enforce the no-overlap, max-days-per-request, and sufficient-balance rules. Confirmed — handleRecordUpdate() has no status branch.",
+    "Dead BalanceBadge Blade view: resources/views/filament/components/balance-badge.blade.php exists but is not referenced by any panel code. The ViewColumn in EmployeeResource uses filament.columns.balance-badge; the components/ file is unreachable dead code. Confirmed — no view('filament.components.balance-badge') call exists.",
+    "Navigation badge over-counts across organizations: LeaveRequestResource::getNavigationBadge() calls LeaveRequest::withoutGlobalScopes()->pending()->count() without any user-org scope. A lower-privilege user whose getEloquentQuery() is scoped to their own org will see the directorate-wide pending count in the sidebar. Fix by scoping to static::getEloquentQuery()->pending()->count(). Confirmed — badge query has no user filter."
+  ],
+  "reviewDoc": ".agents/tasks/phase3-services/2026-10-05-192020-review.md"
+}

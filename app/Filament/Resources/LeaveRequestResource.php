@@ -42,7 +42,8 @@ class LeaveRequestResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) LeaveRequest::withoutGlobalScopes()->pending()->count() ?: null;
+        // OrganizationScope applies automatically — shows only the logged-in user's org
+        return (string) LeaveRequest::pending()->count() ?: null;
     }
 
     // -------------------------------------------------------------------------
