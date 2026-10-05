@@ -383,7 +383,7 @@ class LeaveRequestResource extends Resource
                     ->requiresConfirmation()
                     ->visible(fn(LeaveRequest $record): bool =>
                         in_array($record->status, [LeaveStatus::DRAFT, LeaveStatus::RETURNED])
-                        && Auth::user()?->can('create', LeaveRequest::class)
+                        && Auth::user()?->can('submit', $record)
                     )
                     ->action(function (LeaveRequest $record): void {
                         try {

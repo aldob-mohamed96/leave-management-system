@@ -43,7 +43,7 @@ class ViewLeaveRequest extends ViewRecord
                 ->requiresConfirmation()
                 ->visible(fn(): bool =>
                     in_array($this->getRecord()->status, [LeaveStatus::DRAFT, LeaveStatus::RETURNED])
-                    && Auth::user()?->can('create', LeaveRequest::class)
+                    && Auth::user()?->can('submit', $this->getRecord())
                 )
                 ->action(function (): void {
                     $record = $this->getRecord();

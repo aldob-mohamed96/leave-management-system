@@ -64,6 +64,16 @@ class LeaveRequestPolicy
     }
 
     /**
+     * هل يمكن للمستخدم تقديم طلب إجازة؟
+     */
+    public function submit(User $user, LeaveRequest $leaveRequest): bool
+    {
+        $user->setOrganizationTeam();
+
+        return $user->hasPermissionTo('submit_leave_request');
+    }
+
+    /**
      * هل يمكن للمستخدم اعتماد طلب الإجازة؟
      */
     public function approve(User $user, LeaveRequest $leaveRequest): bool
