@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "LeaveRequestResource — the most complex resource. Integrates LeaveRequestService (create/submit/approve/reject/return/cancel) and LeaveBalanceService. Depends on FEAT-001 and FEAT-002.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "1. Create app/Filament/Resources/LeaveRequestResource.php with navigationGroup('طلبات الإجازات'), navigationLabel('طلبات الإجازة'), navigationIcon('heroicon-o-clipboard-document-list'), navigationBadge() that returns the count of pending requests the user can see (LeaveRequest::pending()->count()).",
 
@@ -32,5 +32,5 @@
     "php artisan test --stop-on-failure"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "1) LeaveRequestResource created with full form, table, infolist, and workflow actions (submit/approve/reject/return/cancel). 2) All actions use app(LeaveRequestService::class) inside action closures — no constructor injection. 3) CreateLeaveRequest overrides handleRecordCreation() to call LeaveRequestService::create() and return ->request. 4) EditLeaveRequest overrides handleRecordUpdate() to update fields directly (no re-run of service for RETURNED requests). 5) ViewLeaveRequest page includes all 5 header actions with correct visibility guards using LeaveRequestPolicy. 6) getEloquentQuery() applies permission-aware scoping: view_all_leave_requests uses subtreeIds(), view_leave_requests scopes to own organization. 7) Working days auto-calculation uses WorkingDaysRule in a reactive afterStateUpdated closure. 8) Balance info section is read-only (disabled, dehydrated=false) and hidden on create. 9) All actions wrap in try/catch for LeaveRequestException and ValidationException with Notification::make()->danger() on failure. 10) Routes confirmed: /admin/leave-requests index/create/view/edit. 11) All 95 existing tests pass."
 }
