@@ -7,6 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Render / load balancer health check
+Route::get('/healthz', fn () => response('ok', 200));
+
 // Public verification page (no auth required)
 Route::get('/verify/{number}', [LeaveVerificationController::class, 'show'])
     ->name('leave.verify');
