@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\OrganizationType;
 use App\Filament\Widgets\Administration\AvgResponseTimeWidget;
 use App\Filament\Widgets\Administration\SchoolComparisonWidget;
 use App\Filament\Widgets\Administration\TopLeaveTakersWidget;
@@ -11,6 +12,8 @@ use App\Filament\Widgets\Directorate\YearlyComparisonWidget;
 use App\Filament\Widgets\School\OnLeaveTodayWidget;
 use App\Filament\Widgets\School\PendingRequestsWidget;
 use App\Filament\Widgets\School\SchoolStatusOverview;
+use App\Models\Organization;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -19,7 +22,44 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getHeading(): string
     {
-        return 'لوحة تحكم نظام الإجازات';
+        $org = $this->currentOrganization();
+
+        return $org?->name ?: 'لوحة تحكم نظام الإجازات';
+    }
+
+    public function getSubheading(): ?string
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        $user->setOrganizationTeam();
+        $role = $user->getRoleNames()->first() ?: 'بدون دور';
+        $org = $this->currentOrganization();
+
+        $parts = ["مرحباً، {$user->name}", $role];
+
+        if ($org?->type === OrganizationType::SCHOOL && $org->parent_id) {
+            $admin = Organization::withoutGlobalScopes()->find($org->parent_id);
+            if ($admin) {
+                $parts[] = $admin->name;
+            }
+        }
+
+        return implode(' — ', $parts);
+    }
+
+    private function currentOrganization(): ?Organization
+    {
+        $user = Auth::user();
+
+        if (! $user?->organization_id) {
+            return null;
+        }
+
+        return Organization::withoutGlobalScopes()->find($user->organization_id);
     }
 
     public function getWidgets(): array

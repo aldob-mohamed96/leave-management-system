@@ -14,7 +14,7 @@ class LeaveTypeResource extends JsonResource
             'code'                  => $this->code,
             'name'                  => $this->name,
             'deducts_balance'       => $this->deducts_balance,
-            'yearly_entitlement'    => (float) $this->yearly_entitlement,
+            'yearly_entitlement'    => (int) $this->yearly_entitlement,
             'max_days_per_request'  => $this->max_days_per_request,
             'is_active'             => $this->is_active,
         ];

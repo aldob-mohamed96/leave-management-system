@@ -26,6 +26,7 @@ class RoleAndPermissionSeeder extends Seeder
         'return_leave_request',
         'view_leave_requests',
         'view_all_leave_requests',   // مستوى الإدارة والمديرية
+        'delete_leave_request',      // حذف قبل قرار الإدارة
         // موظفون
         'create_employee',
         'edit_employee',
@@ -47,6 +48,7 @@ class RoleAndPermissionSeeder extends Seeder
      */
     private const ROLES = [
         // ========= مدرسة =========
+        // المدرسة: موظفين + طلبات إجازة فقط (بدون مستخدمين/مؤسسات/تقارير)
         'school_employee' => [
             'label'       => 'موظف مدرسة',
             'org_types'   => [OrganizationType::SCHOOL],
@@ -55,6 +57,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'edit_leave_request',
                 'submit_leave_request',
                 'cancel_leave_request',
+                'delete_leave_request',
                 'view_leave_requests',
                 'view_employees',
             ],
@@ -62,21 +65,21 @@ class RoleAndPermissionSeeder extends Seeder
         'school_manager' => [
             'label'       => 'مدير مدرسة',
             'org_types'   => [OrganizationType::SCHOOL],
+            // يعتمد مرحلة المدرسة (توقيع إلكتروني) ثم يرفع للإدارة
             'permissions' => [
                 'create_leave_request',
                 'edit_leave_request',
                 'submit_leave_request',
-                'cancel_leave_request',
                 'approve_leave_request',
-                'reject_leave_request',
                 'return_leave_request',
+                'cancel_leave_request',
+                'delete_leave_request',
                 'view_leave_requests',
                 'view_all_leave_requests',
                 'create_employee',
                 'edit_employee',
+                'delete_employee',
                 'view_employees',
-                'manage_users',
-                'manage_roles',
             ],
         ],
         'school_assistant' => [
@@ -87,6 +90,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'edit_leave_request',
                 'submit_leave_request',
                 'cancel_leave_request',
+                'delete_leave_request',
                 'view_leave_requests',
                 'view_all_leave_requests',
                 'create_employee',
@@ -102,14 +106,17 @@ class RoleAndPermissionSeeder extends Seeder
                 'edit_leave_request',
                 'submit_leave_request',
                 'cancel_leave_request',
+                'delete_leave_request',
                 'view_leave_requests',
                 'view_all_leave_requests',
                 'create_employee',
                 'edit_employee',
+                'delete_employee',
                 'view_employees',
             ],
         ],
         // ========= إدارة تعليمية =========
+        // الإدارة: إشراف واعتماد + تقارير + مستخدمين/مؤسسات
         'leaves_officer' => [
             'label'       => 'مسؤول الإجازات',
             'org_types'   => [OrganizationType::ADMINISTRATION],
@@ -121,6 +128,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'view_all_leave_requests',
                 'view_employees',
                 'view_reports',
+                'export_reports',
             ],
         ],
         'admin_manager' => [
@@ -150,6 +158,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'view_leave_requests',
                 'view_all_leave_requests',
                 'view_employees',
+                'view_reports',
             ],
         ],
         // ========= مديرية =========

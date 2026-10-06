@@ -2,7 +2,6 @@
 
 use App\Enums\LeaveStatus;
 use App\Exports\LeaveRequestsExport;
-use App\Imports\EmployeesImport;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
@@ -11,7 +10,6 @@ use App\Models\User;
 use App\Notifications\LeaveRequestNotification;
 use App\Services\LeaveRequestPdfService;
 use Illuminate\Support\Facades\Notification;
-use Maatwebsite\Excel\Facades\Excel;
 
 // =============================================================================
 // Test 1 — PDF generation
@@ -121,48 +119,7 @@ it('export query returns only rows matching the status filter', function () {
 });
 
 // =============================================================================
-// Test 5 — Employee import: valid rows create records
-// =============================================================================
-
-it('valid CSV rows create Employee records during import', function () {
-    $orgs = createHierarchy();
-    // SCH-TEST code is set by createHierarchy()
-
-    $csv  = "employee_code,full_name,job_title,grade,entitlement_grade,organization_code,birth_date,hire_date,work_start_date,phone\n";
-    $csv .= "EMP-IMP-01,أحمد محمد,معلم,,teacher,SCH-TEST,,,,\n";
-
-    $path = sys_get_temp_dir() . '/test_import_valid.csv';
-    file_put_contents($path, $csv);
-
-    $import = new EmployeesImport();
-    Excel::import($import, $path);
-
-    expect(Employee::withoutGlobalScopes()->where('employee_code', 'EMP-IMP-01')->exists())->toBeTrue();
-
-    @unlink($path);
-});
-
-// =============================================================================
-// Test 6 — Employee import: invalid org code rows are skipped
-// =============================================================================
-
-it('rows with a bad organization code are skipped during import', function () {
-    $csv  = "employee_code,full_name,job_title,grade,entitlement_grade,organization_code,birth_date,hire_date,work_start_date,phone\n";
-    $csv .= "EMP-BAD-01,موظف سيء,معلم,,,BAD-ORG-CODE,,,,\n";
-
-    $path = sys_get_temp_dir() . '/test_import_bad_org.csv';
-    file_put_contents($path, $csv);
-
-    $import = new EmployeesImport();
-    Excel::import($import, $path);
-
-    expect(Employee::withoutGlobalScopes()->where('employee_code', 'EMP-BAD-01')->exists())->toBeFalse();
-
-    @unlink($path);
-});
-
-// =============================================================================
-// Test 7 — Overdue command sends notifications to created_by user
+// Test 5 — Overdue command sends notifications to created_by user
 // =============================================================================
 
 it('leave:notify-overdue sends notifications to created_by users', function () {

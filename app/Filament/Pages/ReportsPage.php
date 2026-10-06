@@ -28,8 +28,18 @@ class ReportsPage extends Page implements HasForms
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+        $user?->setOrganizationTeam();
+
+        return (bool) $user?->can('view_reports');
+    }
+
     public function mount(): void
     {
+        abort_unless(static::canAccess(), 403);
+
         $this->form->fill();
     }
 

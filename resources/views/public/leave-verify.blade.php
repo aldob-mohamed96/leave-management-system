@@ -110,12 +110,12 @@
             </tr>
             <tr>
                 <th>عدد الأيام</th>
-                <td>{{ $request->days }}</td>
+                <td>{{ (int) $request->days }}</td>
             </tr>
             <tr>
                 <th>الحالة</th>
                 <td>
-                    <span class="status-badge">{{ $request->status->label() }}</span>
+                    <span class="status-badge">{{ $request->displayStatusLabel() }}</span>
                 </td>
             </tr>
             <tr>

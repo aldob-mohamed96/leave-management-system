@@ -25,9 +25,9 @@ class LeaveBalance extends Model
 
     protected $casts = [
         'year'         => 'integer',
-        'entitled'     => 'decimal:1',
-        'carried_over' => 'decimal:1',
-        'used'         => 'decimal:1',
+        'entitled'     => 'integer',
+        'carried_over' => 'integer',
+        'used'         => 'integer',
     ];
 
     // -------------------------------------------------------------------------
@@ -74,9 +74,9 @@ class LeaveBalance extends Model
      * Remaining = entitled + carried_over - used
      * Never stored — always computed to stay in sync with the ledger.
      */
-    public function getRemainingAttribute(): float
+    public function getRemainingAttribute(): int
     {
-        return max(0, (float)$this->entitled + (float)$this->carried_over - (float)$this->used);
+        return max(0, (int) $this->entitled + (int) $this->carried_over - (int) $this->used);
     }
 
     // -------------------------------------------------------------------------

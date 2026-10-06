@@ -18,13 +18,13 @@ class LeaveBalanceTransactionFactory extends Factory
             'leave_balance_id'  => LeaveBalance::factory(),
             'leave_request_id'  => null,
             'type'              => $this->faker->randomElement(TransactionType::cases()),
-            'days'              => $this->faker->randomFloat(1, 0.5, 10),
+            'days'              => $this->faker->numberBetween(1, 10),
             'note'              => $this->faker->optional(0.6)->sentence(),
             'created_by'        => null,
         ];
     }
 
-    public function accrual(float $days): static
+    public function accrual(int $days): static
     {
         return $this->state(fn() => [
             'type' => TransactionType::ACCRUAL,
@@ -33,7 +33,7 @@ class LeaveBalanceTransactionFactory extends Factory
         ]);
     }
 
-    public function deduction(float $days): static
+    public function deduction(int $days): static
     {
         return $this->state(fn() => [
             'type' => TransactionType::DEDUCTION,
@@ -42,7 +42,7 @@ class LeaveBalanceTransactionFactory extends Factory
         ]);
     }
 
-    public function refund(float $days): static
+    public function refund(int $days): static
     {
         return $this->state(fn() => [
             'type' => TransactionType::REFUND,
@@ -51,7 +51,7 @@ class LeaveBalanceTransactionFactory extends Factory
         ]);
     }
 
-    public function carryover(float $days): static
+    public function carryover(int $days): static
     {
         return $this->state(fn() => [
             'type' => TransactionType::CARRYOVER,

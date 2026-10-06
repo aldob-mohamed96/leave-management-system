@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\EntitlementGrade;
 use App\Models\Scopes\OrganizationScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,12 +35,28 @@ class Employee extends Model
         'is_active',
     ];
 
+    /**
+     * Strip accidental Arabic diacritics / zero-width chars from employee codes
+     * (e.g. Damma U+064F typed before Latin letters on Arabic keyboards).
+     */
+    public function setEmployeeCodeAttribute(?string $value): void
+    {
+        if ($value === null) {
+            $this->attributes['employee_code'] = null;
+
+            return;
+        }
+
+        $clean = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{06D6}-\x{06ED}\x{200B}-\x{200D}\x{FEFF}]/u', '', $value);
+        $this->attributes['employee_code'] = trim((string) $clean);
+    }
+
     protected $casts = [
-        'birth_date'        => 'date',
-        'hire_date'         => 'date',
-        'work_start_date'   => 'date',
-        'is_active'         => 'boolean',
-        'entitlement_grade' => EntitlementGrade::class,
+        'birth_date'      => 'date',
+        'hire_date'       => 'date',
+        'work_start_date' => 'date',
+        'is_active'       => 'boolean',
+        // entitlement_grade is a string code referencing entitlement_grades.code
     ];
 
     // -------------------------------------------------------------------------
@@ -54,7 +69,7 @@ class Employee extends Model
             ->logFillable()
             ->logOnlyDirty()
             ->dontLogIfAttributesChangedOnly(['updated_at'])
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
                 'created' => "تم تسجيل الموظف: {$this->full_name}",
                 'updated' => "تم تحديث بيانات الموظف: {$this->full_name}",
                 'deleted' => "تم حذف الموظف: {$this->full_name}",
@@ -75,6 +90,12 @@ class Employee extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** الدرجة الوظيفية (من جدول entitlement_grades) */
+    public function entitlementGrade(): BelongsTo
+    {
+        return $this->belongsTo(EntitlementGrade::class, 'entitlement_grade', 'code');
     }
 
     public function leaveBalances(): HasMany
@@ -134,16 +155,18 @@ class Employee extends Model
      */
     public function regularLeaveEntitlement(): int
     {
-        // No grade assigned → default 28 days (age rule does not apply)
         if ($this->entitlement_grade === null) {
             return 28;
         }
 
-        // Grade assigned + employee over 50 → override to 50 days
         if ($this->birth_date && $this->birth_date->age >= 50) {
-            return EntitlementGrade::ADMIN_OVER_50->yearlyDays();
+            return (int) (EntitlementGrade::findByCode('admin_over50')?->yearly_days ?? 50);
         }
 
-        return $this->entitlement_grade->yearlyDays();
+        if ($this->relationLoaded('entitlementGrade') && $this->entitlementGrade) {
+            return (int) $this->entitlementGrade->yearly_days;
+        }
+
+        return (int) (EntitlementGrade::findByCode($this->entitlement_grade)?->yearly_days ?? 28);
     }
 }

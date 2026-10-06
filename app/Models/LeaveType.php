@@ -23,7 +23,7 @@ class LeaveType extends Model
 
     protected $casts = [
         'deducts_balance'     => 'boolean',
-        'yearly_entitlement'  => 'decimal:1',
+        'yearly_entitlement'  => 'integer',
         'max_days_per_request' => 'integer',
         'is_active'           => 'boolean',
     ];

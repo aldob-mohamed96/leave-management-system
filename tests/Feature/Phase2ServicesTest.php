@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Notification;
  */
 function setupPhase2(): array
 {
+    test()->seed(\Database\Seeders\EntitlementGradeSeeder::class);
+
     $orgs = createHierarchy();
 
     $regular = LeaveType::factory()->regular()->create();
@@ -44,6 +46,10 @@ function setupPhase2(): array
         ->inOrganization($orgs['school'])
         ->withGrade(EntitlementGrade::TEACHER_FIRST)  // 30 days
         ->create(['birth_date' => now()->subYears(35)]);
+
+    $substitute = Employee::factory()
+        ->inOrganization($orgs['school'])
+        ->create(['full_name' => 'موظف بديل للاختبار']);
 
     $user = User::factory()->inOrganization($orgs['school'])->create();
 
@@ -71,7 +77,7 @@ function setupPhase2(): array
     WorkflowConfiguration::factory()->leavesOfficerStage($orgs['school'])->create();
     WorkflowConfiguration::factory()->adminManagerStage($orgs['school'])->create();
 
-    return compact('orgs', 'regular', 'casual', 'employee', 'user');
+    return compact('orgs', 'regular', 'casual', 'employee', 'substitute', 'user');
 }
 
 // =============================================================================
@@ -91,8 +97,8 @@ describe('LeaveBalanceService', function () {
         $service = app(LeaveBalanceService::class);
         $balance = $service->getOrCreateBalance($emp, $lt, now()->year);
 
-        expect($balance->entitled)->toBe('40.0');
-        expect($balance->used)->toBe('0.0');
+        expect($balance->entitled)->toBe(40);
+        expect($balance->used)->toBe(0);
     });
 
     it('getOrCreateBalance returns existing record on second call', function () {
@@ -537,6 +543,8 @@ describe('LeaveRequestService lifecycle', function () {
         $service = app(LeaveRequestService::class);
         $result  = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-09-01',
             'end_date'      => '2026-09-03',
@@ -555,6 +563,8 @@ describe('LeaveRequestService lifecycle', function () {
         $service = app(LeaveRequestService::class);
         $result  = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-09-07',  // Monday
             'end_date'      => '2026-09-13',  // Sunday
@@ -570,6 +580,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result  = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-10-01',
             'end_date'      => '2026-10-03',
@@ -589,6 +601,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result    = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-10-05',
             'end_date'      => '2026-10-07',
@@ -609,6 +623,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result    = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-11-01',
             'end_date'      => '2026-11-03',
@@ -627,6 +643,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result    = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-11-10',
             'end_date'      => '2026-11-12',
@@ -651,6 +669,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-12-01',
             'end_date'      => '2026-12-03',
@@ -686,6 +706,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-09-15',
             'end_date'      => '2026-09-17',
@@ -711,6 +733,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-09-20',
             'end_date'      => '2026-09-22',
@@ -730,6 +754,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-10-10',
             'end_date'      => '2026-10-12',
@@ -754,6 +780,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result  = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-10-15',
             'end_date'      => '2026-10-17',
@@ -777,6 +805,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-11-05',
             'end_date'      => '2026-11-07',
@@ -804,6 +834,8 @@ describe('LeaveRequestService lifecycle', function () {
 
         $result = $service->create([
             'employee_id'   => $ctx['employee']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'             => 'ظرف عائلي للاختبار',
             'leave_type_id' => $ctx['regular']->id,
             'start_date'    => '2026-11-17',
             'end_date'      => '2026-11-19',

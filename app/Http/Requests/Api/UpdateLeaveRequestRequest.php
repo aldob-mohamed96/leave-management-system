@@ -20,10 +20,10 @@ class UpdateLeaveRequestRequest extends FormRequest
             'leave_type_id'          => ['nullable', 'integer', 'exists:leave_types,id'],
             'start_date'             => ['nullable', 'date'],
             'end_date'               => ['nullable', 'date', 'after_or_equal:start_date'],
-            'days'                   => ['nullable', 'numeric', 'min:0.5', 'max:365'],
+            'days'                   => ['nullable', 'integer', 'min:1', 'max:365'],
             'written_at'             => ['nullable', 'date'],
-            'reason'                 => ['nullable', 'string', 'max:500'],
-            'substitute_employee_id' => ['nullable', 'integer', 'exists:employees,id'],
+            'reason'                 => ['sometimes', 'required', 'string', 'min:5', 'max:500'],
+            'substitute_employee_id' => ['sometimes', 'required', 'integer', 'exists:employees,id'],
         ];
     }
 
@@ -43,6 +43,15 @@ class UpdateLeaveRequestRequest extends FormRequest
                     "لا يمكن تعديل الطلب في حالته الحالية ({$request->status->label()})."
                 );
             }
+
+            $employeeId = $this->input('employee_id', $request->employee_id);
+            $substituteId = $this->input('substitute_employee_id');
+            if ($substituteId !== null && (int) $substituteId === (int) $employeeId) {
+                $v->errors()->add(
+                    'substitute_employee_id',
+                    'لا يمكن أن يكون الموظف البديل هو نفس طالب الإجازة.'
+                );
+            }
         });
     }
 
@@ -50,10 +59,14 @@ class UpdateLeaveRequestRequest extends FormRequest
     {
         return [
             'end_date.after_or_equal'       => 'تاريخ النهاية يجب أن يكون بعد أو مساوياً لتاريخ البداية.',
-            'days.min'                       => 'الحد الأدنى لعدد الأيام هو 0.5 يوم.',
+            'days.min'                       => 'الحد الأدنى لعدد الأيام هو يوم واحد.',
             'days.max'                       => 'الحد الأقصى لعدد الأيام هو 365 يوماً.',
-            'reason.max'                     => 'السبب يجب ألا يتجاوز 500 حرف.',
-            'substitute_employee_id.exists'  => 'موظف الخلافة المحدد غير موجود.',
+            'days.integer'                   => 'عدد الأيام يجب أن يكون رقماً صحيحاً.',
+            'reason.required'                 => 'سبب طلب الإجازة مطلوب.',
+            'reason.min'                      => 'سبب طلب الإجازة يجب ألا يقل عن 5 أحرف.',
+            'reason.max'                      => 'السبب يجب ألا يتجاوز 500 حرف.',
+            'substitute_employee_id.required' => 'يجب تحديد الموظف البديل (القائم بالعمل أثناء الإجازة).',
+            'substitute_employee_id.exists'   => 'الموظف البديل المحدد غير موجود.',
         ];
     }
 }

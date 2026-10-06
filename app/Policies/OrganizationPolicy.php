@@ -17,8 +17,7 @@ class OrganizationPolicy
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('manage_organization')
-            || $user->hasPermissionTo('view_employees');
+        return $user->hasPermissionTo('manage_organization');
     }
 
     /**
@@ -28,8 +27,7 @@ class OrganizationPolicy
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('manage_organization')
-            || $user->hasPermissionTo('view_employees');
+        return $user->hasPermissionTo('manage_organization');
     }
 
     /**

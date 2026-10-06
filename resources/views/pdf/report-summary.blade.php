@@ -87,7 +87,7 @@
       <td>{{ $idx + 1 }}</td>
       <td>{{ $emp['name'] }}</td>
       <td>{{ $emp['school'] }}</td>
-      <td><strong>{{ number_format($emp['total_days'], 1) }}</strong></td>
+      <td><strong>{{ (int) $emp['total_days'] }}</strong></td>
       <td>{{ $emp['count'] }}</td>
     </tr>
     @endforeach

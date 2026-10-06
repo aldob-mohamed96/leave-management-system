@@ -36,6 +36,7 @@ class LeaveRequest extends Model
         'balance_used',
         'balance_remaining',
         'status',
+        'was_modified',
         'current_stage',
         'rejection_reason',
         'created_by',
@@ -48,14 +49,57 @@ class LeaveRequest extends Model
         'start_date'        => 'date',
         'end_date'          => 'date',
         'written_at'        => 'date',
-        'days'              => 'decimal:1',
-        'balance_entitled'  => 'decimal:1',
-        'balance_used'      => 'decimal:1',
-        'balance_remaining' => 'decimal:1',
+        'days'              => 'integer',
+        'balance_entitled'  => 'integer',
+        'balance_used'      => 'integer',
+        'balance_remaining' => 'integer',
         'status'            => LeaveStatus::class,
+        'was_modified'      => 'boolean',
         'submitted_at'      => 'datetime',
         'decided_at'        => 'datetime',
     ];
+
+    /**
+     * تسمية الحالة للواجهة: قائم / تم تعديله وقائم / تم حذفه …
+     */
+    public function displayStatusLabel(): string
+    {
+        if ($this->trashed() || $this->status === LeaveStatus::CANCELLED) {
+            return 'تم حذفه';
+        }
+
+        if ($this->status === LeaveStatus::REJECTED) {
+            return 'مرفوض';
+        }
+
+        if ($this->status === LeaveStatus::DRAFT) {
+            return $this->was_modified ? 'تم تعديله وقائم' : 'مسودة';
+        }
+
+        if ($this->status === LeaveStatus::RETURNED) {
+            return $this->was_modified ? 'تم تعديله وقائم' : 'مُعاد للتعديل';
+        }
+
+        // مقدّم / قيد المراجعة / معتمد
+        return $this->was_modified ? 'تم تعديله وقائم' : 'قائم';
+    }
+
+    public function displayStatusColor(): string
+    {
+        if ($this->trashed() || $this->status === LeaveStatus::CANCELLED) {
+            return 'danger';
+        }
+
+        if ($this->status === LeaveStatus::REJECTED) {
+            return 'danger';
+        }
+
+        if ($this->was_modified) {
+            return 'warning';
+        }
+
+        return $this->status->color();
+    }
 
     // -------------------------------------------------------------------------
     // Activity Log
@@ -68,8 +112,14 @@ class LeaveRequest extends Model
             ->logOnlyDirty()
             ->dontLogIfAttributesChangedOnly(['updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
-                $employee = $this->employee?->full_name ?? "#{$this->employee_id}";
-                return match($eventName) {
+                $employee = "#{$this->employee_id}";
+                if ($this->relationLoaded('employee')) {
+                    $employee = $this->employee?->full_name ?? $employee;
+                } elseif ($this->employee_id) {
+                    $employee = Employee::query()->whereKey($this->employee_id)->value('full_name') ?? $employee;
+                }
+
+                return match ($eventName) {
                     'created' => "تم إنشاء طلب إجازة للموظف {$employee} - رقم {$this->number}",
                     'updated' => "تم تحديث طلب الإجازة رقم {$this->number} - الحالة: {$this->status->label()}",
                     'deleted' => "تم حذف طلب الإجازة رقم {$this->number}",
@@ -84,12 +134,13 @@ class LeaveRequest extends Model
 
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class);
+        // Keep history visible even if the employee was soft-deleted later.
+        return $this->belongsTo(Employee::class)->withTrashed();
     }
 
     public function organization(): BelongsTo
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Organization::class)->withoutGlobalScopes();
     }
 
     public function leaveType(): BelongsTo
@@ -99,7 +150,7 @@ class LeaveRequest extends Model
 
     public function substituteEmployee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'substitute_employee_id');
+        return $this->belongsTo(Employee::class, 'substitute_employee_id')->withTrashed();
     }
 
     public function createdBy(): BelongsTo
@@ -125,6 +176,20 @@ class LeaveRequest extends Model
     public function balanceTransactions(): HasMany
     {
         return $this->hasMany(LeaveBalanceTransaction::class);
+    }
+
+    // -------------------------------------------------------------------------
+    // Labels
+    // -------------------------------------------------------------------------
+
+    public static function stageLabel(?string $stage): string
+    {
+        return match ($stage) {
+            'direct_manager', 'school_principal' => 'مدير المدرسة',
+            'leaves_officer' => 'مسؤول الإجازات',
+            'admin_manager' => 'مدير الإدارة',
+            default => $stage ? str_replace('_', ' ', $stage) : '—',
+        };
     }
 
     // -------------------------------------------------------------------------

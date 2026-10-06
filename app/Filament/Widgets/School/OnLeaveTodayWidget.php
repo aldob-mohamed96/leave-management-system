@@ -30,6 +30,8 @@ class OnLeaveTodayWidget extends BaseWidget
             ->query(fn () => \App\Models\LeaveRequest::withoutGlobalScopes()
                 ->whereIn('id', $records->pluck('id')->toArray()))
             ->paginated(false)
+            ->emptyStateHeading('لا يوجد موظفون في إجازة اليوم')
+            ->emptyStateDescription('عند وجود إجازات سارية ستظهر هنا.')
             ->columns([
                 Tables\Columns\TextColumn::make('employee.full_name')
                     ->label('اسم الموظف')
@@ -40,10 +42,10 @@ class OnLeaveTodayWidget extends BaseWidget
                     ->label('نوع الإجازة'),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('من')
-                    ->date('Y/m/d'),
+                    ->date('d F Y'),
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('إلى')
-                    ->date('Y/m/d'),
+                    ->date('d F Y'),
                 Tables\Columns\TextColumn::make('days')
                     ->label('عدد الأيام')
                     ->suffix(' يوم'),

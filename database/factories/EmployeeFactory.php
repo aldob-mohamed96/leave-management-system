@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\EntitlementGrade;
+use App\Enums\EntitlementGrade as EntitlementGradeEnum;
 use App\Models\Employee;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -66,18 +66,20 @@ class EmployeeFactory extends Factory
         $workStartDate = $this->faker->dateTimeBetween($hireDate, 'now');
 
         return [
-            'organization_id'  => Organization::factory(),
-            'user_id'          => null,
-            'employee_code'    => $this->faker->unique()->numerify('EMP-######'),
-            'full_name'        => "{$firstName} {$fatherName} {$lastName}",
-            'job_title'        => $this->faker->randomElement(self::$jobTitles),
-            'grade'            => $this->faker->randomElement(self::$grades),
-            'entitlement_grade' => $this->faker->randomElement(EntitlementGrade::cases()),
-            'birth_date'       => $this->faker->dateTimeBetween('-55 years', '-25 years'),
-            'hire_date'        => $hireDate,
-            'work_start_date'  => $workStartDate,
-            'phone'            => '01' . $this->faker->numerify('#########'),
-            'is_active'        => true,
+            'organization_id'   => Organization::factory(),
+            'user_id'           => null,
+            'employee_code'     => $this->faker->unique()->numerify('EMP-######'),
+            'full_name'         => "{$firstName} {$fatherName} {$lastName}",
+            'job_title'         => $this->faker->randomElement(self::$jobTitles),
+            'grade'             => $this->faker->randomElement(self::$grades),
+            'entitlement_grade' => $this->faker->randomElement(
+                array_column(EntitlementGradeEnum::cases(), 'value')
+            ),
+            'birth_date'        => $this->faker->dateTimeBetween('-55 years', '-25 years'),
+            'hire_date'         => $hireDate,
+            'work_start_date'   => $workStartDate,
+            'phone'             => '01'.$this->faker->numerify('#########'),
+            'is_active'         => true,
         ];
     }
 
@@ -87,38 +89,40 @@ class EmployeeFactory extends Factory
 
     public function inOrganization(Organization $organization): static
     {
-        return $this->state(fn() => ['organization_id' => $organization->id]);
+        return $this->state(fn () => ['organization_id' => $organization->id]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn() => ['is_active' => false]);
+        return $this->state(fn () => ['is_active' => false]);
     }
 
     public function teacher(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'job_title' => $this->faker->randomElement(['معلم أول', 'معلم', 'معلم مساعد']),
         ]);
     }
 
     public function principal(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'job_title' => $this->faker->randomElement(['ناظر', 'وكيل مدرسة']),
         ]);
     }
 
-    public function withGrade(EntitlementGrade $grade): static
+    public function withGrade(EntitlementGradeEnum|string $grade): static
     {
-        return $this->state(fn() => ['entitlement_grade' => $grade]);
+        $code = $grade instanceof EntitlementGradeEnum ? $grade->value : $grade;
+
+        return $this->state(fn () => ['entitlement_grade' => $code]);
     }
 
     public function over50(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'birth_date'        => $this->faker->dateTimeBetween('-60 years', '-51 years'),
-            'entitlement_grade' => EntitlementGrade::ADMIN_OVER_50,
+            'entitlement_grade' => EntitlementGradeEnum::ADMIN_OVER_50->value,
         ]);
     }
 }

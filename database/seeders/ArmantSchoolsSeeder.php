@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Enums\OrganizationType;
+use App\Models\Employee;
+use App\Models\LeaveBalance;
+use App\Models\LeaveType;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -60,6 +63,40 @@ class ArmantSchoolsSeeder extends Seeder
 
         $allowedEmails = [];
         $userCount = 0;
+
+        // Administration oversight accounts (see schools under إدارة أرمنت).
+        $adminAccounts = [
+            [
+                'email' => 'armant.manager@armant-schools.edu',
+                'name'  => 'مدير إدارة أرمنت التعليمية',
+                'role'  => 'مدير الإدارة',
+                'password' => 'ArmantAdmin#2026',
+            ],
+            [
+                'email' => 'armant.leaves@armant-schools.edu',
+                'name'  => 'مسؤول إجازات إدارة أرمنت',
+                'role'  => 'مسؤول الإجازات',
+                'password' => 'ArmantLeaves#2026',
+            ],
+        ];
+
+        foreach ($adminAccounts as $account) {
+            $allowedEmails[] = $account['email'];
+
+            $user = User::updateOrCreate(
+                ['email' => $account['email']],
+                [
+                    'name'                 => $account['name'],
+                    'password'             => $account['password'],
+                    'organization_id'      => $administration->id,
+                    'is_active'            => true,
+                    'must_change_password' => true,
+                ]
+            );
+
+            $this->assignRole($user, $account['role'], $administration->id);
+            $userCount++;
+        }
 
         foreach ($payload['schools'] as $index => $schoolData) {
             $school = $schools[$index];
@@ -120,13 +157,71 @@ class ArmantSchoolsSeeder extends Seeder
         setPermissionsTeamId(null);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        $employeeCount = $this->seedEmployeesForSchools($schools);
+
         // Ensure workflows exist for every school (including newly added ones).
         $this->call(WorkflowConfigurationSeeder::class);
 
         $domain = $payload['email_domain'] ?? 'armant-schools.edu';
         $this->command?->info("✓ {$userCount} Armant school accounts seeded (@{$domain}).");
         $this->command?->info("✓ Removed {$deleted} users outside the Armant schools list.");
-        $this->command?->info('  Sample login: arm001.manager@armant-schools.edu');
+        $this->command?->info("✓ {$employeeCount} employees seeded for Armant schools.");
+        $this->command?->info('  School login : arm001.manager@armant-schools.edu');
+        $this->command?->info('  Admin login  : armant.manager@armant-schools.edu');
+    }
+
+    /**
+     * Ensure each Armant school has demo employees + leave balances.
+     *
+     * @param  list<Organization>  $schools
+     */
+    private function seedEmployeesForSchools(array $schools): int
+    {
+        $leaveTypes = LeaveType::all();
+        $year = now()->year;
+        $created = 0;
+
+        foreach ($schools as $school) {
+            $existing = Employee::withoutGlobalScopes()
+                ->where('organization_id', $school->id)
+                ->count();
+
+            $needed = max(0, 3 - $existing);
+
+            for ($i = 0; $i < $needed; $i++) {
+                $employee = Employee::factory()
+                    ->inOrganization($school)
+                    ->create();
+
+                foreach ($leaveTypes as $leaveType) {
+                    $entitled = match ($leaveType->code) {
+                        'regular' => $employee->regularLeaveEntitlement(),
+                        default   => $leaveType->yearly_entitlement,
+                    };
+
+                    if ($entitled == 0 && ! $leaveType->deducts_balance) {
+                        continue;
+                    }
+
+                    LeaveBalance::firstOrCreate(
+                        [
+                            'employee_id'   => $employee->id,
+                            'leave_type_id' => $leaveType->id,
+                            'year'          => $year,
+                        ],
+                        [
+                            'entitled'     => $entitled,
+                            'carried_over' => 0,
+                            'used'         => 0,
+                        ]
+                    );
+                }
+
+                $created++;
+            }
+        }
+
+        return $created;
     }
 
     private function ensureOrganization(

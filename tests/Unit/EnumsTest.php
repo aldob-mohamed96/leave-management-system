@@ -43,7 +43,7 @@ describe('LeaveStatus', function () {
         expect(LeaveStatus::RETURNED->label())->toBe('مُعاد للتعديل');
         expect(LeaveStatus::APPROVED->label())->toBe('معتمد');
         expect(LeaveStatus::REJECTED->label())->toBe('مرفوض');
-        expect(LeaveStatus::CANCELLED->label())->toBe('ملغي');
+        expect(LeaveStatus::CANCELLED->label())->toBe('تم حذفه');
     });
 
     it('identifies terminal statuses correctly', function () {
@@ -98,9 +98,9 @@ describe('EntitlementGrade', function () {
     it('has Arabic labels', function () {
         expect(EntitlementGrade::TEACHER->label())->toBe('معلم');
         expect(EntitlementGrade::TEACHER_FIRST->label())->toBe('معلم أول');
-        expect(EntitlementGrade::TEACHER_FIRST_A->label())->toBe('معلم أول أ');
+        expect(EntitlementGrade::TEACHER_FIRST_A->label())->toBe('معلم أول (أ)');
         expect(EntitlementGrade::TEACHER_EXPERT->label())->toBe('معلم خبير');
-        expect(EntitlementGrade::TEACHER_SENIOR->label())->toBe('معلم كبير');
+        expect(EntitlementGrade::TEACHER_SENIOR->label())->toBe('كبير معلمين');
         expect(EntitlementGrade::ADMIN_OVER_50->label())->toBe('موظف (فوق 50 سنة)');
     });
 });

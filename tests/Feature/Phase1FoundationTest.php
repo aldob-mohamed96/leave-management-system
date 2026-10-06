@@ -309,7 +309,7 @@ describe('LeaveBalance', function () {
             'used'          => 10,
         ]);
 
-        expect($balance->remaining)->toBe(40.0); // 45 + 5 - 10
+        expect($balance->remaining)->toBe(40); // 45 + 5 - 10
     });
 
     it('remaining never goes below zero', function () {
@@ -326,7 +326,7 @@ describe('LeaveBalance', function () {
             'used'          => 15, // over-used
         ]);
 
-        expect($balance->remaining)->toBe(0.0);
+        expect($balance->remaining)->toBe(0);
     });
 
     it('transactions can be appended to a balance', function () {
@@ -857,7 +857,7 @@ describe('LeaveType seeding', function () {
 
         foreach ($eventBased as $code) {
             $lt = LeaveType::where('code', $code)->first();
-            expect($lt->yearly_entitlement)->toBe('0.0');
+            expect($lt->yearly_entitlement)->toBe(0);
         }
     });
 });

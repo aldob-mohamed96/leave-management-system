@@ -8,6 +8,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\Organization;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class DashboardStatsService
 {
@@ -134,7 +135,6 @@ class DashboardStatsService
 
     /**
      * Average response time in hours (from submitted_at to decided_at).
-     * Uses SQLite julianday for sub-day precision.
      */
     public function avgResponseTime(Organization $adm): float
     {
@@ -143,7 +143,7 @@ class DashboardStatsService
             ->whereIn('status', [LeaveStatus::APPROVED->value, LeaveStatus::REJECTED->value])
             ->whereNotNull('submitted_at')
             ->whereNotNull('decided_at')
-            ->selectRaw('AVG((julianday(decided_at) - julianday(submitted_at)) * 24) as avg_hours')
+            ->selectRaw($this->averageResponseHoursSelect().' as avg_hours')
             ->value('avg_hours') ?? 0.0;
 
         return round((float) $avg, 1);
@@ -193,7 +193,7 @@ class DashboardStatsService
                 ->whereIn('status', [LeaveStatus::APPROVED->value, LeaveStatus::REJECTED->value])
                 ->whereNotNull('submitted_at')
                 ->whereNotNull('decided_at')
-                ->selectRaw('AVG((julianday(decided_at) - julianday(submitted_at)) * 24) as avg_hours')
+                ->selectRaw($this->averageResponseHoursSelect().' as avg_hours')
                 ->value('avg_hours') ?? 0.0;
 
             return [
@@ -215,7 +215,7 @@ class DashboardStatsService
         $raw = LeaveRequest::withoutGlobalScopes()
             ->whereIn('organization_id', $dir->subtreeIds())
             ->whereYear('created_at', $year)
-            ->selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
+            ->selectRaw($this->monthBucketSelect().', COUNT(*) as count')
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();
@@ -223,7 +223,7 @@ class DashboardStatsService
         $result = [];
         for ($m = 1; $m <= 12; $m++) {
             $key      = str_pad($m, 2, '0', STR_PAD_LEFT);
-            $result[] = (int) ($raw[$key] ?? 0);
+            $result[] = (int) ($raw[$key] ?? $raw[(string) $m] ?? 0);
         }
 
         return $result;
@@ -262,5 +262,29 @@ class DashboardStatsService
         }
 
         return $query->count();
+    }
+
+    /**
+     * Driver-aware AVG hours expression (MySQL / MariaDB / SQLite / Postgres).
+     */
+    private function averageResponseHoursSelect(): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'mysql', 'mariadb' => 'AVG(TIMESTAMPDIFF(SECOND, submitted_at, decided_at) / 3600.0)',
+            'pgsql'            => 'AVG(EXTRACT(EPOCH FROM (decided_at - submitted_at)) / 3600.0)',
+            default            => 'AVG((julianday(decided_at) - julianday(submitted_at)) * 24)',
+        };
+    }
+
+    /**
+     * Driver-aware month bucket: zero-padded month string as `month`.
+     */
+    private function monthBucketSelect(): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'mysql', 'mariadb' => "DATE_FORMAT(created_at, '%m') as month",
+            'pgsql'            => "to_char(created_at, 'MM') as month",
+            default            => "strftime('%m', created_at) as month",
+        };
     }
 }

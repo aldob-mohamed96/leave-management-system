@@ -2,50 +2,215 @@
 
 namespace App\Services;
 
+use App\Enums\OrganizationType;
+use App\Enums\StepStatus;
+use App\Models\Employee;
+use App\Models\EntitlementGrade;
 use App\Models\LeaveRequest;
+use App\Models\Organization;
+use App\Support\ArabicPdf;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class LeaveRequestPdfService
 {
     /**
+     * Build the shared view data for PDF / print templates.
+     *
+     * @return array<string, mixed>
+     */
+    public function viewData(LeaveRequest $request): array
+    {
+        $request->loadMissing([
+            'employee.entitlementGrade',
+            'leaveType',
+            'steps.actedBy',
+        ]);
+
+        // Load organization + parents outside OrganizationScope (school users can't see parent admin).
+        $organization = Organization::withoutGlobalScopes()->find($request->organization_id);
+        $hierarchy = $this->resolveHierarchy($organization);
+
+        // Substitute may be soft-deleted — still show the name on the form.
+        $substitute = $request->substitute_employee_id
+            ? Employee::withoutGlobalScopes()->withTrashed()->find($request->substitute_employee_id)
+            : null;
+
+        $leaveTypeName = $request->leaveType?->name ?? 'إجازة';
+        $leaveTypeShort = trim(preg_replace('/^إجازة\s*/u', '', $leaveTypeName) ?: $leaveTypeName);
+
+        $employee = $request->employee;
+        // Prefer entitlement grade (معلم / معلم أول / …) over free-text employee.grade
+        $gradeLabel = $employee?->entitlementGrade?->name
+            ?: (EntitlementGrade::findByCode($employee?->entitlement_grade)?->name)
+            ?: $employee?->grade
+            ?: null;
+
+        // ملحوظة العارضة تظهر فقط مع الإجازة الاعتيادية لمدة يوم أو يومين
+        $showCasualNote = ($request->leaveType?->isRegular() ?? false)
+            && (float) $request->days <= 2;
+
+        return [
+            'leaveRequest'     => $request,
+            'directorate'      => $hierarchy['directorate'],
+            'administration'   => $hierarchy['administration'],
+            'school'           => $hierarchy['school'],
+            'barcode'          => $this->generateBarcode($request->number),
+            'qrCode'           => $this->generateQrCode($request->number),
+            'daysInWords'      => $this->daysToArabicWords((int) $request->days),
+            'approvalRows'     => $this->buildApprovalRows($request),
+            'printedAt'        => now(),
+            'leaveTypeShort'   => $leaveTypeShort,
+            'employeeGrade'    => $gradeLabel,
+            'substituteName'   => $substitute?->full_name,
+            'showCasualNote'   => $showCasualNote,
+        ];
+    }
+
+    /**
      * Generate a PDF binary string for the given leave request.
      */
     public function generate(LeaveRequest $request): string
     {
-        // Pre-generate the QR code as inline SVG
-        $qrCode = '';
+        // Always render Arabic UI strings regardless of current app locale.
+        $previousLocale = app()->getLocale();
+        app()->setLocale('ar');
+
         try {
-            $qrCode = QrCode::format('svg')
-                ->size(80)
-                ->generate(route('leave.verify', ['number' => $request->number]));
-        } catch (\Throwable $e) {
-            // QR generation failure is non-fatal — PDF will render without QR
-            \Illuminate\Support\Facades\Log::warning('[LeaveRequestPdfService] QR code generation failed.', [
-                'number' => $request->number,
-                'error'  => $e->getMessage(),
-            ]);
+            $html = view('pdf.leave-request', $this->viewData($request))->render();
+            $html = ArabicPdf::shapeHtml($html);
+
+            return Pdf::loadHTML($html)
+                ->setPaper('a4', 'portrait')
+                ->setOption('isHtml5ParserEnabled', true)
+                ->setOption('isRemoteEnabled', true)
+                ->setOption('defaultFont', 'DejaVu Sans')
+                ->output();
+        } finally {
+            app()->setLocale($previousLocale);
+        }
+    }
+
+    /**
+     * Arabic download filename: طلب-إجازة-{اسم الموظف}-{رقم الطلب}.pdf
+     */
+    public function downloadFilename(LeaveRequest $request): string
+    {
+        $request->loadMissing('employee');
+
+        $name = trim((string) ($request->employee?->full_name ?? 'موظف'));
+        $name = preg_replace('/\s+/u', '-', $name) ?? $name;
+        $name = preg_replace('/[\\\\\\/:*?"<>|]+/u', '', $name) ?? $name;
+
+        $number = str_replace(['/', '\\'], '-', (string) $request->number);
+
+        return "طلب-إجازة-{$name}-{$number}.pdf";
+    }
+
+    /**
+     * @return array{directorate: ?Organization, administration: ?Organization, school: ?Organization}
+     */
+    private function resolveHierarchy(?Organization $organization): array
+    {
+        $school = null;
+        $administration = null;
+        $directorate = null;
+
+        $current = $organization
+            ? Organization::withoutGlobalScopes()->find($organization->id)
+            : null;
+
+        while ($current) {
+            match ($current->type) {
+                OrganizationType::SCHOOL => $school = $current,
+                OrganizationType::ADMINISTRATION => $administration = $current,
+                OrganizationType::DIRECTORATE => $directorate = $current,
+                default => null,
+            };
+
+            $current = $current->parent_id
+                ? Organization::withoutGlobalScopes()->find($current->parent_id)
+                : null;
         }
 
-        // Convert days to Arabic words
-        $daysInWords = $this->daysToArabicWords((int) $request->days);
+        return compact('directorate', 'administration', 'school');
+    }
 
-        $pdf = Pdf::loadView('pdf.leave-request', [
-            'leaveRequest' => $request,
-            'qrCode'       => $qrCode,
-            'daysInWords'  => $daysInWords,
-        ]);
+    private function generateBarcode(string $number): string
+    {
+        try {
+            // Code128 accepts ASCII only — map Arabic prefix to EG for the barcode payload.
+            $barcodeValue = preg_replace('/^إج-/', 'EG-', $number) ?? $number;
 
-        return $pdf->output();
+            $generator = new BarcodeGeneratorPNG();
+            $png = $generator->getBarcode($barcodeValue, $generator::TYPE_CODE_128, 2, 50);
+
+            return 'data:image/png;base64,'.base64_encode($png);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[LeaveRequestPdfService] Barcode generation failed.', [
+                'number' => $number,
+                'error'  => $e->getMessage(),
+            ]);
+
+            return '';
+        }
+    }
+
+    private function generateQrCode(string $number): string
+    {
+        try {
+            return QrCode::format('svg')
+                ->size(70)
+                ->margin(0)
+                ->generate(route('leave.verify', ['number' => $number]));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[LeaveRequestPdfService] QR code generation failed.', [
+                'number' => $number,
+                'error'  => $e->getMessage(),
+            ]);
+
+            return '';
+        }
+    }
+
+    /**
+     * @return list<array{label: string, name: string, date: string, note: string, signed: bool, signature: string}>
+     */
+    private function buildApprovalRows(LeaveRequest $request): array
+    {
+        $defaults = [
+            'school_principal' => 'مدير المدرسة (توقيع إلكتروني)',
+            'leaves_officer'   => 'مسؤول الإجازات / شؤون العاملين',
+            'admin_manager'    => 'مدير الإدارة',
+        ];
+
+        $rows = [];
+        $steps = $request->steps->keyBy('stage');
+
+        foreach ($defaults as $stage => $label) {
+            $step = $steps->get($stage);
+            $signed = $step?->status === StepStatus::APPROVED;
+            $actorName = $step?->actedBy?->name ?? '';
+
+            $rows[] = [
+                'label'     => $label,
+                'name'      => $actorName,
+                'date'      => $step?->acted_at?->format('Y/m/d') ?? '',
+                'note'      => $step?->note ?? '',
+                'signed'    => $signed,
+                'signature' => $signed ? $actorName : '',
+            ];
+        }
+
+        return $rows;
     }
 
     /**
      * Convert an integer number of days to Arabic words.
-     * Examples: 1 → يوم واحد, 2 → يومان, 21 → واحد وعشرون يوماً, 45 → خمسة وأربعون يوماً
      */
     private function daysToArabicWords(int $days): string
     {
-        // Full phrases for 1–19 (standalone — not used in compound numbers)
         $standalone = [
             '', 'يوم واحد', 'يومان', 'ثلاثة أيام', 'أربعة أيام', 'خمسة أيام',
             'ستة أيام', 'سبعة أيام', 'ثمانية أيام', 'تسعة أيام', 'عشرة أيام',
@@ -54,7 +219,6 @@ class LeaveRequestPdfService
             'تسعة عشر يوماً',
         ];
 
-        // Unit words for use in compound numbers (without "أيام" suffix)
         $units = [
             '', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة',
             'ستة', 'سبعة', 'ثمانية', 'تسعة',
@@ -74,16 +238,14 @@ class LeaveRequestPdfService
         }
 
         if ($days < 100) {
-            $ten  = (int) ($days / 10);
+            $ten = (int) ($days / 10);
             $rest = $days % 10;
 
             if ($rest === 0) {
-                return $tens[$ten] . ' يوماً';
+                return $tens[$ten].' يوماً';
             }
 
-            // Arabic grammar: units + و + tens + يوماً
-            // e.g. 25 → "خمسة وعشرون يوماً"
-            return $units[$rest] . ' و' . $tens[$ten] . ' يوماً';
+            return $units[$rest].' و'.$tens[$ten].' يوماً';
         }
 
         return "{$days} يوماً";

@@ -32,6 +32,8 @@ class PendingRequestsWidget extends BaseWidget
             ->query(fn () => \App\Models\LeaveRequest::withoutGlobalScopes()
                 ->whereIn('id', $records->pluck('id')->toArray()))
             ->paginated(false)
+            ->emptyStateHeading('لا توجد طلبات معلّقة')
+            ->emptyStateDescription('الطلبات المنتظرة للاعتماد ستظهر هنا.')
             ->columns([
                 Tables\Columns\TextColumn::make('number')
                     ->label('رقم الطلب')
@@ -42,12 +44,15 @@ class PendingRequestsWidget extends BaseWidget
                     ->label('نوع الإجازة'),
                 Tables\Columns\TextColumn::make('submitted_at')
                     ->label('تاريخ التقديم')
-                    ->dateTime('Y/m/d'),
+                    ->date('d F Y'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state->label())
                     ->color(fn ($state) => $state->color()),
+                Tables\Columns\TextColumn::make('current_stage')
+                    ->label('المرحلة')
+                    ->formatStateUsing(fn (?string $state) => \App\Models\LeaveRequest::stageLabel($state)),
                 Tables\Columns\IconColumn::make('is_overdue')
                     ->label('متأخر')
                     ->state(fn ($record) => $record->submitted_at

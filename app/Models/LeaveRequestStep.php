@@ -13,6 +13,14 @@ class LeaveRequestStep extends Model
 {
     use HasFactory, LogsActivity;
 
+    /**
+     * Always eager-load the actor — Filament/activity-log touch actedBy
+     * frequently, and Model::shouldBeStrict() forbids lazy loading.
+     *
+     * @var list<string>
+     */
+    protected $with = ['actedBy'];
+
     protected $fillable = [
         'leave_request_id',
         'step_order',
@@ -39,10 +47,27 @@ class LeaveRequestStep extends Model
             ->logFillable()
             ->logOnlyDirty()
             ->setDescriptionForEvent(function (string $eventName) {
-                $actor    = $this->actedBy?->name ?? 'النظام';
-                $request  = $this->leaveRequest?->number ?? "#{$this->leave_request_id}";
+                // Avoid lazy-loading under Model::shouldBeStrict() — resolve via
+                // already-loaded relations or a direct attribute/query lookup.
+                $actor = 'النظام';
+                if ($this->relationLoaded('actedBy')) {
+                    $actor = $this->actedBy?->name ?? 'النظام';
+                } elseif ($this->acted_by) {
+                    $actor = User::query()->whereKey($this->acted_by)->value('name') ?? 'النظام';
+                }
+
+                $requestNumber = "#{$this->leave_request_id}";
+                if ($this->relationLoaded('leaveRequest')) {
+                    $requestNumber = $this->leaveRequest?->number ?? $requestNumber;
+                } elseif ($this->leave_request_id) {
+                    $requestNumber = LeaveRequest::query()
+                        ->whereKey($this->leave_request_id)
+                        ->value('number') ?? $requestNumber;
+                }
+
                 $decision = $this->status?->label() ?? '';
-                return "قرار المرحلة {$this->stage} على طلب {$request}: {$decision} بواسطة {$actor}";
+
+                return "قرار المرحلة {$this->stage} على طلب {$requestNumber}: {$decision} بواسطة {$actor}";
             });
     }
 

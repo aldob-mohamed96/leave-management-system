@@ -6,6 +6,7 @@ use App\Enums\LeaveStatus;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\Organization;
+use App\Support\ArabicPdf;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 
@@ -30,10 +31,14 @@ class ReportPdfService
     {
         $data = $this->buildReportData($filters);
 
-        $pdf = Pdf::loadView('pdf.report-summary', $data)
-            ->setPaper('a4', 'portrait');
+        $html = view('pdf.report-summary', $data)->render();
+        $html = ArabicPdf::shapeHtml($html);
 
-        return $pdf->output();
+        return Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true)
+            ->output();
     }
 
     private function buildReportData(array $filters): array

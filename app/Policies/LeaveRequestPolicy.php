@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\OrganizationType;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -42,25 +43,39 @@ class LeaveRequestPolicy
 
     /**
      * هل يمكن للمستخدم تعديل طلب إجازة؟
-     * يشترط أن تكون حالة الطلب قابلة للتعديل.
+     * المدرسة: قبل اعتماد/رفض الإدارة. غير ذلك: حالات المسودة/المعاد فقط.
      */
     public function update(User $user, LeaveRequest $leaveRequest): bool
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('edit_leave_request')
-            && $leaveRequest->status->canBeEdited();
+        if (! $user->hasPermissionTo('edit_leave_request')) {
+            return false;
+        }
+
+        if ($user->hasPermissionTo('manage_organization') || $user->hasPermissionTo('view_reports')) {
+            return $leaveRequest->status->canBeEdited()
+                || $leaveRequest->status->canBeModifiedBySchool();
+        }
+
+        // School users: edit until administration makes a final decision.
+        return $leaveRequest->status->canBeModifiedBySchool();
     }
 
     /**
      * هل يمكن للمستخدم حذف طلب إجازة؟
-     * مخصص للمدير فقط (manage_organization).
+     * المدرسة قبل قرار الإدارة، أو صلاحية manage_organization.
      */
     public function delete(User $user, LeaveRequest $leaveRequest): bool
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('manage_organization');
+        if ($user->hasPermissionTo('manage_organization')) {
+            return true;
+        }
+
+        return $user->hasPermissionTo('delete_leave_request')
+            && $leaveRequest->status->canBeModifiedBySchool();
     }
 
     /**
@@ -75,22 +90,36 @@ class LeaveRequestPolicy
 
     /**
      * هل يمكن للمستخدم اعتماد طلب الإجازة؟
+     * - مدير المدرسة: مرحلة school_principal فقط
+     * - الإدارة/المديرية: مراحل الإدارة
      */
     public function approve(User $user, LeaveRequest $leaveRequest): bool
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('approve_leave_request');
+        if (! $user->hasPermissionTo('approve_leave_request')) {
+            return false;
+        }
+
+        if ($leaveRequest->current_stage === 'school_principal') {
+            return $this->isSchoolPrincipalActor($user, $leaveRequest);
+        }
+
+        return $this->isAdministrationActor($user)
+            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
     }
 
     /**
      * هل يمكن للمستخدم رفض طلب الإجازة؟
+     * الرفض النهائي من الإدارة فقط.
      */
     public function reject(User $user, LeaveRequest $leaveRequest): bool
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('reject_leave_request');
+        return $this->isAdministrationActor($user)
+            && $user->hasPermissionTo('reject_leave_request')
+            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
     }
 
     /**
@@ -100,7 +129,33 @@ class LeaveRequestPolicy
     {
         $user->setOrganizationTeam();
 
-        return $user->hasPermissionTo('return_leave_request');
+        if (! $user->hasPermissionTo('return_leave_request')) {
+            return false;
+        }
+
+        if ($leaveRequest->current_stage === 'school_principal') {
+            return $this->isSchoolPrincipalActor($user, $leaveRequest);
+        }
+
+        return $this->isAdministrationActor($user)
+            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
+    }
+
+    private function isAdministrationActor(User $user): bool
+    {
+        $type = $user->organization?->type;
+
+        return in_array($type, [
+            OrganizationType::ADMINISTRATION,
+            OrganizationType::DIRECTORATE,
+        ], true);
+    }
+
+    private function isSchoolPrincipalActor(User $user, LeaveRequest $leaveRequest): bool
+    {
+        return ($user->organization?->isSchool() ?? false)
+            && $leaveRequest->organization_id === $user->organization_id
+            && $user->hasRole('مدير مدرسة');
     }
 
     /**

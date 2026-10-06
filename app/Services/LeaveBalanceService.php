@@ -29,7 +29,7 @@ class LeaveBalanceService
     ): LeaveBalance {
         $entitled = $leaveType->code === 'regular'
             ? $employee->regularLeaveEntitlement()
-            : (float) $leaveType->yearly_entitlement;
+            : (int) $leaveType->yearly_entitlement;
 
         return LeaveBalance::firstOrCreate(
             [
@@ -55,7 +55,7 @@ class LeaveBalanceService
      */
     public function deduct(
         LeaveBalance $balance,
-        float $days,
+        int $days,
         LeaveRequest $request,
         User $actedBy
     ): LeaveBalanceTransaction {
@@ -83,7 +83,7 @@ class LeaveBalanceService
      */
     public function refund(
         LeaveBalance $balance,
-        float $days,
+        int $days,
         LeaveRequest $request,
         User $actedBy
     ): LeaveBalanceTransaction {
@@ -99,7 +99,7 @@ class LeaveBalanceService
             ]);
 
             $balance->update([
-                'used' => max(0.0, (float) $balance->used - $days),
+                'used' => max(0, (int) $balance->used - $days),
             ]);
 
             return $transaction;
@@ -113,7 +113,7 @@ class LeaveBalanceService
      */
     public function adjust(
         LeaveBalance $balance,
-        float $days,
+        int $days,
         string $note,
         User $actedBy
     ): LeaveBalanceTransaction {
@@ -132,7 +132,7 @@ class LeaveBalanceService
                 $balance->increment('entitled', $days);
             } elseif ($days < 0) {
                 $balance->update([
-                    'used' => max(0.0, (float) $balance->used - abs($days)),
+                    'used' => max(0, (int) $balance->used - abs($days)),
                 ]);
             }
 
@@ -189,7 +189,7 @@ class LeaveBalanceService
         foreach ($leaveTypes as $leaveType) {
             $days = $leaveType->code === 'regular'
                 ? $employee->regularLeaveEntitlement()
-                : (float) $leaveType->yearly_entitlement;
+                : (int) $leaveType->yearly_entitlement;
 
             $balance = $this->getOrCreateBalance($employee, $leaveType, $year);
 

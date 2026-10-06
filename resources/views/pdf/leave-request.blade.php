@@ -1,161 +1,281 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>طلب إجازة - {{ $leaveRequest->number }}</title>
+    <title>طلب إجازة - {{ $leaveRequest->employee?->full_name ?? '' }} - {{ $leaveRequest->number }}</title>
+    <style>
+        /*
+         * DomPDF + Ar-PHP: glyphs are pre-shaped into visual LTR order.
+         * Document must stay LTR so DomPDF does not reverse them again.
+         * text-align:right keeps Arabic alignment; table cell order is
+         * written left→right so labels end up on the right visually.
+         */
+        html, body {
+            font-family: DejaVu Sans, sans-serif;
+            direction: ltr;
+            text-align: right;
+            font-size: 11px;
+            color: #111;
+            margin: 0;
+            padding: 0;
+        }
+        body { padding: 12px 18px; }
+        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        .header-table td { vertical-align: top; }
+        .org-line { font-size: 12px; font-weight: bold; color: #1e3a5f; line-height: 1.5; text-align: right; }
+        .code-box { text-align: left; font-size: 10px; }
+        .barcode { margin-top: 4px; text-align: left; }
+        .title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e3a5f;
+            margin: 6px 0 10px;
+            border-bottom: 2px solid #1e3a5f;
+            padding-bottom: 6px;
+        }
+        .section-title {
+            background: #1e3a5f;
+            color: #fff;
+            font-weight: bold;
+            padding: 4px 8px;
+            font-size: 11px;
+            margin: 10px 0 5px;
+            text-align: right;
+        }
+        table.data { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+        table.data td, table.data th {
+            border: 1px solid #999;
+            padding: 5px 7px;
+            vertical-align: middle;
+            text-align: right;
+        }
+        .label { background: #f0f3f7; font-weight: bold; width: 20%; }
+        .value { width: 30%; }
+        .statement {
+            border: 1px solid #999;
+            padding: 8px;
+            margin: 8px 0;
+            line-height: 1.8;
+            font-size: 11px;
+            text-align: right;
+        }
+        .note {
+            font-size: 9.5px;
+            color: #444;
+            margin: 6px 0;
+            border: 1px dashed #aaa;
+            padding: 5px 7px;
+            text-align: right;
+        }
+        .approval-box {
+            border: 1px solid #1e3a5f;
+            padding: 8px;
+            text-align: center;
+            margin-top: 8px;
+            min-height: 45px;
+        }
+        .signature-box {
+            min-height: 34px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .signature-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1e3a5f;
+            line-height: 1.3;
+            border-bottom: 1px solid #1e3a5f;
+            display: inline-block;
+            padding: 0 6px 2px;
+        }
+        .signature-stamp {
+            font-size: 8px;
+            color: #555;
+            margin-top: 2px;
+        }
+        .signature-line {
+            border-bottom: 1px solid #777;
+            height: 22px;
+            margin: 6px 10px 2px;
+        }
+        .footer {
+            border-top: 1px solid #ccc;
+            margin-top: 12px;
+            padding-top: 6px;
+            font-size: 9px;
+            color: #555;
+        }
+        .footer table { width: 100%; border-collapse: collapse; }
+        .muted { color: #666; }
+    </style>
 </head>
 <body>
-<div style="font-family: DejaVu Sans, serif; direction: rtl; font-size: 12px; color: #111; margin: 0; padding: 10px 20px;">
 
-    {{-- ===== HEADER ===== --}}
-    <div style="text-align: center; border-bottom: 2px solid #1e3a5f; padding-bottom: 12px; margin-bottom: 16px;">
-        <div style="font-size: 14px; color: #555; margin-bottom: 4px;">وزارة التربية والتعليم</div>
-        <div style="font-size: 18px; font-weight: bold; color: #1e3a5f; margin-bottom: 4px;">طلب إجازة اعتيادية</div>
-        <div style="font-size: 11px; color: #777;">رقم الطلب: <strong>{{ $leaveRequest->number }}</strong></div>
+    {{-- Header: left = barcode/meta, right = org names (LTR cell order) --}}
+    <table class="header-table">
+        <tr>
+            <td style="width: 38%;" class="code-box">
+                <div><strong>رقم الطلب:</strong> {{ $leaveRequest->number }}</div>
+                <div class="muted">كود المدرسة: {{ $school?->code ?? $leaveRequest->organization?->code ?? '—' }}</div>
+                @if(!empty($barcode))
+                    <div class="barcode">
+                        <img src="{{ $barcode }}" alt="barcode" style="height: 42px;">
+                    </div>
+                @endif
+            </td>
+            <td style="width: 62%;">
+                <div class="org-line">{{ $directorate?->name ?? 'مديرية التربية والتعليم بالأقصر' }}</div>
+                <div class="org-line">{{ $administration?->name ?? '—' }}</div>
+                <div class="org-line">{{ $school?->name ?? $leaveRequest->organization?->name ?? '—' }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="title">طلب إجازة ({{ $leaveTypeShort ?? 'اعتيادية' }})</div>
+
+    <div class="section-title">أولاً: بيانات الموظف</div>
+    <table class="data">
+        {{-- LTR cell order so rightmost pair is اسم الموظف --}}
+        <tr>
+            <td class="value">{{ $leaveRequest->employee?->employee_code ?? '—' }}</td>
+            <td class="label">كود الموظف</td>
+            <td class="value">{{ $leaveRequest->employee?->full_name ?? '—' }}</td>
+            <td class="label">اسم الموظف</td>
+        </tr>
+        <tr>
+            <td class="value">{{ $employeeGrade ?? '—' }}</td>
+            <td class="label">الدرجة الوظيفية</td>
+            <td class="value">{{ $leaveRequest->employee?->job_title ?? '—' }}</td>
+            <td class="label">المسمى الوظيفي</td>
+        </tr>
+        <tr>
+            <td class="value">{{ $leaveRequest->employee?->hire_date?->format('Y/m/d') ?? '—' }}</td>
+            <td class="label">تاريخ التعيين</td>
+            <td class="value">{{ $school?->name ?? $leaveRequest->organization?->name ?? '—' }}</td>
+            <td class="label">جهة العمل</td>
+        </tr>
+        <tr>
+            <td class="value">{{ $leaveRequest->employee?->work_start_date?->format('Y/m/d') ?? '—' }}</td>
+            <td class="label">تاريخ استلام العمل</td>
+            <td class="value">{{ $leaveRequest->employee?->birth_date?->format('Y/m/d') ?? '—' }}</td>
+            <td class="label">تاريخ الميلاد</td>
+        </tr>
+    </table>
+
+    <div class="section-title">ثانياً: بيانات الإجازة</div>
+    <div class="statement">
+        أرجو الموافقة على منحي
+        <strong>({{ $leaveTypeShort ?? 'إجازة' }})</strong>
+        مدتها
+        (<strong>{{ (int) $leaveRequest->days }}</strong>)
+        يوم
+        (<strong>{{ $daysInWords }}</strong>)
+        اعتباراً من
+        <strong>{{ $leaveRequest->start_date?->format('Y/m/d') ?? '—/—/—' }}</strong>
+        إلى
+        <strong>{{ $leaveRequest->end_date?->format('Y/m/d') ?? '—/—/—' }}</strong>.
+        <br>
+        تاريخ تحرير الطلب:
+        <strong>{{ $leaveRequest->written_at?->format('Y/m/d') ?? $leaveRequest->created_at?->format('Y/m/d') ?? '—' }}</strong>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        القائم بالعمل أثناء الإجازة:
+        <strong>{{ $substituteName ?? '—' }}</strong>
+        <br>
+        السبب: {{ $leaveRequest->reason ?: '—' }}
     </div>
 
-    {{-- ===== SECTION 1: Employee Data ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            أولاً: بيانات الموظف
+    @if(!empty($showCasualNote))
+        <div class="note">
+            ملحوظة: لا تُمنح الإجازة الاعتيادية لمدة يوم أو يومين إلا بعد استنفاد رصيد الإجازة العارضة.
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold; width: 22%;">اسم الموظف</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; width: 28%;">{{ $leaveRequest->employee?->full_name ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold; width: 22%;">كود الموظف</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; width: 28%;">{{ $leaveRequest->employee?->employee_code ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">المسمى الوظيفي</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->employee?->job_title ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">الدرجة الوظيفية</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->employee?->grade ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">جهة العمل</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->organization?->name ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">تاريخ التعيين</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->employee?->hire_date?->toDateString() ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">تاريخ الميلاد</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->employee?->birth_date?->toDateString() ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">تاريخ بداية العمل</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->employee?->work_start_date?->toDateString() ?? '—' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    {{-- ===== SECTION 2: Leave Data ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            ثانياً: بيانات الإجازة
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold; width: 22%;">نوع الإجازة</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; width: 28%;">{{ $leaveRequest->leaveType?->name ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold; width: 22%;">تاريخ كتابة الطلب</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; width: 28%;">{{ $leaveRequest->written_at?->toDateString() ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">من تاريخ</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->start_date?->toDateString() ?? '—' }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">إلى تاريخ</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->end_date?->toDateString() ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">عدد الأيام (رقماً)</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $leaveRequest->days }}</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">عدد الأيام (كتابةً)</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;">{{ $daysInWords ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">الموظف البديل</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;" colspan="3">{{ $leaveRequest->substituteEmployee?->full_name ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ccc; padding: 5px 8px; background: #f5f5f5; font-weight: bold;">سبب الإجازة</td>
-                <td style="border: 1px solid #ccc; padding: 5px 8px;" colspan="3">{{ $leaveRequest->reason ?? '—' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    {{-- ===== SECTION 3: Opinions ===== --}}
-    <div style="margin-bottom: 14px;">
-        <div style="background: #1e3a5f; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            ثالثاً: آراء الجهات
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">الجهة</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">الاسم</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">التاريخ</th>
-                    <th style="border: 1px solid #ccc; padding: 5px 8px; background: #e8edf2; text-align: right; width: 25%;">التوقيع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; font-weight: bold;">المدير المباشر</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; height: 30px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; font-weight: bold;">مسؤول الإجازات</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; height: 30px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; font-weight: bold; vertical-align: top;">رصيد الإجازة</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;" colspan="3">
-                        <span style="margin-left: 8px;">المستحق: {{ $leaveRequest->balance_entitled ?? '—' }}</span>
-                        <span style="margin-left: 8px;">المستخدم: {{ $leaveRequest->balance_used ?? '—' }}</span>
-                        <span style="margin-left: 8px;">المتبقي: {{ $leaveRequest->balance_remaining ?? '—' }}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; font-weight: bold;">مدير الإدارة</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px; height: 30px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 8px;">&nbsp;</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    {{-- ===== SECTION 4: Notes / Rejection ===== --}}
-    @if($leaveRequest->status === \App\Enums\LeaveStatus::REJECTED && $leaveRequest->rejection_reason)
-    <div style="margin-bottom: 14px;">
-        <div style="background: #c0392b; color: #fff; font-weight: bold; padding: 5px 8px; font-size: 12px; margin-bottom: 6px;">
-            ملاحظات
-        </div>
-        <div style="border: 1px solid #e74c3c; padding: 8px; background: #fef2f2; font-size: 11px;">
-            <strong>سبب الرفض:</strong> {{ $leaveRequest->rejection_reason }}
-        </div>
-    </div>
     @endif
 
-    {{-- ===== FOOTER ===== --}}
-    <div style="border-top: 1px solid #ccc; padding-top: 10px; margin-top: 16px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+    <div class="section-title">خاص بقسم الإجازات — الرصيد</div>
+    <table class="data">
+        <tr>
+            <td class="value">{{ $leaveRequest->balance_used !== null ? (int) $leaveRequest->balance_used : '—' }} يوم</td>
+            <td class="label">السابق منحها</td>
+            <td class="value">{{ $leaveRequest->balance_entitled !== null ? (int) $leaveRequest->balance_entitled : '—' }} يوم</td>
+            <td class="label">الإجازة المستحقة</td>
+        </tr>
+        <tr>
+            <td class="value">{{ $leaveRequest->displayStatusLabel() }}</td>
+            <td class="label">حالة الطلب</td>
+            <td class="value">{{ $leaveRequest->balance_remaining !== null ? (int) $leaveRequest->balance_remaining : '—' }} يوم</td>
+            <td class="label">الرصيد المتبقي</td>
+        </tr>
+    </table>
+
+    <div class="section-title">ثالثاً: الإجراءات والآراء</div>
+    <table class="data">
+        <thead>
             <tr>
-                <td style="text-align: right; vertical-align: middle; width: 70%;">
-                    <div>صدر بتاريخ: {{ $leaveRequest->decided_at ? $leaveRequest->decided_at->format('Y/m/d') : now()->format('Y/m/d') }}</div>
-                    <div style="color: #666; margin-top: 3px;">صفحة 1</div>
-                </td>
-                <td style="text-align: left; vertical-align: middle; width: 30%;">
+                <th style="background:#e8edf2; width:26%;">التوقيع / الملاحظة</th>
+                <th style="background:#e8edf2; width:18%;">التاريخ</th>
+                <th style="background:#e8edf2; width:28%;">الاسم</th>
+                <th style="background:#e8edf2; width:28%;">الجهة</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($approvalRows as $row)
+                <tr>
+                    <td class="signature-box">
+                        @if(!empty($row['signed']))
+                            <div class="signature-name">{{ $row['signature'] }}</div>
+                            <div class="signature-stamp">توقيع إلكتروني معتمد</div>
+                            @if(!empty($row['note']))
+                                <div style="font-size:8px; color:#444; margin-top:2px;">{{ $row['note'] }}</div>
+                            @endif
+                        @else
+                            <div class="signature-line"></div>
+                            <div class="signature-stamp">خانة التوقيع</div>
+                        @endif
+                    </td>
+                    <td>{{ $row['date'] ?: '' }}</td>
+                    <td>{{ $row['name'] ?: '' }}</td>
+                    <td style="font-weight:bold; height:36px;">{{ $row['label'] }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="approval-box">
+        <div style="font-weight:bold; margin-bottom:6px;">رأى مدير الإدارة</div>
+        <div style="font-size:13px;">
+            @if($leaveRequest->status === \App\Enums\LeaveStatus::APPROVED)
+                يعتمد
+            @elseif($leaveRequest->status === \App\Enums\LeaveStatus::REJECTED)
+                يُرفض
+            @else
+                ........................
+            @endif
+        </div>
+    </div>
+
+    @if($leaveRequest->status === \App\Enums\LeaveStatus::REJECTED && $leaveRequest->rejection_reason)
+        <div style="margin-top:8px; border:1px solid #c0392b; padding:6px; background:#fef2f2; text-align:right;">
+            <strong>سبب الرفض:</strong> {{ $leaveRequest->rejection_reason }}
+        </div>
+    @endif
+
+    <div class="footer">
+        <table>
+            <tr>
+                <td style="width:30%; text-align:left;">
                     @if(!empty($qrCode))
                         {!! $qrCode !!}
                     @endif
                 </td>
+                <td style="width:70%; text-align:right;">
+                    تاريخ الطباعة: {{ $printedAt->format('Y/m/d H:i') }}
+                    &nbsp;|&nbsp;
+                    {{ $administration?->name ?? '' }}
+                    @if($school) — {{ $school->name }} @endif
+                </td>
             </tr>
         </table>
     </div>
 
-</div>
 </body>
 </html>

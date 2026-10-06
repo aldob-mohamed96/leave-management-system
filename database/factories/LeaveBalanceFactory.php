@@ -13,9 +13,9 @@ class LeaveBalanceFactory extends Factory
 
     public function definition(): array
     {
-        $entitled    = $this->faker->randomElement([7.0, 21.0, 30.0, 45.0]);
-        $carriedOver = $this->faker->randomFloat(1, 0, 10);
-        $used        = $this->faker->randomFloat(1, 0, $entitled);
+        $entitled    = $this->faker->randomElement([7, 21, 30, 45]);
+        $carriedOver = $this->faker->numberBetween(0, 10);
+        $used        = $this->faker->numberBetween(0, $entitled);
 
         return [
             'employee_id'   => Employee::factory(),

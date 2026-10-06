@@ -44,7 +44,16 @@ class LeaveRequestService
      */
     public function create(array $data, User $createdBy): CreateLeaveRequestResult
     {
-        $employee  = Employee::withoutGlobalScopes()->findOrFail($data['employee_id']);
+        $employee = Employee::withoutGlobalScopes()
+            ->whereNull('deleted_at')
+            ->find($data['employee_id'] ?? null);
+
+        if (! $employee) {
+            throw ValidationException::withMessages([
+                'employee_id' => 'الموظف المحدد غير موجود أو تم حذفه.',
+            ]);
+        }
+
         $leaveType = LeaveType::findOrFail($data['leave_type_id']);
         $year      = now()->year;
 
@@ -53,9 +62,15 @@ class LeaveRequestService
         // ---- Working days calculation ----
         $workingDaysRule = new WorkingDaysRule();
         $workingDaysRule->setData($data);
-        $workingDaysRule->validate('days', $data['days'] ?? 0, fn($msg) => null);
+        $workingDaysRule->validate('days', $data['days'] ?? 0, fn ($msg) => null);
+
         if ($workingDaysRule->calculatedDays > 0) {
             $data['days'] = $workingDaysRule->calculatedDays;
+        } elseif (empty($data['days']) || (int) $data['days'] <= 0) {
+            throw ValidationException::withMessages([
+                'start_date' => 'لا توجد أيام عمل في الفترة المحددة (عطلة أسبوعية أو إجازة رسمية). اختر تواريخاً أخرى.',
+                'days'       => 'عدد الأيام يجب أن يكون أكبر من صفر.',
+            ]);
         }
 
         // ---- Sufficient balance ----
@@ -93,6 +108,39 @@ class LeaveRequestService
             $warnings[] = $casualRule->warning;
         }
 
+        // ---- Substitute + reason (required for printable form) ----
+        $substituteId = $data['substitute_employee_id'] ?? null;
+        if (empty($substituteId)) {
+            throw ValidationException::withMessages([
+                'substitute_employee_id' => 'يجب تحديد الموظف البديل (القائم بالعمل أثناء الإجازة).',
+            ]);
+        }
+
+        if ((int) $substituteId === (int) $employee->id) {
+            throw ValidationException::withMessages([
+                'substitute_employee_id' => 'لا يمكن أن يكون الموظف البديل هو نفس طالب الإجازة.',
+            ]);
+        }
+
+        $substituteExists = Employee::withoutGlobalScopes()
+            ->whereNull('deleted_at')
+            ->whereKey($substituteId)
+            ->exists();
+
+        if (! $substituteExists) {
+            throw ValidationException::withMessages([
+                'substitute_employee_id' => 'الموظف البديل المحدد غير موجود أو تم حذفه.',
+            ]);
+        }
+
+        $reason = trim((string) ($data['reason'] ?? ''));
+        if (mb_strlen($reason) < 5) {
+            throw ValidationException::withMessages([
+                'reason' => 'سبب طلب الإجازة مطلوب ولا يقل عن 5 أحرف.',
+            ]);
+        }
+        $data['reason'] = $reason;
+
         // ---- Persist ----
         $request = DB::transaction(function () use ($data, $createdBy, $employee) {
             return LeaveRequest::create([
@@ -104,7 +152,7 @@ class LeaveRequestService
                 'end_date'              => $data['end_date'],
                 'days'                  => $data['days'],
                 'written_at'            => $data['written_at'] ?? null,
-                'reason'                => $data['reason'] ?? null,
+                'reason'                => isset($data['reason']) ? trim((string) $data['reason']) : null,
                 'status'                => LeaveStatus::DRAFT,
                 'created_by'            => $createdBy->id,
             ]);
@@ -132,10 +180,18 @@ class LeaveRequestService
             // Delete any stale steps from a previous submission
             $request->steps()->delete();
 
+            $employee = Employee::withoutGlobalScopes()
+                ->withTrashed()
+                ->find($request->employee_id);
+
+            if (! $employee) {
+                throw new LeaveRequestException('لا يمكن تقديم الطلب: بيانات الموظف غير موجودة.');
+            }
+
             // Snapshot current balance
             $leaveType = $request->leaveType;
             $balance   = $this->balanceService->getOrCreateBalance(
-                $request->employee,
+                $employee,
                 $leaveType,
                 now()->year
             );
@@ -145,7 +201,8 @@ class LeaveRequestService
             $request->balance_remaining = $balance->remaining;
 
             // Build workflow steps from configuration
-            $stages = WorkflowConfiguration::where('organization_id', $request->organization_id)
+            $stages = WorkflowConfiguration::withoutGlobalScopes()
+                ->where('organization_id', $request->organization_id)
                 ->where('is_active', true)
                 ->orderBy('step_order')
                 ->get();
@@ -171,8 +228,55 @@ class LeaveRequestService
             // Notify relevant users (best-effort)
             $this->notifySubmitted($request);
 
-            return $request->fresh();
+            $request = $request->fresh(['steps']);
+
+            // أي تقديم من المدرسة يعتمد مرحلة مدير المدرسة تلقائياً (توقيع إلكتروني)
+            if ($firstStage->stage_name === 'school_principal') {
+                $principalStep = $request->steps->firstWhere('stage', 'school_principal');
+
+                if ($principalStep && $principalStep->status === StepStatus::PENDING) {
+                    $approver = $this->resolveSchoolPrincipalApprover($request, $submittedBy);
+
+                    return $this->approve(
+                        $request,
+                        $principalStep,
+                        $approver,
+                        'اعتماد إلكتروني من المدرسة عند التقديم'
+                    );
+                }
+            }
+
+            return $request;
         });
+    }
+
+    /**
+     * Prefer the school manager for the electronic signature; fall back to submitter.
+     */
+    private function resolveSchoolPrincipalApprover(LeaveRequest $request, User $submittedBy): User
+    {
+        $submittedBy->setOrganizationTeam();
+
+        if ($submittedBy->hasRole('مدير مدرسة')) {
+            return $submittedBy;
+        }
+
+        $organizationId = $request->organization_id;
+
+        setPermissionsTeamId($organizationId);
+
+        $manager = User::query()
+            ->where('organization_id', $organizationId)
+            ->where('is_active', true)
+            ->whereHas('roles', function ($query) use ($organizationId) {
+                $query->where('name', 'مدير مدرسة')
+                    ->where('roles.organization_id', $organizationId);
+            })
+            ->first();
+
+        setPermissionsTeamId($submittedBy->organization_id);
+
+        return $manager ?? $submittedBy;
     }
 
     // -------------------------------------------------------------------------
@@ -265,7 +369,7 @@ class LeaveRequestService
                         $request->leaveType,
                         now()->year
                     );
-                    $this->balanceService->deduct($balance, (float) $request->days, $request, $actedBy);
+                    $this->balanceService->deduct($balance, (int) $request->days, $request, $actedBy);
                 }
 
                 $this->notifyApproved($request);
@@ -393,7 +497,7 @@ class LeaveRequestService
                     $request->leaveType,
                     now()->year
                 );
-                $this->balanceService->refund($balance, (float) $request->days, $request, $cancelledBy);
+                $this->balanceService->refund($balance, (int) $request->days, $request, $cancelledBy);
             }
 
             return $request->fresh();

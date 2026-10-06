@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * صفحة تعديل طلب إجازة.
  *
- * السماح بالتعديل فقط للطلبات في حالة DRAFT أو RETURNED.
+ * السماح بالتعديل قبل قرار الإدارة النهائي (مسودة / معاد / مقدّم / قيد المراجعة).
  *
  * عند الحفظ:
  *  - DRAFT   → نعيد حساب أيام العمل + نتحقق من التداخل والحد الأقصى والرصيد
@@ -44,10 +44,6 @@ class EditLeaveRequest extends EditRecord
         $record = $this->getRecord();
 
         abort_unless(Gate::allows('update', $record), 403, 'ليس لديك صلاحية تعديل هذا الطلب.');
-
-        if (! $record->status->canBeEdited()) {
-            abort(403, 'لا يمكن تعديل الطلب في حالته الحالية.');
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -156,6 +152,16 @@ class EditLeaveRequest extends EditRecord
                 ->warning()
                 ->send();
         }
+
+        // إذا كان الطلب مقدَّماً أو قيد المراجعة، نرجعه لمسودة بعد التعديل.
+        if (in_array($record->status, [LeaveStatus::SUBMITTED, LeaveStatus::IN_REVIEW], true)) {
+            $record->steps()->delete();
+            $updateData['status'] = LeaveStatus::DRAFT;
+            $updateData['current_stage'] = null;
+            $updateData['submitted_at'] = null;
+        }
+
+        $updateData['was_modified'] = true;
 
         $record->update($updateData);
 

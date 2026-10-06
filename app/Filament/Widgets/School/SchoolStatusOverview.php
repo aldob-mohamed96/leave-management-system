@@ -31,7 +31,7 @@ class SchoolStatusOverview extends StatsOverviewWidget
             LeaveStatus::RETURNED->value  => 'warning',
             LeaveStatus::APPROVED->value  => 'success',
             LeaveStatus::REJECTED->value  => 'danger',
-            LeaveStatus::CANCELLED->value => 'gray',
+            LeaveStatus::CANCELLED->value => 'danger',
         ];
 
         $stats = [];

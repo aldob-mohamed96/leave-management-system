@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\LeaveStatus;
 use App\Models\LeaveRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -75,14 +76,24 @@ class LeaveRequestObserver
     {
         $year = now()->year;
 
-        // Atomic sequence using DB lock to avoid race conditions
-        $last = \App\Models\LeaveRequest::withoutGlobalScopes()
-            ->whereYear('created_at', $year)
-            ->lockForUpdate()
-            ->max(\Illuminate\Support\Facades\DB::raw("CAST(SUBSTR(number, -6) AS INTEGER)"));
+        // Atomic sequence using DB lock to avoid race conditions.
+        // CAST AS INTEGER is SQLite-only; MySQL needs UNSIGNED/SIGNED.
+        return DB::transaction(function () use ($year) {
+            $castExpr = match (DB::getDriverName()) {
+                'mysql', 'mariadb' => 'CAST(RIGHT(`number`, 6) AS UNSIGNED)',
+                'pgsql'            => 'CAST(RIGHT(number, 6) AS INTEGER)',
+                default            => 'CAST(SUBSTR(number, -6) AS INTEGER)',
+            };
 
-        $sequence = ($last ?? 0) + 1;
+            $last = LeaveRequest::withoutGlobalScopes()
+                ->whereYear('created_at', $year)
+                ->where('number', 'like', "LV-{$year}-%")
+                ->lockForUpdate()
+                ->max(DB::raw($castExpr));
 
-        return sprintf('LV-%d-%06d', $year, $sequence);
+            $sequence = ((int) ($last ?? 0)) + 1;
+
+            return sprintf('LV-%d-%06d', $year, $sequence);
+        });
     }
 }

@@ -30,10 +30,30 @@ class ViewLeaveRequest extends ViewRecord
         return [
             // Edit
             \Filament\Actions\EditAction::make()
-                ->visible(fn(): bool =>
-                    $this->getRecord()->status->canBeEdited()
-                    && Auth::user()?->can('update', $this->getRecord())
-                ),
+                ->visible(fn (): bool => Auth::user()?->can('update', $this->getRecord()) ?? false),
+
+            \Filament\Actions\DeleteAction::make()
+                ->label('حذف')
+                ->requiresConfirmation()
+                ->modalHeading('تأكيد حذف طلب الإجازة')
+                ->modalDescription('سيتم تعليم الطلب كـ «تم حذفه».')
+                ->modalSubmitActionLabel('نعم، احذف')
+                ->modalCancelActionLabel('إلغاء')
+                ->successRedirectUrl(LeaveRequestResource::getUrl('index'))
+                ->visible(fn (): bool => Auth::user()?->can('delete', $this->getRecord()) ?? false)
+                ->before(function (): void {
+                    $record = $this->getRecord();
+                    if ($record->status !== LeaveStatus::CANCELLED && $record->status->canBeCancelled()) {
+                        try {
+                            app(\App\Services\LeaveRequestService::class)->cancel($record, Auth::user());
+                        } catch (\Throwable) {
+                            $record->forceFill([
+                                'status' => LeaveStatus::CANCELLED,
+                                'current_stage' => null,
+                            ])->save();
+                        }
+                    }
+                }),
 
             // Submit
             Action::make('submit')
@@ -60,7 +80,9 @@ class ViewLeaveRequest extends ViewRecord
 
             // Approve
             Action::make('approve')
-                ->label('اعتماد')
+                ->label(fn (): string => $this->getRecord()->current_stage === 'school_principal'
+                    ? 'اعتماد وتوقيع إلكتروني'
+                    : 'اعتماد')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible(fn(): bool =>
@@ -180,12 +202,15 @@ class ViewLeaveRequest extends ViewRecord
 
             // Cancel
             Action::make('cancel')
-                ->label('إلغاء الطلب')
+                ->label('حذف الطلب')
                 ->icon('heroicon-o-no-symbol')
-                ->color('gray')
+                ->color('danger')
                 ->requiresConfirmation()
+                ->modalHeading('تأكيد حذف الطلب')
+                ->modalDescription('سيتم تعليم الطلب كـ «تم حذفه».')
                 ->visible(fn(): bool =>
-                    $this->getRecord()->status->canBeCancelled()
+                    ! $this->getRecord()->trashed()
+                    && $this->getRecord()->status->canBeCancelled()
                     && Auth::user()?->can('cancel', $this->getRecord())
                 )
                 ->action(function (): void {
@@ -193,13 +218,24 @@ class ViewLeaveRequest extends ViewRecord
                     try {
                         app(\App\Services\LeaveRequestService::class)->cancel($record, Auth::user());
                         $this->refreshFormData([]);
-                        Notification::make()->success()->title('تم إلغاء الطلب')->send();
+                        Notification::make()->success()->title('تم حذفه')->send();
                     } catch (LeaveRequestException $e) {
                         Notification::make()->danger()->title($e->getMessage())->send();
                     } catch (ValidationException $e) {
                         Notification::make()->danger()->title($e->getMessage())->send();
                     }
                 }),
+
+            // Print (opens printable Arabic HTML page)
+            Action::make('print')
+                ->label('طباعة')
+                ->icon('heroicon-o-printer')
+                ->color('gray')
+                ->url(fn(): string => route('leave.pdf.print', [
+                    'number' => $this->getRecord()->number,
+                    'autoprint' => 1,
+                ]))
+                ->openUrlInNewTab(),
 
             // Download PDF
             Action::make('downloadPdf')

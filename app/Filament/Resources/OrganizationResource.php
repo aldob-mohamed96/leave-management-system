@@ -24,6 +24,14 @@ class OrganizationResource extends Resource
     protected static ?string $modelLabel      = 'مؤسسة';
     protected static ?string $pluralModelLabel = 'المؤسسات';
 
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        $user?->setOrganizationTeam();
+
+        return (bool) $user?->can('viewAny', Organization::class);
+    }
+
     // -------------------------------------------------------------------------
     // Form
     // -------------------------------------------------------------------------

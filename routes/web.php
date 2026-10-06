@@ -20,13 +20,38 @@ Route::get('/leave-pdf/{number}', function (string $number) {
     // Enforce per-record authorization — only users with 'view' permission on this record
     \Illuminate\Support\Facades\Gate::authorize('view', $leaveRequest);
 
-    $content = app(\App\Services\LeaveRequestPdfService::class)->generate($leaveRequest);
+    app()->setLocale('ar');
+
+    $service = app(\App\Services\LeaveRequestPdfService::class);
+    $content = $service->generate($leaveRequest);
+    $filename = $service->downloadFilename($leaveRequest);
+
     return response()->streamDownload(
-        fn() => print($content),
-        "leave-request-{$number}.pdf",
-        ['Content-Type' => 'application/pdf']
+        fn () => print($content),
+        $filename,
+        [
+            'Content-Type' => 'application/pdf',
+            'Content-Language' => 'ar',
+        ]
     );
 })->middleware('auth')->name('leave.pdf.download');
+
+// Authenticated print-friendly HTML page (native Arabic rendering)
+Route::get('/leave-print/{number}', function (string $number) {
+    $leaveRequest = \App\Models\LeaveRequest::withoutGlobalScopes()
+        ->where('number', $number)
+        ->firstOrFail();
+
+    \Illuminate\Support\Facades\Gate::authorize('view', $leaveRequest);
+
+    app()->setLocale('ar');
+
+    $data = app(\App\Services\LeaveRequestPdfService::class)->viewData($leaveRequest);
+
+    return response()
+        ->view('print.leave-request', $data)
+        ->header('Content-Language', 'ar');
+})->middleware('auth')->name('leave.pdf.print');
 
 // Authenticated Excel export route
 Route::get('/leave-export', function (\Illuminate\Http\Request $request) {

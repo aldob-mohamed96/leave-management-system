@@ -26,6 +26,14 @@ class UserResource extends Resource
     protected static ?string $modelLabel      = 'مستخدم';
     protected static ?string $pluralModelLabel = 'المستخدمون';
 
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        $user?->setOrganizationTeam();
+
+        return (bool) $user?->can('viewAny', User::class);
+    }
+
     // -------------------------------------------------------------------------
     // Form
     // -------------------------------------------------------------------------
@@ -84,11 +92,16 @@ class UserResource extends Resource
                         return [];
                     }
 
-                    return Role::where('team_id', $orgId)
+                    // Spatie teams column is organization_id (not team_id).
+                    $teamKey = config('permission.column_names.team_foreign_key', 'organization_id');
+
+                    return Role::query()
+                        ->where($teamKey, $orgId)
+                        ->orderBy('name')
                         ->pluck('name', 'name')
                         ->toArray();
                 })
-                ->reactive()
+                ->live()
                 ->helperText('يجب اختيار المؤسسة أولاً لعرض أدوارها.'),
         ]);
     }
@@ -136,7 +149,11 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('roles_list')
                     ->label('الأدوار')
-                    ->getStateUsing(fn(User $record): string => $record->getRoleNames()->implode('، ') ?: '—'),
+                    ->getStateUsing(function (User $record): string {
+                        $record->setOrganizationTeam();
+
+                        return $record->getRoleNames()->implode('، ') ?: '—';
+                    }),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')

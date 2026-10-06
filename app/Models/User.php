@@ -141,6 +141,7 @@ class User extends Authenticatable implements FilamentUser
                 'مدير مدرسة',
                 'وكيل مدرسة',
                 'أخصائي',
+                'موظف مدرسة',
             ])
             || $this->hasPermissionTo('manage_organization');
     }

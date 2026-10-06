@@ -9,10 +9,12 @@
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^2.0",
         "filament/filament": "^3.0",
+        "khaled.alshamaa/ar-php": "^7.0",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
+        "picqer/php-barcode-generator": "^3.3",
         "simplesoftwareio/simple-qrcode": "^4.0",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-permission": "^6.0"

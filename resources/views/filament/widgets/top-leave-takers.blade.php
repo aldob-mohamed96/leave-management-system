@@ -21,7 +21,7 @@
                         <td class="text-center px-3 py-2 text-gray-500">{{ $idx + 1 }}</td>
                         <td class="px-3 py-2 font-medium">{{ $emp->full_name }}</td>
                         <td class="px-3 py-2 text-gray-600">{{ $emp->school_name }}</td>
-                        <td class="text-center px-3 py-2 font-bold text-blue-700">{{ number_format($emp->total_days, 1) }}</td>
+                        <td class="text-center px-3 py-2 font-bold text-blue-700">{{ (int) $emp->total_days }}</td>
                         <td class="text-center px-3 py-2">{{ $emp->request_count }}</td>
                     </tr>
                     @endforeach

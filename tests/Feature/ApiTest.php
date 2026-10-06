@@ -27,6 +27,8 @@ function createApiUser(?Organization $org = null): User
 
 function setupApiScenario(): array
 {
+    test()->seed(\Database\Seeders\EntitlementGradeSeeder::class);
+
     $orgs    = createHierarchy();
     $regular = LeaveType::factory()->regular()->create();
     $casual  = LeaveType::factory()->casual()->create();
@@ -35,6 +37,10 @@ function setupApiScenario(): array
         ->inOrganization($orgs['school'])
         ->withGrade(EntitlementGrade::TEACHER_FIRST)
         ->create(['birth_date' => now()->subYears(35)]);
+
+    $substitute = Employee::factory()
+        ->inOrganization($orgs['school'])
+        ->create(['full_name' => 'موظف بديل للاختبار']);
 
     $user = User::factory()->inOrganization($orgs['school'])->create([
         'password' => Hash::make('password123'),
@@ -53,7 +59,7 @@ function setupApiScenario(): array
     WorkflowConfiguration::factory()->leavesOfficerStage($orgs['school'])->create();
     WorkflowConfiguration::factory()->adminManagerStage($orgs['school'])->create();
 
-    return compact('orgs', 'regular', 'casual', 'emp', 'user');
+    return compact('orgs', 'regular', 'casual', 'emp', 'substitute', 'user');
 }
 
 // =============================================================================
@@ -182,6 +188,8 @@ describe('API Leave Requests', function () {
         $response = $this->actingAs($ctx['user'], 'sanctum')
                          ->postJson('/api/leave-requests', [
                              'employee_id'   => $ctx['emp']->id,
+                             'substitute_employee_id' => $ctx['substitute']->id,
+                             'reason'                 => 'ظرف عائلي للاختبار',
                              'leave_type_id' => $ctx['regular']->id,
                              'start_date'    => now()->addDays(5)->toDateString(),
                              'end_date'      => now()->addDays(7)->toDateString(),
@@ -224,6 +232,8 @@ describe('API Leave Requests', function () {
         $response = $this->actingAs($ctx['user'], 'sanctum')
                          ->postJson('/api/leave-requests', [
                              'employee_id'   => $ctx['emp']->id,
+                             'substitute_employee_id' => $ctx['substitute']->id,
+                             'reason'                 => 'ظرف عائلي للاختبار',
                              'leave_type_id' => $ctx['regular']->id,
                              'start_date'    => now()->addDays(7)->toDateString(),
                              'end_date'      => now()->addDays(12)->toDateString(),
@@ -238,11 +248,13 @@ describe('API Leave Requests', function () {
         $svc = app(\App\Services\LeaveRequestService::class);
 
         $result = $svc->create([
-            'employee_id'   => $ctx['emp']->id,
-            'leave_type_id' => $ctx['regular']->id,
-            'start_date'    => now()->addDays(10)->toDateString(),
-            'end_date'      => now()->addDays(12)->toDateString(),
-            'days'          => 3,
+            'employee_id'            => $ctx['emp']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'                 => 'ظرف عائلي للاختبار',
+            'leave_type_id'          => $ctx['regular']->id,
+            'start_date'             => now()->addDays(10)->toDateString(),
+            'end_date'               => now()->addDays(12)->toDateString(),
+            'days'                   => 3,
         ], $ctx['user']);
 
         $svc->submit($result->request, $ctx['user']);
@@ -261,11 +273,13 @@ describe('API Leave Requests', function () {
         $svc = app(\App\Services\LeaveRequestService::class);
 
         $result = $svc->create([
-            'employee_id'   => $ctx['emp']->id,
-            'leave_type_id' => $ctx['regular']->id,
-            'start_date'    => now()->addDays(14)->toDateString(),
-            'end_date'      => now()->addDays(16)->toDateString(),
-            'days'          => 3,
+            'employee_id'            => $ctx['emp']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'                 => 'ظرف عائلي للاختبار',
+            'leave_type_id'          => $ctx['regular']->id,
+            'start_date'             => now()->addDays(14)->toDateString(),
+            'end_date'               => now()->addDays(16)->toDateString(),
+            'days'                   => 3,
         ], $ctx['user']);
         $req = $svc->submit($result->request, $ctx['user']);
         $step = $req->steps()->where('stage', 'direct_manager')->first();
@@ -285,11 +299,13 @@ describe('API Leave Requests', function () {
         $svc = app(\App\Services\LeaveRequestService::class);
 
         $result = $svc->create([
-            'employee_id'   => $ctx['emp']->id,
-            'leave_type_id' => $ctx['regular']->id,
-            'start_date'    => now()->addDays(20)->toDateString(),
-            'end_date'      => now()->addDays(22)->toDateString(),
-            'days'          => 3,
+            'employee_id'            => $ctx['emp']->id,
+            'substitute_employee_id' => $ctx['substitute']->id,
+            'reason'                 => 'ظرف عائلي للاختبار',
+            'leave_type_id'          => $ctx['regular']->id,
+            'start_date'             => now()->addDays(20)->toDateString(),
+            'end_date'               => now()->addDays(22)->toDateString(),
+            'days'                   => 3,
         ], $ctx['user']);
         $req  = $svc->submit($result->request, $ctx['user']);
         $step = $req->steps()->where('stage', 'direct_manager')->first();

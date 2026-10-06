@@ -13,12 +13,14 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -36,14 +38,11 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('نظام إدارة الإجازات — مديرية الأقصر')
             ->font('Tajawal', provider: GoogleFontProvider::class)
             ->navigationGroups([
-                NavigationGroup::make('المؤسسات والمستخدمون')
-                    ->icon('heroicon-o-building-office'),
-                NavigationGroup::make('الموظفون')
-                    ->icon('heroicon-o-users'),
-                NavigationGroup::make('طلبات الإجازات')
-                    ->icon('heroicon-o-calendar-days'),
-                NavigationGroup::make('الإعدادات')
-                    ->icon('heroicon-o-cog-6-tooth'),
+                // Icons belong on items, not groups (Filament forbids both).
+                NavigationGroup::make('المؤسسات والمستخدمون'),
+                NavigationGroup::make('الموظفون'),
+                NavigationGroup::make('طلبات الإجازات'),
+                NavigationGroup::make('الإعدادات'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -54,6 +53,10 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
             ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_START,
+                fn (): string => Blade::render('filament.hooks.context-bar'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

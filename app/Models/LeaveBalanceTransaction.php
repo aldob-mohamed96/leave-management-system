@@ -25,7 +25,7 @@ class LeaveBalanceTransaction extends Model
 
     protected $casts = [
         'type'       => TransactionType::class,
-        'days'       => 'decimal:1',
+        'days'       => 'integer',
         'created_at' => 'datetime',
     ];
 

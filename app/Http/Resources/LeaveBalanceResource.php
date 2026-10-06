@@ -13,10 +13,10 @@ class LeaveBalanceResource extends JsonResource
             'id'           => $this->id,
             'leave_type'   => LeaveTypeResource::make($this->whenLoaded('leaveType')),
             'year'         => $this->year,
-            'entitled'     => (float) $this->entitled,
-            'carried_over' => (float) $this->carried_over,
-            'used'         => (float) $this->used,
-            'remaining'    => (float) $this->remaining,
+            'entitled'     => (int) $this->entitled,
+            'carried_over' => (int) $this->carried_over,
+            'used'         => (int) $this->used,
+            'remaining'    => (int) $this->remaining,
         ];
     }
 }

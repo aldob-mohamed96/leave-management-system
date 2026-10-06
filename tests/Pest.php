@@ -12,6 +12,15 @@ uses(TestCase::class, RefreshDatabase::class)->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
+| Feature: seed entitlement grades (DB-backed leave days)
+|--------------------------------------------------------------------------
+*/
+uses()->beforeEach(function () {
+    $this->seed(\Database\Seeders\EntitlementGradeSeeder::class);
+})->in('Feature');
+
+/*
+|--------------------------------------------------------------------------
 | Helpers
 |--------------------------------------------------------------------------
 */

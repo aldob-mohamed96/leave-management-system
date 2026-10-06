@@ -23,7 +23,21 @@ class CreateLeaveRequest extends CreateRecord
      */
     protected function handleRecordCreation(array $data): LeaveRequest
     {
-        $result = app(LeaveRequestService::class)->create($data, Auth::user());
+        try {
+            $result = app(LeaveRequestService::class)->create($data, Auth::user());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $messages) {
+                foreach ($messages as $message) {
+                    Notification::make()
+                        ->danger()
+                        ->title($message)
+                        ->persistent()
+                        ->send();
+                }
+            }
+
+            throw $e;
+        }
 
         if (! empty($result->warnings)) {
             foreach ($result->warnings as $warning) {

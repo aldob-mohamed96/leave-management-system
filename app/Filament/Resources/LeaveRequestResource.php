@@ -36,6 +36,14 @@ class LeaveRequestResource extends Resource
     protected static ?string $modelLabel      = 'طلب إجازة';
     protected static ?string $pluralModelLabel = 'طلبات الإجازات';
 
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        $user?->setOrganizationTeam();
+
+        return (bool) $user?->can('viewAny', LeaveRequest::class);
+    }
+
     // -------------------------------------------------------------------------
     // Navigation Badge (pending requests count)
     // -------------------------------------------------------------------------
@@ -57,16 +65,11 @@ class LeaveRequestResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('employee_id')
                         ->label('الموظف')
-                        ->options(
-                            Employee::withoutGlobalScopes()
-                                ->active()
-                                ->orderBy('full_name')
-                                ->pluck('full_name', 'id')
-                                ->toArray()
-                        )
+                        ->options(fn (): array => self::employeeOptions())
                         ->searchable()
                         ->required()
-                        ->reactive(),
+                        ->reactive()
+                        ->helperText('يظهر فقط موظفو مؤسستك (ونطاقها).'),
 
                     Forms\Components\Select::make('leave_type_id')
                         ->label('نوع الإجازة')
@@ -98,8 +101,11 @@ class LeaveRequestResource extends Resource
                     Forms\Components\TextInput::make('days')
                         ->label('عدد الأيام (أيام العمل)')
                         ->numeric()
+                        ->integer()
+                        ->minValue(1)
                         ->disabled()
                         ->dehydrated()
+                        ->required()
                         ->helperText('يُحسب تلقائياً عند اختيار التواريخ، مع استثناء أيام الإجازة الرسمية والعطل الأسبوعية.'),
 
                     Forms\Components\DatePicker::make('written_at')
@@ -107,24 +113,25 @@ class LeaveRequestResource extends Resource
                         ->nullable(),
 
                     Forms\Components\Select::make('substitute_employee_id')
-                        ->label('الموظف البديل')
+                        ->label('الموظف البديل (القائم بالعمل أثناء الإجازة)')
                         ->options(function (Forms\Get $get): array {
                             $selectedId = $get('employee_id');
 
-                            return Employee::withoutGlobalScopes()
-                                ->active()
-                                ->when($selectedId, fn($q) => $q->where('id', '!=', $selectedId))
-                                ->orderBy('full_name')
-                                ->pluck('full_name', 'id')
-                                ->toArray();
+                            return self::employeeOptions(
+                                excludeId: $selectedId ? (int) $selectedId : null
+                            );
                         })
                         ->searchable()
-                        ->nullable(),
+                        ->required()
+                        ->helperText('مطلوب — الموظف الذي سيقوم بالعمل أثناء فترة الإجازة.'),
 
                     Forms\Components\Textarea::make('reason')
                         ->label('السبب')
-                        ->nullable()
-                        ->columnSpanFull(),
+                        ->required()
+                        ->minLength(5)
+                        ->maxLength(500)
+                        ->columnSpanFull()
+                        ->helperText('اكتب سبب طلب الإجازة بوضوح (5 أحرف على الأقل).'),
                 ])
                 ->columns(2),
 
@@ -170,9 +177,7 @@ class LeaveRequestResource extends Resource
         $rule->setData(['start_date' => $start, 'end_date' => $end]);
         $rule->validate('days', 0, fn($msg) => null);
 
-        if ($rule->calculatedDays > 0) {
-            $set('days', $rule->calculatedDays);
-        }
+        $set('days', $rule->calculatedDays);
     }
 
     // -------------------------------------------------------------------------
@@ -199,27 +204,28 @@ class LeaveRequestResource extends Resource
 
                     Infolists\Components\TextEntry::make('start_date')
                         ->label('من')
-                        ->date('Y-m-d'),
+                        ->date('d F Y'),
 
                     Infolists\Components\TextEntry::make('end_date')
                         ->label('إلى')
-                        ->date('Y-m-d'),
+                        ->date('d F Y'),
 
                     Infolists\Components\TextEntry::make('days')
                         ->label('عدد الأيام'),
 
                     Infolists\Components\TextEntry::make('written_at')
                         ->label('تاريخ الكتابة')
-                        ->date('Y-m-d'),
+                        ->date('d F Y'),
 
                     Infolists\Components\TextEntry::make('status')
                         ->label('الحالة')
                         ->badge()
-                        ->formatStateUsing(fn(LeaveStatus $state): string => $state->label())
-                        ->color(fn(LeaveStatus $state): string => $state->color()),
+                        ->formatStateUsing(fn ($state, LeaveRequest $record): string => $record->displayStatusLabel())
+                        ->color(fn ($state, LeaveRequest $record): string => $record->displayStatusColor()),
 
                     Infolists\Components\TextEntry::make('current_stage')
                         ->label('المرحلة الحالية')
+                        ->formatStateUsing(fn (?string $state): string => LeaveRequest::stageLabel($state))
                         ->placeholder('—'),
 
                     Infolists\Components\TextEntry::make('reason')
@@ -255,7 +261,8 @@ class LeaveRequestResource extends Resource
                         ->label('')
                         ->schema([
                             Infolists\Components\TextEntry::make('stage')
-                                ->label('المرحلة'),
+                                ->label('المرحلة')
+                                ->formatStateUsing(fn (?string $state): string => LeaveRequest::stageLabel($state)),
 
                             Infolists\Components\TextEntry::make('status')
                                 ->label('الحالة')
@@ -269,7 +276,7 @@ class LeaveRequestResource extends Resource
 
                             Infolists\Components\TextEntry::make('acted_at')
                                 ->label('التاريخ')
-                                ->dateTime('Y-m-d H:i')
+                                ->dateTime('d F Y H:i')
                                 ->placeholder('—'),
 
                             Infolists\Components\TextEntry::make('note')
@@ -289,6 +296,8 @@ class LeaveRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->emptyStateHeading('لا توجد طلبات إجازة')
+            ->emptyStateDescription('أضف طلب إجازة للبدء.')
             ->columns([
                 Tables\Columns\TextColumn::make('number')
                     ->label('رقم الطلب')
@@ -307,28 +316,29 @@ class LeaveRequestResource extends Resource
 
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('من')
-                    ->date('Y-m-d')
+                    ->date('d F Y')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('إلى')
-                    ->date('Y-m-d')
+                    ->date('d F Y')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('days')
                     ->label('الأيام')
-                    ->numeric(1)
+                    ->numeric(0)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
-                    ->formatStateUsing(fn(LeaveStatus $state): string => $state->label())
-                    ->color(fn(LeaveStatus $state): string => $state->color())
+                    ->formatStateUsing(fn ($state, LeaveRequest $record): string => $record->displayStatusLabel())
+                    ->color(fn ($state, LeaveRequest $record): string => $record->displayStatusColor())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('current_stage')
                     ->label('المرحلة الحالية')
+                    ->formatStateUsing(fn (?string $state): string => LeaveRequest::stageLabel($state))
                     ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('organization.name')
@@ -338,11 +348,43 @@ class LeaveRequestResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->label('الحالة')
-                    ->options(
-                        collect(LeaveStatus::cases())
-                            ->mapWithKeys(fn(LeaveStatus $s) => [$s->value => $s->label()])
-                            ->toArray()
-                    ),
+                    ->options([
+                        'active' => 'قائم',
+                        'modified' => 'تم تعديله وقائم',
+                        'cancelled' => 'تم حذفه',
+                        'draft' => 'مسودة',
+                        'returned' => 'مُعاد للتعديل',
+                        'rejected' => 'مرفوض',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'active' => $query->whereNull('deleted_at')
+                                ->where('was_modified', false)
+                                ->whereIn('status', [
+                                    LeaveStatus::SUBMITTED->value,
+                                    LeaveStatus::IN_REVIEW->value,
+                                    LeaveStatus::APPROVED->value,
+                                ]),
+                            'modified' => $query->whereNull('deleted_at')
+                                ->where('was_modified', true)
+                                ->whereNotIn('status', [
+                                    LeaveStatus::CANCELLED->value,
+                                    LeaveStatus::REJECTED->value,
+                                ]),
+                            'cancelled' => $query->where(function (Builder $q) {
+                                $q->where('status', LeaveStatus::CANCELLED->value)
+                                    ->orWhereNotNull('deleted_at');
+                            }),
+                            'draft' => $query->whereNull('deleted_at')
+                                ->where('status', LeaveStatus::DRAFT->value),
+                            'returned' => $query->whereNull('deleted_at')
+                                ->where('status', LeaveStatus::RETURNED->value)
+                                ->where('was_modified', false),
+                            'rejected' => $query->whereNull('deleted_at')
+                                ->where('status', LeaveStatus::REJECTED->value),
+                            default => $query,
+                        };
+                    }),
 
                 Tables\Filters\SelectFilter::make('leave_type_id')
                     ->label('نوع الإجازة')
@@ -374,8 +416,33 @@ class LeaveRequestResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
-                    ->visible(fn(LeaveRequest $record): bool => $record->status->canBeEdited()
-                        && Auth::user()?->can('update', $record)),
+                    ->visible(fn (LeaveRequest $record): bool => Auth::user()?->can('update', $record) ?? false),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('حذف')
+                    ->requiresConfirmation()
+                    ->modalHeading('تأكيد حذف طلب الإجازة')
+                    ->modalDescription('سيتم تعليم الطلب كـ «تم حذفه».')
+                    ->modalSubmitActionLabel('نعم، احذف')
+                    ->modalCancelActionLabel('إلغاء')
+                    ->visible(fn (LeaveRequest $record): bool => Auth::user()?->can('delete', $record) ?? false)
+                    ->before(function (LeaveRequest $record): void {
+                        if ($record->status !== LeaveStatus::CANCELLED && $record->status->canBeCancelled()) {
+                            try {
+                                app(\App\Services\LeaveRequestService::class)->cancel($record, Auth::user());
+                            } catch (\Throwable) {
+                                $record->forceFill([
+                                    'status' => LeaveStatus::CANCELLED,
+                                    'current_stage' => null,
+                                ])->save();
+                            }
+                        } elseif ($record->status !== LeaveStatus::CANCELLED) {
+                            $record->forceFill([
+                                'status' => LeaveStatus::CANCELLED,
+                                'current_stage' => null,
+                            ])->save();
+                        }
+                    }),
 
                 Tables\Actions\Action::make('submit')
                     ->label('تقديم الطلب')
@@ -401,7 +468,9 @@ class LeaveRequestResource extends Resource
                     }),
 
                 Tables\Actions\Action::make('approve')
-                    ->label('اعتماد')
+                    ->label(fn (LeaveRequest $record): string => $record->current_stage === 'school_principal'
+                        ? 'اعتماد وتوقيع إلكتروني'
+                        : 'اعتماد')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn(LeaveRequest $record): bool =>
@@ -512,18 +581,21 @@ class LeaveRequestResource extends Resource
                     }),
 
                 Tables\Actions\Action::make('cancel')
-                    ->label('إلغاء')
+                    ->label('حذف')
                     ->icon('heroicon-o-no-symbol')
-                    ->color('gray')
+                    ->color('danger')
                     ->requiresConfirmation()
+                    ->modalHeading('تأكيد حذف الطلب')
+                    ->modalDescription('سيتم تعليم الطلب كـ «تم حذفه».')
                     ->visible(fn(LeaveRequest $record): bool =>
-                        $record->status->canBeCancelled()
+                        ! $record->trashed()
+                        && $record->status->canBeCancelled()
                         && Auth::user()?->can('cancel', $record)
                     )
                     ->action(function (LeaveRequest $record): void {
                         try {
                             app(\App\Services\LeaveRequestService::class)->cancel($record, Auth::user());
-                            Notification::make()->success()->title('تم إلغاء الطلب')->send();
+                            Notification::make()->success()->title('تم حذفه')->send();
                         } catch (LeaveRequestException $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
                         } catch (ValidationException $e) {
@@ -546,6 +618,32 @@ class LeaveRequestResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    /**
+     * Employees visible to the current user (own org subtree).
+     *
+     * @return array<int|string, string>
+     */
+    public static function employeeOptions(?int $excludeId = null): array
+    {
+        $user = Auth::user();
+
+        if (! $user?->organization_id) {
+            return [];
+        }
+
+        $orgIds = $user->organization?->subtreeIds() ?? [$user->organization_id];
+
+        // withoutGlobalScopes() also removes SoftDeletingScope — filter deleted rows explicitly.
+        return Employee::withoutGlobalScopes()
+            ->whereNull('deleted_at')
+            ->active()
+            ->whereIn('organization_id', $orgIds)
+            ->when($excludeId, fn (Builder $q) => $q->where('id', '!=', $excludeId))
+            ->orderBy('full_name')
+            ->pluck('full_name', 'id')
+            ->all();
+    }
+
     // -------------------------------------------------------------------------
     // Modify query for permission-aware scoping
     // -------------------------------------------------------------------------
@@ -553,7 +651,9 @@ class LeaveRequestResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = Auth::user();
-        $base = LeaveRequest::withoutGlobalScopes();
+        $base = LeaveRequest::withoutGlobalScopes()
+            ->withTrashed()
+            ->with(['employee', 'leaveType', 'organization', 'steps.actedBy']);
 
         if (! $user) {
             return $base->whereRaw('1 = 0');

@@ -3,8 +3,8 @@
 namespace App\Enums;
 
 /**
- * الدرجة الوظيفية التي تحدد عدد أيام الإجازة الاعتيادية المستحقة.
- * مستقلة عن حقل `grade` النصي الحر — هذه قيم مقيّدة لحساب الرصيد.
+ * الدرجة الوظيفية — أكواد معرّفة مسبقاً للتوافق مع الاختبارات.
+ * المصدر التشغيلي للأسماء وعدد الأيام هو جدول entitlement_grades (Filament).
  */
 enum EntitlementGrade: string
 {
@@ -22,9 +22,9 @@ enum EntitlementGrade: string
         return match($this) {
             self::TEACHER         => 'معلم',
             self::TEACHER_FIRST   => 'معلم أول',
-            self::TEACHER_FIRST_A => 'معلم أول أ',
+            self::TEACHER_FIRST_A => 'معلم أول (أ)',
             self::TEACHER_EXPERT  => 'معلم خبير',
-            self::TEACHER_SENIOR  => 'معلم كبير',
+            self::TEACHER_SENIOR  => 'كبير معلمين',
             self::ADMIN_4         => 'إداري الدرجة الرابعة',
             self::ADMIN_3         => 'إداري الدرجة الثالثة',
             self::ADMIN_OVER_50   => 'موظف (فوق 50 سنة)',

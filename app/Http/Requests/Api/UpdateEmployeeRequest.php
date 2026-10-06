@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Api;
 
-use App\Enums\EntitlementGrade;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class UpdateEmployeeRequest extends FormRequest
 {
@@ -21,7 +20,7 @@ class UpdateEmployeeRequest extends FormRequest
             'full_name'         => ['nullable', 'string', 'max:255'],
             'job_title'         => ['nullable', 'string', 'max:100'],
             'grade'             => ['nullable', 'string', 'max:50'],
-            'entitlement_grade' => ['nullable', new Enum(EntitlementGrade::class)],
+            'entitlement_grade' => ['nullable', 'string', 'max:50', Rule::exists('entitlement_grades', 'code')],
             'birth_date'        => ['nullable', 'date', 'before:today'],
             'hire_date'         => ['nullable', 'date'],
             'work_start_date'   => ['nullable', 'date'],
@@ -36,7 +35,7 @@ class UpdateEmployeeRequest extends FormRequest
             'employee_code.max'         => 'كود الموظف يجب ألا يتجاوز 30 حرفاً.',
             'employee_code.unique'      => 'كود الموظف مستخدم بالفعل.',
             'full_name.max'             => 'اسم الموظف يجب ألا يتجاوز 255 حرفاً.',
-            'entitlement_grade.enum'    => 'الدرجة الوظيفية المحددة غير صحيحة.',
+            'entitlement_grade.exists'  => 'الدرجة الوظيفية المحددة غير صحيحة.',
             'birth_date.before'         => 'تاريخ الميلاد يجب أن يكون في الماضي.',
         ];
     }
