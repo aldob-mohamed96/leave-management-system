@@ -1,132 +1,133 @@
 إدارة أرمنت التعليمية — بيانات تسجيل الدخول
-كلمة المرور الموحدة: 12345678
+كلمة المرور الموحدة: 123456789
 رابط الدخول: https://leave.rtltec.com/admin
-------------------------------------------------------------------------
-إدارة أرمنت التعليمية | مدير الإدارة | armant.manager@armant-schools.edu | 12345678
-إدارة أرمنت التعليمية | مسؤول الإجازات | armant.leaves@armant-schools.edu | 12345678
-مدرسة أبو بكر الصديق الابتدائية | مدير مدرسة | arm001.manager@armant-schools.edu | 12345678
-مدرسة أبو بكر الصديق الابتدائية | أخصائي | arm001.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية المشتركة | مدير مدرسة | arm002.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية المشتركة | أخصائي | arm002.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية بنات | مدير مدرسة | arm003.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية بنات | أخصائي | arm003.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية بنين | مدير مدرسة | arm004.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الابتدائية بنين | أخصائي | arm004.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الإعدادية الحديثة | مدير مدرسة | arm005.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الإعدادية الحديثة | أخصائي | arm005.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الإعدادية بنات | مدير مدرسة | arm006.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الإعدادية بنات | أخصائي | arm006.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الزخرفية بنين | مدير مدرسة | arm007.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الزخرفية بنين | أخصائي | arm007.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الزراعية | مدير مدرسة | arm008.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الزراعية | أخصائي | arm008.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الفنية بنات | مدير مدرسة | arm009.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الفنية بنات | أخصائي | arm009.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الميكانيكية بنين | مدير مدرسة | arm010.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية الميكانيكية بنين | أخصائي | arm010.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية بنات | مدير مدرسة | arm011.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية بنات | أخصائي | arm011.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية بنين | مدير مدرسة | arm012.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الثانوية بنين | أخصائي | arm012.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الحائط الابتدائية | مدير مدرسة | arm013.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الحائط الابتدائية | أخصائي | arm013.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الحيط الإعدادية بنات | مدير مدرسة | arm014.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الحيط الإعدادية بنات | أخصائي | arm014.specialist@armant-schools.edu | 12345678
-مدرسة أرمنت الحيط الإعدادية بنين | مدير مدرسة | arm015.manager@armant-schools.edu | 12345678
-مدرسة أرمنت الحيط الإعدادية بنين | أخصائي | arm015.specialist@armant-schools.edu | 12345678
-مدرسة التربية الفكرية الابتدائية | مدير مدرسة | arm016.manager@armant-schools.edu | 12345678
-مدرسة التربية الفكرية الابتدائية | أخصائي | arm016.specialist@armant-schools.edu | 12345678
-مدرسة الجروف | مدير مدرسة | arm017.manager@armant-schools.edu | 12345678
-مدرسة الجروف | أخصائي | arm017.specialist@armant-schools.edu | 12345678
-مدرسة الحرية الابتدائية | مدير مدرسة | arm018.manager@armant-schools.edu | 12345678
-مدرسة الحرية الابتدائية | أخصائي | arm018.specialist@armant-schools.edu | 12345678
-مدرسة الحوزة الابتدائية المشتركة | مدير مدرسة | arm019.manager@armant-schools.edu | 12345678
-مدرسة الحوزة الابتدائية المشتركة | أخصائي | arm019.specialist@armant-schools.edu | 12345678
-مدرسة الديمقراط الابتدائية المشتركة | مدير مدرسة | arm020.manager@armant-schools.edu | 12345678
-مدرسة الديمقراط الابتدائية المشتركة | أخصائي | arm020.specialist@armant-schools.edu | 12345678
-مدرسة الديمقراط الإعدادية المهنية | مدير مدرسة | arm021.manager@armant-schools.edu | 12345678
-مدرسة الديمقراط الإعدادية المهنية | أخصائي | arm021.specialist@armant-schools.edu | 12345678
-مدرسة الرزيقات قبلي الابتدائية | مدير مدرسة | arm022.manager@armant-schools.edu | 12345678
-مدرسة الرزيقات قبلي الابتدائية | أخصائي | arm022.specialist@armant-schools.edu | 12345678
-مدرسة الرزيقات بحري الابتدائية | مدير مدرسة | arm023.manager@armant-schools.edu | 12345678
-مدرسة الرزيقات بحري الابتدائية | أخصائي | arm023.specialist@armant-schools.edu | 12345678
-مدرسة الرياينة الابتدائية المشتركة | مدير مدرسة | arm024.manager@armant-schools.edu | 12345678
-مدرسة الرياينة الابتدائية المشتركة | أخصائي | arm024.specialist@armant-schools.edu | 12345678
-مدرسة السادات الابتدائية (أرمنت الحيط) | مدير مدرسة | arm025.manager@armant-schools.edu | 12345678
-مدرسة السادات الابتدائية (أرمنت الحيط) | أخصائي | arm025.specialist@armant-schools.edu | 12345678
-مدرسة السادات الابتدائية (أرمنت الوابورات) | مدير مدرسة | arm026.manager@armant-schools.edu | 12345678
-مدرسة السادات الابتدائية (أرمنت الوابورات) | أخصائي | arm026.specialist@armant-schools.edu | 12345678
-مدرسة السلام الابتدائية | مدير مدرسة | arm027.manager@armant-schools.edu | 12345678
-مدرسة السلام الابتدائية | أخصائي | arm027.specialist@armant-schools.edu | 12345678
-مدرسة الشهيد أحمد محمد الأمير الابتدائية | مدير مدرسة | arm028.manager@armant-schools.edu | 12345678
-مدرسة الشهيد أحمد محمد الأمير الابتدائية | أخصائي | arm028.specialist@armant-schools.edu | 12345678
-مدرسة الشهيد عبد الرازق الفرشوطي الابتدائية | مدير مدرسة | arm029.manager@armant-schools.edu | 12345678
-مدرسة الشهيد عبد الرازق الفرشوطي الابتدائية | أخصائي | arm029.specialist@armant-schools.edu | 12345678
-مدرسة الشهيد عبد الرحمن أبو الحجاج الابتدائية | مدير مدرسة | arm030.manager@armant-schools.edu | 12345678
-مدرسة الشهيد عبد الرحمن أبو الحجاج الابتدائية | أخصائي | arm030.specialist@armant-schools.edu | 12345678
-مدرسة الشهيد عثمان مكي الإعدادية | مدير مدرسة | arm031.manager@armant-schools.edu | 12345678
-مدرسة الشهيد عثمان مكي الإعدادية | أخصائي | arm031.specialist@armant-schools.edu | 12345678
-مدرسة الصف الإعدادية | مدير مدرسة | arm032.manager@armant-schools.edu | 12345678
-مدرسة الصف الإعدادية | أخصائي | arm032.specialist@armant-schools.edu | 12345678
-مدرسة الغرز الابتدائية المشتركة | مدير مدرسة | arm033.manager@armant-schools.edu | 12345678
-مدرسة الغرز الابتدائية المشتركة | أخصائي | arm033.specialist@armant-schools.edu | 12345678
-مدرسة المحاميد الثانوية المشتركة | مدير مدرسة | arm034.manager@armant-schools.edu | 12345678
-مدرسة المحاميد الثانوية المشتركة | أخصائي | arm034.specialist@armant-schools.edu | 12345678
-مدرسة المحاميد بحري الابتدائية | مدير مدرسة | arm035.manager@armant-schools.edu | 12345678
-مدرسة المحاميد بحري الابتدائية | أخصائي | arm035.specialist@armant-schools.edu | 12345678
-مدرسة المحاميد بحري الإعدادية | مدير مدرسة | arm036.manager@armant-schools.edu | 12345678
-مدرسة المحاميد بحري الإعدادية | أخصائي | arm036.specialist@armant-schools.edu | 12345678
-مدرسة المريس الابتدائية الجديدة | مدير مدرسة | arm037.manager@armant-schools.edu | 12345678
-مدرسة المريس الابتدائية الجديدة | أخصائي | arm037.specialist@armant-schools.edu | 12345678
-مدرسة النصر الابتدائية | مدير مدرسة | arm038.manager@armant-schools.edu | 12345678
-مدرسة النصر الابتدائية | أخصائي | arm038.specialist@armant-schools.edu | 12345678
-مدرسة أم المؤمنين الإعدادية المشتركة | مدير مدرسة | arm039.manager@armant-schools.edu | 12345678
-مدرسة أم المؤمنين الإعدادية المشتركة | أخصائي | arm039.specialist@armant-schools.edu | 12345678
-مدرسة أولاد دهمش الابتدائية | مدير مدرسة | arm040.manager@armant-schools.edu | 12345678
-مدرسة أولاد دهمش الابتدائية | أخصائي | arm040.specialist@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الحيط الإعدادية | مدير مدرسة | arm041.manager@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الحيط الإعدادية | أخصائي | arm041.specialist@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الحيط الشرقي | مدير مدرسة | arm042.manager@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الحيط الشرقي | أخصائي | arm042.specialist@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الغربي الابتدائية | مدير مدرسة | arm043.manager@armant-schools.edu | 12345678
-مدرسة حاجر أرمنت الغربي الابتدائية | أخصائي | arm043.specialist@armant-schools.edu | 12345678
-مدرسة حاجر الحيط الشرقي الابتدائية | مدير مدرسة | arm044.manager@armant-schools.edu | 12345678
-مدرسة حاجر الحيط الشرقي الابتدائية | أخصائي | arm044.specialist@armant-schools.edu | 12345678
-مدرسة حاجر الرزيقات بحري الابتدائية | مدير مدرسة | arm045.manager@armant-schools.edu | 12345678
-مدرسة حاجر الرزيقات بحري الابتدائية | أخصائي | arm045.specialist@armant-schools.edu | 12345678
-مدرسة حاجر الرياينة الابتدائية | مدير مدرسة | arm046.manager@armant-schools.edu | 12345678
-مدرسة حاجر الرياينة الابتدائية | أخصائي | arm046.specialist@armant-schools.edu | 12345678
-مدرسة حاجر الرياينة الإعدادية | مدير مدرسة | arm047.manager@armant-schools.edu | 12345678
-مدرسة حاجر الرياينة الإعدادية | أخصائي | arm047.specialist@armant-schools.edu | 12345678
-مدرسة حاجر المحاميد بحري الابتدائية | مدير مدرسة | arm048.manager@armant-schools.edu | 12345678
-مدرسة حاجر المحاميد بحري الابتدائية | أخصائي | arm048.specialist@armant-schools.edu | 12345678
-مدرسة حاجر المحاميد قبلي الابتدائية | مدير مدرسة | arm049.manager@armant-schools.edu | 12345678
-مدرسة حاجر المحاميد قبلي الابتدائية | أخصائي | arm049.specialist@armant-schools.edu | 12345678
-مدرسة خالد بن الوليد الابتدائية | مدير مدرسة | arm050.manager@armant-schools.edu | 12345678
-مدرسة خالد بن الوليد الابتدائية | أخصائي | arm050.specialist@armant-schools.edu | 12345678
-مدرسة عائشة أم المؤمنين الإعدادية بنات | مدير مدرسة | arm051.manager@armant-schools.edu | 12345678
-مدرسة عائشة أم المؤمنين الإعدادية بنات | أخصائي | arm051.specialist@armant-schools.edu | 12345678
-مدرسة نجع البحر الابتدائية | مدير مدرسة | arm052.manager@armant-schools.edu | 12345678
-مدرسة نجع البحر الابتدائية | أخصائي | arm052.specialist@armant-schools.edu | 12345678
-مدرسة نجع البقالة | مدير مدرسة | arm053.manager@armant-schools.edu | 12345678
-مدرسة نجع البقالة | أخصائي | arm053.specialist@armant-schools.edu | 12345678
-مدرسة نجع الغوال الابتدائية | مدير مدرسة | arm054.manager@armant-schools.edu | 12345678
-مدرسة نجع الغوال الابتدائية | أخصائي | arm054.specialist@armant-schools.edu | 12345678
-مدرسة نجع دنقل الابتدائية | مدير مدرسة | arm055.manager@armant-schools.edu | 12345678
-مدرسة نجع دنقل الابتدائية | أخصائي | arm055.specialist@armant-schools.edu | 12345678
-مدرسة العز الابتدائية المشتركة | مدير مدرسة | arm056.manager@armant-schools.edu | 12345678
-مدرسة العز الابتدائية المشتركة | أخصائي | arm056.specialist@armant-schools.edu | 12345678
-مدرسة ترعة السواحل للتعليم الأساسي | مدير مدرسة | arm057.manager@armant-schools.edu | 12345678
-مدرسة ترعة السواحل للتعليم الأساسي | أخصائي | arm057.specialist@armant-schools.edu | 12345678
-مدرسة الفرقان 1 للتعليم المجتمعي | مدير مدرسة | arm058.manager@armant-schools.edu | 12345678
-مدرسة الفرقان 1 للتعليم المجتمعي | أخصائي | arm058.specialist@armant-schools.edu | 12345678
-مدرسة الفرقان 2 للتعليم المجتمعي | مدير مدرسة | arm059.manager@armant-schools.edu | 12345678
-مدرسة الفرقان 2 للتعليم المجتمعي | أخصائي | arm059.specialist@armant-schools.edu | 12345678
-مدرسة عمر بن الخطاب للتعليم المجتمعي | مدير مدرسة | arm060.manager@armant-schools.edu | 12345678
-مدرسة عمر بن الخطاب للتعليم المجتمعي | أخصائي | arm060.specialist@armant-schools.edu | 12345678
-مدرسة الرواد للتعليم المجتمعي | مدير مدرسة | arm061.manager@armant-schools.edu | 12345678
-مدرسة الرواد للتعليم المجتمعي | أخصائي | arm061.specialist@armant-schools.edu | 12345678
-مدرسة جيل المستقبل للتعليم المجتمعي | مدير مدرسة | arm062.manager@armant-schools.edu | 12345678
-مدرسة جيل المستقبل للتعليم المجتمعي | أخصائي | arm062.specialist@armant-schools.edu | 12345678
-مدرسة حاجر الضبعية الصناعية المشتركة | مدير مدرسة | arm063.manager@armant-schools.edu | 12345678
-مدرسة حاجر الضبعية الصناعية المشتركة | أخصائي | arm063.specialist@armant-schools.edu | 12345678
+يمكن الدخول بالبريد أو رقم التليفون
+----------------------------------------------------------------------------------------
+إدارة أرمنت التعليمية | مدير الإدارة | armant.manager@armant-schools.edu | 01000000001 | 123456789
+إدارة أرمنت التعليمية | مسؤول الإجازات | armant.leaves@armant-schools.edu | 01000000002 | 123456789
+مدرسة أبو بكر الصديق الابتدائية | مدير مدرسة | arm001.manager@armant-schools.edu | 01000110000 | 123456789
+مدرسة أبو بكر الصديق الابتدائية | أخصائي | arm001.specialist@armant-schools.edu | 01000120000 | 123456789
+مدرسة أرمنت الابتدائية المشتركة | مدير مدرسة | arm002.manager@armant-schools.edu | 01000210000 | 123456789
+مدرسة أرمنت الابتدائية المشتركة | أخصائي | arm002.specialist@armant-schools.edu | 01000220000 | 123456789
+مدرسة أرمنت الابتدائية بنات | مدير مدرسة | arm003.manager@armant-schools.edu | 01000310000 | 123456789
+مدرسة أرمنت الابتدائية بنات | أخصائي | arm003.specialist@armant-schools.edu | 01000320000 | 123456789
+مدرسة أرمنت الابتدائية بنين | مدير مدرسة | arm004.manager@armant-schools.edu | 01000410000 | 123456789
+مدرسة أرمنت الابتدائية بنين | أخصائي | arm004.specialist@armant-schools.edu | 01000420000 | 123456789
+مدرسة أرمنت الإعدادية الحديثة | مدير مدرسة | arm005.manager@armant-schools.edu | 01000510000 | 123456789
+مدرسة أرمنت الإعدادية الحديثة | أخصائي | arm005.specialist@armant-schools.edu | 01000520000 | 123456789
+مدرسة أرمنت الإعدادية بنات | مدير مدرسة | arm006.manager@armant-schools.edu | 01000610000 | 123456789
+مدرسة أرمنت الإعدادية بنات | أخصائي | arm006.specialist@armant-schools.edu | 01000620000 | 123456789
+مدرسة أرمنت الثانوية الزخرفية بنين | مدير مدرسة | arm007.manager@armant-schools.edu | 01000710000 | 123456789
+مدرسة أرمنت الثانوية الزخرفية بنين | أخصائي | arm007.specialist@armant-schools.edu | 01000720000 | 123456789
+مدرسة أرمنت الثانوية الزراعية | مدير مدرسة | arm008.manager@armant-schools.edu | 01000810000 | 123456789
+مدرسة أرمنت الثانوية الزراعية | أخصائي | arm008.specialist@armant-schools.edu | 01000820000 | 123456789
+مدرسة أرمنت الثانوية الفنية بنات | مدير مدرسة | arm009.manager@armant-schools.edu | 01000910000 | 123456789
+مدرسة أرمنت الثانوية الفنية بنات | أخصائي | arm009.specialist@armant-schools.edu | 01000920000 | 123456789
+مدرسة أرمنت الثانوية الميكانيكية بنين | مدير مدرسة | arm010.manager@armant-schools.edu | 01001010000 | 123456789
+مدرسة أرمنت الثانوية الميكانيكية بنين | أخصائي | arm010.specialist@armant-schools.edu | 01001020000 | 123456789
+مدرسة أرمنت الثانوية بنات | مدير مدرسة | arm011.manager@armant-schools.edu | 01001110000 | 123456789
+مدرسة أرمنت الثانوية بنات | أخصائي | arm011.specialist@armant-schools.edu | 01001120000 | 123456789
+مدرسة أرمنت الثانوية بنين | مدير مدرسة | arm012.manager@armant-schools.edu | 01001210000 | 123456789
+مدرسة أرمنت الثانوية بنين | أخصائي | arm012.specialist@armant-schools.edu | 01001220000 | 123456789
+مدرسة أرمنت الحائط الابتدائية | مدير مدرسة | arm013.manager@armant-schools.edu | 01001310000 | 123456789
+مدرسة أرمنت الحائط الابتدائية | أخصائي | arm013.specialist@armant-schools.edu | 01001320000 | 123456789
+مدرسة أرمنت الحيط الإعدادية بنات | مدير مدرسة | arm014.manager@armant-schools.edu | 01001410000 | 123456789
+مدرسة أرمنت الحيط الإعدادية بنات | أخصائي | arm014.specialist@armant-schools.edu | 01001420000 | 123456789
+مدرسة أرمنت الحيط الإعدادية بنين | مدير مدرسة | arm015.manager@armant-schools.edu | 01001510000 | 123456789
+مدرسة أرمنت الحيط الإعدادية بنين | أخصائي | arm015.specialist@armant-schools.edu | 01001520000 | 123456789
+مدرسة التربية الفكرية الابتدائية | مدير مدرسة | arm016.manager@armant-schools.edu | 01001610000 | 123456789
+مدرسة التربية الفكرية الابتدائية | أخصائي | arm016.specialist@armant-schools.edu | 01001620000 | 123456789
+مدرسة الجروف | مدير مدرسة | arm017.manager@armant-schools.edu | 01001710000 | 123456789
+مدرسة الجروف | أخصائي | arm017.specialist@armant-schools.edu | 01001720000 | 123456789
+مدرسة الحرية الابتدائية | مدير مدرسة | arm018.manager@armant-schools.edu | 01001810000 | 123456789
+مدرسة الحرية الابتدائية | أخصائي | arm018.specialist@armant-schools.edu | 01001820000 | 123456789
+مدرسة الحوزة الابتدائية المشتركة | مدير مدرسة | arm019.manager@armant-schools.edu | 01001910000 | 123456789
+مدرسة الحوزة الابتدائية المشتركة | أخصائي | arm019.specialist@armant-schools.edu | 01001920000 | 123456789
+مدرسة الديمقراط الابتدائية المشتركة | مدير مدرسة | arm020.manager@armant-schools.edu | 01002010000 | 123456789
+مدرسة الديمقراط الابتدائية المشتركة | أخصائي | arm020.specialist@armant-schools.edu | 01002020000 | 123456789
+مدرسة الديمقراط الإعدادية المهنية | مدير مدرسة | arm021.manager@armant-schools.edu | 01002110000 | 123456789
+مدرسة الديمقراط الإعدادية المهنية | أخصائي | arm021.specialist@armant-schools.edu | 01002120000 | 123456789
+مدرسة الرزيقات قبلي الابتدائية | مدير مدرسة | arm022.manager@armant-schools.edu | 01002210000 | 123456789
+مدرسة الرزيقات قبلي الابتدائية | أخصائي | arm022.specialist@armant-schools.edu | 01002220000 | 123456789
+مدرسة الرزيقات بحري الابتدائية | مدير مدرسة | arm023.manager@armant-schools.edu | 01002310000 | 123456789
+مدرسة الرزيقات بحري الابتدائية | أخصائي | arm023.specialist@armant-schools.edu | 01002320000 | 123456789
+مدرسة الرياينة الابتدائية المشتركة | مدير مدرسة | arm024.manager@armant-schools.edu | 01002410000 | 123456789
+مدرسة الرياينة الابتدائية المشتركة | أخصائي | arm024.specialist@armant-schools.edu | 01002420000 | 123456789
+مدرسة السادات الابتدائية (أرمنت الحيط) | مدير مدرسة | arm025.manager@armant-schools.edu | 01002510000 | 123456789
+مدرسة السادات الابتدائية (أرمنت الحيط) | أخصائي | arm025.specialist@armant-schools.edu | 01002520000 | 123456789
+مدرسة السادات الابتدائية (أرمنت الوابورات) | مدير مدرسة | arm026.manager@armant-schools.edu | 01002610000 | 123456789
+مدرسة السادات الابتدائية (أرمنت الوابورات) | أخصائي | arm026.specialist@armant-schools.edu | 01002620000 | 123456789
+مدرسة السلام الابتدائية | مدير مدرسة | arm027.manager@armant-schools.edu | 01002710000 | 123456789
+مدرسة السلام الابتدائية | أخصائي | arm027.specialist@armant-schools.edu | 01002720000 | 123456789
+مدرسة الشهيد أحمد محمد الأمير الابتدائية | مدير مدرسة | arm028.manager@armant-schools.edu | 01002810000 | 123456789
+مدرسة الشهيد أحمد محمد الأمير الابتدائية | أخصائي | arm028.specialist@armant-schools.edu | 01002820000 | 123456789
+مدرسة الشهيد عبد الرازق الفرشوطي الابتدائية | مدير مدرسة | arm029.manager@armant-schools.edu | 01002910000 | 123456789
+مدرسة الشهيد عبد الرازق الفرشوطي الابتدائية | أخصائي | arm029.specialist@armant-schools.edu | 01002920000 | 123456789
+مدرسة الشهيد عبد الرحمن أبو الحجاج الابتدائية | مدير مدرسة | arm030.manager@armant-schools.edu | 01003010000 | 123456789
+مدرسة الشهيد عبد الرحمن أبو الحجاج الابتدائية | أخصائي | arm030.specialist@armant-schools.edu | 01003020000 | 123456789
+مدرسة الشهيد عثمان مكي الإعدادية | مدير مدرسة | arm031.manager@armant-schools.edu | 01003110000 | 123456789
+مدرسة الشهيد عثمان مكي الإعدادية | أخصائي | arm031.specialist@armant-schools.edu | 01003120000 | 123456789
+مدرسة الصف الإعدادية | مدير مدرسة | arm032.manager@armant-schools.edu | 01003210000 | 123456789
+مدرسة الصف الإعدادية | أخصائي | arm032.specialist@armant-schools.edu | 01003220000 | 123456789
+مدرسة الغرز الابتدائية المشتركة | مدير مدرسة | arm033.manager@armant-schools.edu | 01003310000 | 123456789
+مدرسة الغرز الابتدائية المشتركة | أخصائي | arm033.specialist@armant-schools.edu | 01003320000 | 123456789
+مدرسة المحاميد الثانوية المشتركة | مدير مدرسة | arm034.manager@armant-schools.edu | 01003410000 | 123456789
+مدرسة المحاميد الثانوية المشتركة | أخصائي | arm034.specialist@armant-schools.edu | 01003420000 | 123456789
+مدرسة المحاميد بحري الابتدائية | مدير مدرسة | arm035.manager@armant-schools.edu | 01003510000 | 123456789
+مدرسة المحاميد بحري الابتدائية | أخصائي | arm035.specialist@armant-schools.edu | 01003520000 | 123456789
+مدرسة المحاميد بحري الإعدادية | مدير مدرسة | arm036.manager@armant-schools.edu | 01003610000 | 123456789
+مدرسة المحاميد بحري الإعدادية | أخصائي | arm036.specialist@armant-schools.edu | 01003620000 | 123456789
+مدرسة المريس الابتدائية الجديدة | مدير مدرسة | arm037.manager@armant-schools.edu | 01003710000 | 123456789
+مدرسة المريس الابتدائية الجديدة | أخصائي | arm037.specialist@armant-schools.edu | 01003720000 | 123456789
+مدرسة النصر الابتدائية | مدير مدرسة | arm038.manager@armant-schools.edu | 01003810000 | 123456789
+مدرسة النصر الابتدائية | أخصائي | arm038.specialist@armant-schools.edu | 01003820000 | 123456789
+مدرسة أم المؤمنين الإعدادية المشتركة | مدير مدرسة | arm039.manager@armant-schools.edu | 01003910000 | 123456789
+مدرسة أم المؤمنين الإعدادية المشتركة | أخصائي | arm039.specialist@armant-schools.edu | 01003920000 | 123456789
+مدرسة أولاد دهمش الابتدائية | مدير مدرسة | arm040.manager@armant-schools.edu | 01004010000 | 123456789
+مدرسة أولاد دهمش الابتدائية | أخصائي | arm040.specialist@armant-schools.edu | 01004020000 | 123456789
+مدرسة حاجر أرمنت الحيط الإعدادية | مدير مدرسة | arm041.manager@armant-schools.edu | 01004110000 | 123456789
+مدرسة حاجر أرمنت الحيط الإعدادية | أخصائي | arm041.specialist@armant-schools.edu | 01004120000 | 123456789
+مدرسة حاجر أرمنت الحيط الشرقي | مدير مدرسة | arm042.manager@armant-schools.edu | 01004210000 | 123456789
+مدرسة حاجر أرمنت الحيط الشرقي | أخصائي | arm042.specialist@armant-schools.edu | 01004220000 | 123456789
+مدرسة حاجر أرمنت الغربي الابتدائية | مدير مدرسة | arm043.manager@armant-schools.edu | 01004310000 | 123456789
+مدرسة حاجر أرمنت الغربي الابتدائية | أخصائي | arm043.specialist@armant-schools.edu | 01004320000 | 123456789
+مدرسة حاجر الحيط الشرقي الابتدائية | مدير مدرسة | arm044.manager@armant-schools.edu | 01004410000 | 123456789
+مدرسة حاجر الحيط الشرقي الابتدائية | أخصائي | arm044.specialist@armant-schools.edu | 01004420000 | 123456789
+مدرسة حاجر الرزيقات بحري الابتدائية | مدير مدرسة | arm045.manager@armant-schools.edu | 01004510000 | 123456789
+مدرسة حاجر الرزيقات بحري الابتدائية | أخصائي | arm045.specialist@armant-schools.edu | 01004520000 | 123456789
+مدرسة حاجر الرياينة الابتدائية | مدير مدرسة | arm046.manager@armant-schools.edu | 01004610000 | 123456789
+مدرسة حاجر الرياينة الابتدائية | أخصائي | arm046.specialist@armant-schools.edu | 01004620000 | 123456789
+مدرسة حاجر الرياينة الإعدادية | مدير مدرسة | arm047.manager@armant-schools.edu | 01004710000 | 123456789
+مدرسة حاجر الرياينة الإعدادية | أخصائي | arm047.specialist@armant-schools.edu | 01004720000 | 123456789
+مدرسة حاجر المحاميد بحري الابتدائية | مدير مدرسة | arm048.manager@armant-schools.edu | 01004810000 | 123456789
+مدرسة حاجر المحاميد بحري الابتدائية | أخصائي | arm048.specialist@armant-schools.edu | 01004820000 | 123456789
+مدرسة حاجر المحاميد قبلي الابتدائية | مدير مدرسة | arm049.manager@armant-schools.edu | 01004910000 | 123456789
+مدرسة حاجر المحاميد قبلي الابتدائية | أخصائي | arm049.specialist@armant-schools.edu | 01004920000 | 123456789
+مدرسة خالد بن الوليد الابتدائية | مدير مدرسة | arm050.manager@armant-schools.edu | 01005010000 | 123456789
+مدرسة خالد بن الوليد الابتدائية | أخصائي | arm050.specialist@armant-schools.edu | 01005020000 | 123456789
+مدرسة عائشة أم المؤمنين الإعدادية بنات | مدير مدرسة | arm051.manager@armant-schools.edu | 01005110000 | 123456789
+مدرسة عائشة أم المؤمنين الإعدادية بنات | أخصائي | arm051.specialist@armant-schools.edu | 01005120000 | 123456789
+مدرسة نجع البحر الابتدائية | مدير مدرسة | arm052.manager@armant-schools.edu | 01005210000 | 123456789
+مدرسة نجع البحر الابتدائية | أخصائي | arm052.specialist@armant-schools.edu | 01005220000 | 123456789
+مدرسة نجع البقالة | مدير مدرسة | arm053.manager@armant-schools.edu | 01005310000 | 123456789
+مدرسة نجع البقالة | أخصائي | arm053.specialist@armant-schools.edu | 01005320000 | 123456789
+مدرسة نجع الغوال الابتدائية | مدير مدرسة | arm054.manager@armant-schools.edu | 01005410000 | 123456789
+مدرسة نجع الغوال الابتدائية | أخصائي | arm054.specialist@armant-schools.edu | 01005420000 | 123456789
+مدرسة نجع دنقل الابتدائية | مدير مدرسة | arm055.manager@armant-schools.edu | 01005510000 | 123456789
+مدرسة نجع دنقل الابتدائية | أخصائي | arm055.specialist@armant-schools.edu | 01005520000 | 123456789
+مدرسة العز الابتدائية المشتركة | مدير مدرسة | arm056.manager@armant-schools.edu | 01005610000 | 123456789
+مدرسة العز الابتدائية المشتركة | أخصائي | arm056.specialist@armant-schools.edu | 01005620000 | 123456789
+مدرسة ترعة السواحل للتعليم الأساسي | مدير مدرسة | arm057.manager@armant-schools.edu | 01005710000 | 123456789
+مدرسة ترعة السواحل للتعليم الأساسي | أخصائي | arm057.specialist@armant-schools.edu | 01005720000 | 123456789
+مدرسة الفرقان 1 للتعليم المجتمعي | مدير مدرسة | arm058.manager@armant-schools.edu | 01005810000 | 123456789
+مدرسة الفرقان 1 للتعليم المجتمعي | أخصائي | arm058.specialist@armant-schools.edu | 01005820000 | 123456789
+مدرسة الفرقان 2 للتعليم المجتمعي | مدير مدرسة | arm059.manager@armant-schools.edu | 01005910000 | 123456789
+مدرسة الفرقان 2 للتعليم المجتمعي | أخصائي | arm059.specialist@armant-schools.edu | 01005920000 | 123456789
+مدرسة عمر بن الخطاب للتعليم المجتمعي | مدير مدرسة | arm060.manager@armant-schools.edu | 01006010000 | 123456789
+مدرسة عمر بن الخطاب للتعليم المجتمعي | أخصائي | arm060.specialist@armant-schools.edu | 01006020000 | 123456789
+مدرسة الرواد للتعليم المجتمعي | مدير مدرسة | arm061.manager@armant-schools.edu | 01006110000 | 123456789
+مدرسة الرواد للتعليم المجتمعي | أخصائي | arm061.specialist@armant-schools.edu | 01006120000 | 123456789
+مدرسة جيل المستقبل للتعليم المجتمعي | مدير مدرسة | arm062.manager@armant-schools.edu | 01006210000 | 123456789
+مدرسة جيل المستقبل للتعليم المجتمعي | أخصائي | arm062.specialist@armant-schools.edu | 01006220000 | 123456789
+مدرسة حاجر الضبعية الصناعية المشتركة | مدير مدرسة | arm063.manager@armant-schools.edu | 01006310000 | 123456789
+مدرسة حاجر الضبعية الصناعية المشتركة | أخصائي | arm063.specialist@armant-schools.edu | 01006320000 | 123456789

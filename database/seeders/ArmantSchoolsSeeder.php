@@ -63,20 +63,25 @@ class ArmantSchoolsSeeder extends Seeder
 
         $allowedEmails = [];
         $userCount = 0;
+        $defaultPassword = $payload['default_password'] ?? '123456789';
 
-        // Administration oversight accounts (see schools under إدارة أرمنت).
-        $adminAccounts = [
+        // Administration oversight accounts (from JSON when present).
+        $adminAccounts = $payload['admin_accounts'] ?? [
             [
                 'email' => 'armant.manager@armant-schools.edu',
                 'name'  => 'مدير إدارة أرمنت التعليمية',
                 'role'  => 'مدير الإدارة',
-                'password' => '12345678',
+                'password' => $defaultPassword,
+                'phone' => '01000000001',
+                'must_change_password' => false,
             ],
             [
                 'email' => 'armant.leaves@armant-schools.edu',
                 'name'  => 'مسؤول إجازات إدارة أرمنت',
                 'role'  => 'مسؤول الإجازات',
-                'password' => '12345678',
+                'password' => $defaultPassword,
+                'phone' => '01000000002',
+                'must_change_password' => false,
             ],
         ];
 
@@ -87,10 +92,11 @@ class ArmantSchoolsSeeder extends Seeder
                 ['email' => $account['email']],
                 [
                     'name'                 => $account['name'],
-                    'password'             => $account['password'],
+                    'password'             => $account['password'] ?? $defaultPassword,
+                    'phone'                => User::normalizePhone($account['phone'] ?? null),
                     'organization_id'      => $administration->id,
                     'is_active'            => true,
-                    'must_change_password' => true,
+                    'must_change_password' => (bool) ($account['must_change_password'] ?? false),
                 ]
             );
 
@@ -118,24 +124,20 @@ class ArmantSchoolsSeeder extends Seeder
                 $user = User::where('email', $account['email'])->first()
                     ?? User::where('email', $legacyEmail)->first();
 
+                $attrs = [
+                    'email'                => $account['email'],
+                    'name'                 => "{$account['title']} — {$school->name}",
+                    'password'             => $account['password'] ?? $defaultPassword,
+                    'phone'                => User::normalizePhone($account['phone'] ?? null),
+                    'organization_id'      => $school->id,
+                    'is_active'            => true,
+                    'must_change_password' => (bool) ($account['must_change_password'] ?? false),
+                ];
+
                 if ($user) {
-                    $user->fill([
-                        'email'                => $account['email'],
-                        'name'                 => "{$account['title']} — {$school->name}",
-                        'password'             => $account['password'],
-                        'organization_id'      => $school->id,
-                        'is_active'            => true,
-                        'must_change_password' => (bool) ($account['must_change_password'] ?? false),
-                    ])->save();
+                    $user->fill($attrs)->save();
                 } else {
-                    $user = User::create([
-                        'email'                => $account['email'],
-                        'name'                 => "{$account['title']} — {$school->name}",
-                        'password'             => $account['password'],
-                        'organization_id'      => $school->id,
-                        'is_active'            => true,
-                        'must_change_password' => (bool) ($account['must_change_password'] ?? false),
-                    ]);
+                    $user = User::create($attrs);
                 }
 
                 $this->assignRole($user, $roleName, $school->id);

@@ -14,15 +14,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm001.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm001.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000120000"
         }
       ]
     },
@@ -35,15 +37,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm002.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm002.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000220000"
         }
       ]
     },
@@ -56,15 +60,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm003.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm003.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000320000"
         }
       ]
     },
@@ -77,15 +83,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm004.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm004.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000420000"
         }
       ]
     },
@@ -98,15 +106,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm005.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm005.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000520000"
         }
       ]
     },
@@ -119,15 +129,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm006.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm006.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000620000"
         }
       ]
     },
@@ -140,15 +152,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm007.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm007.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000720000"
         }
       ]
     },
@@ -161,15 +175,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm008.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm008.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000820000"
         }
       ]
     },
@@ -182,15 +198,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm009.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm009.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01000920000"
         }
       ]
     },
@@ -203,15 +221,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm010.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm010.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001020000"
         }
       ]
     },
@@ -224,15 +244,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm011.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm011.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001120000"
         }
       ]
     },
@@ -245,15 +267,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm012.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm012.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001220000"
         }
       ]
     },
@@ -266,15 +290,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm013.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm013.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001320000"
         }
       ]
     },
@@ -287,15 +313,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm014.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm014.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001420000"
         }
       ]
     },
@@ -308,15 +336,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm015.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm015.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001520000"
         }
       ]
     },
@@ -329,15 +359,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm016.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm016.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001620000"
         }
       ]
     },
@@ -350,15 +382,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm017.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm017.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001720000"
         }
       ]
     },
@@ -371,15 +405,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm018.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm018.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001820000"
         }
       ]
     },
@@ -392,15 +428,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm019.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm019.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01001920000"
         }
       ]
     },
@@ -413,15 +451,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm020.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm020.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002020000"
         }
       ]
     },
@@ -434,15 +474,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm021.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm021.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002120000"
         }
       ]
     },
@@ -455,15 +497,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm022.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm022.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002220000"
         }
       ]
     },
@@ -476,15 +520,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm023.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm023.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002320000"
         }
       ]
     },
@@ -497,15 +543,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm024.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm024.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002420000"
         }
       ]
     },
@@ -518,15 +566,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm025.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm025.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002520000"
         }
       ]
     },
@@ -539,15 +589,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm026.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm026.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002620000"
         }
       ]
     },
@@ -560,15 +612,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm027.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm027.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002720000"
         }
       ]
     },
@@ -581,15 +635,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm028.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm028.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002820000"
         }
       ]
     },
@@ -602,15 +658,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm029.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm029.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01002920000"
         }
       ]
     },
@@ -623,15 +681,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm030.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm030.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003020000"
         }
       ]
     },
@@ -644,15 +704,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm031.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm031.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003120000"
         }
       ]
     },
@@ -665,15 +727,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm032.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm032.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003220000"
         }
       ]
     },
@@ -686,15 +750,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm033.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm033.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003320000"
         }
       ]
     },
@@ -707,15 +773,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm034.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm034.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003420000"
         }
       ]
     },
@@ -728,15 +796,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm035.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm035.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003520000"
         }
       ]
     },
@@ -749,15 +819,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm036.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm036.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003620000"
         }
       ]
     },
@@ -770,15 +842,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm037.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm037.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003720000"
         }
       ]
     },
@@ -791,15 +865,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm038.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm038.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003820000"
         }
       ]
     },
@@ -812,15 +888,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm039.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm039.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01003920000"
         }
       ]
     },
@@ -833,15 +911,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm040.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm040.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004020000"
         }
       ]
     },
@@ -854,15 +934,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm041.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm041.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004120000"
         }
       ]
     },
@@ -875,15 +957,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm042.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm042.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004220000"
         }
       ]
     },
@@ -896,15 +980,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm043.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm043.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004320000"
         }
       ]
     },
@@ -917,15 +1003,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm044.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm044.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004420000"
         }
       ]
     },
@@ -938,15 +1026,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm045.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm045.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004520000"
         }
       ]
     },
@@ -959,15 +1049,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm046.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm046.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004620000"
         }
       ]
     },
@@ -980,15 +1072,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm047.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm047.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004720000"
         }
       ]
     },
@@ -1001,15 +1095,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm048.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm048.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004820000"
         }
       ]
     },
@@ -1022,15 +1118,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm049.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm049.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01004920000"
         }
       ]
     },
@@ -1043,15 +1141,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm050.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm050.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005020000"
         }
       ]
     },
@@ -1064,15 +1164,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm051.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm051.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005120000"
         }
       ]
     },
@@ -1085,15 +1187,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm052.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm052.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005220000"
         }
       ]
     },
@@ -1106,15 +1210,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm053.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm053.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005320000"
         }
       ]
     },
@@ -1127,15 +1233,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm054.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005410000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm054.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005420000"
         }
       ]
     },
@@ -1148,15 +1256,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm055.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005510000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm055.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005520000"
         }
       ]
     },
@@ -1169,15 +1279,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm056.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005610000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm056.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005620000"
         }
       ]
     },
@@ -1190,15 +1302,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm057.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005710000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm057.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005720000"
         }
       ]
     },
@@ -1211,15 +1325,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm058.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005810000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm058.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005820000"
         }
       ]
     },
@@ -1232,15 +1348,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm059.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005910000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm059.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01005920000"
         }
       ]
     },
@@ -1253,15 +1371,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm060.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006010000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm060.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006020000"
         }
       ]
     },
@@ -1274,15 +1394,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm061.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006110000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm061.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006120000"
         }
       ]
     },
@@ -1295,15 +1417,17 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm062.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006210000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm062.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006220000"
         }
       ]
     },
@@ -1316,17 +1440,38 @@
           "role": "manager",
           "title": "مدير المدرسة",
           "email": "arm063.manager@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006310000"
         },
         {
           "role": "specialist",
           "title": "أخصائي",
           "email": "arm063.specialist@armant-schools.edu",
-          "password": "12345678",
-          "must_change_password": false
+          "password": "123456789",
+          "must_change_password": false,
+          "phone": "01006320000"
         }
       ]
+    }
+  ],
+  "default_password": "123456789",
+  "admin_accounts": [
+    {
+      "email": "armant.manager@armant-schools.edu",
+      "name": "مدير إدارة أرمنت التعليمية",
+      "role": "مدير الإدارة",
+      "password": "123456789",
+      "phone": "01000000001",
+      "must_change_password": false
+    },
+    {
+      "email": "armant.leaves@armant-schools.edu",
+      "name": "مسؤول إجازات إدارة أرمنت",
+      "role": "مسؤول الإجازات",
+      "password": "123456789",
+      "phone": "01000000002",
+      "must_change_password": false
     }
   ]
 }
