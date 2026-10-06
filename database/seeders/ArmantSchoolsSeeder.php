@@ -70,13 +70,13 @@ class ArmantSchoolsSeeder extends Seeder
                 'email' => 'armant.manager@armant-schools.edu',
                 'name'  => 'مدير إدارة أرمنت التعليمية',
                 'role'  => 'مدير الإدارة',
-                'password' => 'ArmantAdmin#2026',
+                'password' => '12345678',
             ],
             [
                 'email' => 'armant.leaves@armant-schools.edu',
                 'name'  => 'مسؤول إجازات إدارة أرمنت',
                 'role'  => 'مسؤول الإجازات',
-                'password' => 'ArmantLeaves#2026',
+                'password' => '12345678',
             ],
         ];
 
