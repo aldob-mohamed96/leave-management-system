@@ -4,7 +4,7 @@ use App\Http\Controllers\LeaveVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 // Render / load balancer health check
