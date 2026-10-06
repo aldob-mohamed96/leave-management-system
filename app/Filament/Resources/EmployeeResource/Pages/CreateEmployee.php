@@ -3,10 +3,7 @@
 namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
-use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 
 class CreateEmployee extends CreateRecord
 {
@@ -18,17 +15,29 @@ class CreateEmployee extends CreateRecord
 
     protected ?string $systemPassword = null;
 
+    protected ?string $systemPhone = null;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Virtual UI fields — never mass-assign onto Employee
         $this->createSystemUser = (bool) ($this->data['is_system_employee'] ?? $data['is_system_employee'] ?? false);
         $this->systemEmail = $this->data['system_email'] ?? $data['system_email'] ?? null;
         $this->systemPassword = $this->data['system_password'] ?? $data['system_password'] ?? null;
+        $this->systemPhone = $this->data['system_phone'] ?? $data['system_phone'] ?? null;
 
-        unset($data['is_system_employee'], $data['system_email'], $data['system_password']);
+        unset(
+            $data['is_system_employee'],
+            $data['system_email'],
+            $data['system_password'],
+            $data['system_phone'],
+        );
 
         if (EmployeeResource::isSchoolActor()) {
             $data['organization_id'] = auth()->user()->organization_id;
+            unset($data['user_id']);
+        }
+
+        // Creating a new login account takes precedence over linking an existing user
+        if ($this->createSystemUser) {
             unset($data['user_id']);
         }
 
@@ -37,7 +46,7 @@ class CreateEmployee extends CreateRecord
 
     protected function afterCreate(): void
     {
-        if (! EmployeeResource::isSchoolActor() || ! $this->createSystemUser) {
+        if (! $this->createSystemUser) {
             return;
         }
 
@@ -45,31 +54,11 @@ class CreateEmployee extends CreateRecord
             return;
         }
 
-        $organizationId = $this->record->organization_id;
-
-        $user = User::create([
-            'name'                 => $this->record->full_name,
-            'email'                => $this->systemEmail,
-            'password'             => $this->systemPassword,
-            'organization_id'      => $organizationId,
-            'is_active'            => true,
-            'must_change_password' => true,
-        ]);
-
-        setPermissionsTeamId($organizationId);
-
-        $role = Role::query()
-            ->where('name', 'موظف مدرسة')
-            ->where('organization_id', $organizationId)
-            ->first();
-
-        if ($role) {
-            $user->assignRole($role);
-        }
-
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        setPermissionsTeamId(null);
-
-        $this->record->update(['user_id' => $user->id]);
+        EmployeeResource::provisionSystemUser(
+            employee: $this->record,
+            email: $this->systemEmail,
+            password: $this->systemPassword,
+            phone: $this->systemPhone ?: $this->record->phone,
+        );
     }
 }

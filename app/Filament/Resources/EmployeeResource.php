@@ -100,9 +100,9 @@ class EmployeeResource extends Resource
                 ->searchable()
                 ->helperText('تُدار الدرجات من الإعدادات ← الدرجات الوظيفية'),
 
-            // الإدارة فقط: ربط بحساب موجود
+            // الإدارة: ربط بحساب موجود (بدل إنشاء جديد)
             Forms\Components\Select::make('user_id')
-                ->label('حساب المستخدم')
+                ->label('ربط بحساب موجود')
                 ->options(
                     User::orderBy('name')
                         ->pluck('name', 'id')
@@ -110,16 +110,16 @@ class EmployeeResource extends Resource
                 )
                 ->searchable()
                 ->nullable()
-                ->placeholder('— لا يوجد حساب مرتبط —')
-                ->visible(fn (): bool => ! static::isSchoolActor()),
+                ->placeholder('— لا يوجد —')
+                ->visible(fn (Get $get): bool => ! static::isSchoolActor() && ! (bool) $get('is_system_employee'))
+                ->helperText('أو فعّل «إنشاء حساب دخول» بالأسفل بدل الربط.'),
 
-            // المدرسة فقط: إنشاء حساب موظف نظام تابع للمدرسة
-            Forms\Components\Section::make('حساب موظف النظام')
-                ->description('فعّل الخيار فقط إذا كان الموظف يحتاج الدخول للنظام.')
-                ->visible(fn (): bool => static::isSchoolActor())
+            // مدرسة أو إدارة: إنشاء حساب دخول جديد مرتبط بالموظف
+            Forms\Components\Section::make('حساب دخول للنظام')
+                ->description('فعّل الخيار إذا كان الموظف يحتاج الدخول للنظام. الدور: موظف مدرسة.')
                 ->schema([
                     Forms\Components\Toggle::make('is_system_employee')
-                        ->label('موظف نظام (يملك حساب دخول)')
+                        ->label('إنشاء حساب دخول')
                         ->live()
                         ->dehydrated(false)
                         ->default(fn (?Employee $record): bool => filled($record?->user_id))
@@ -127,7 +127,18 @@ class EmployeeResource extends Resource
 
                     Forms\Components\Placeholder::make('linked_user_info')
                         ->label('الحساب المرتبط')
-                        ->content(fn (?Employee $record): string => $record?->user?->email ?? '—')
+                        ->content(function (?Employee $record): string {
+                            if (! $record?->user) {
+                                return '—';
+                            }
+
+                            $parts = array_filter([
+                                $record->user->email,
+                                $record->user->phone ? 'تليفون: '.$record->user->phone : null,
+                            ]);
+
+                            return implode(' | ', $parts) ?: '—';
+                        })
                         ->visible(fn (?Employee $record): bool => filled($record?->user_id)),
 
                     Forms\Components\TextInput::make('system_email')
@@ -140,7 +151,22 @@ class EmployeeResource extends Resource
                         ->dehydrated(false)
                         ->validationMessages([
                             'unique' => 'البريد الإلكتروني مستخدم بالفعل.',
-                            'required' => 'البريد الإلكتروني مطلوب لموظف النظام.',
+                            'required' => 'البريد الإلكتروني مطلوب لحساب الدخول.',
+                        ]),
+
+                    Forms\Components\TextInput::make('system_phone')
+                        ->label('رقم التليفون (للدخول)')
+                        ->tel()
+                        ->maxLength(20)
+                        ->nullable()
+                        ->default(fn (Get $get): ?string => $get('phone'))
+                        ->dehydrateStateUsing(fn (?string $state): ?string => User::normalizePhone($state))
+                        ->unique(table: User::class, column: 'phone')
+                        ->visible(fn (Get $get, ?Employee $record): bool => (bool) $get('is_system_employee') && blank($record?->user_id))
+                        ->dehydrated(false)
+                        ->helperText('يمكن الدخول بهذا الرقم بدل البريد.')
+                        ->validationMessages([
+                            'unique' => 'رقم التليفون مستخدم بالفعل.',
                         ]),
 
                     Forms\Components\TextInput::make('system_password')
@@ -152,7 +178,7 @@ class EmployeeResource extends Resource
                         ->visible(fn (Get $get, ?Employee $record): bool => (bool) $get('is_system_employee') && blank($record?->user_id))
                         ->dehydrated(false)
                         ->validationMessages([
-                            'required' => 'كلمة المرور مطلوبة لموظف النظام.',
+                            'required' => 'كلمة المرور مطلوبة لحساب الدخول.',
                             'min' => 'كلمة المرور يجب ألا تقل عن 8 أحرف.',
                         ]),
                 ])
@@ -173,12 +199,55 @@ class EmployeeResource extends Resource
             Forms\Components\TextInput::make('phone')
                 ->label('رقم الهاتف')
                 ->tel()
-                ->maxLength(20),
+                ->maxLength(20)
+                ->live(onBlur: true)
+                ->dehydrateStateUsing(fn (?string $state): ?string => User::normalizePhone($state)),
 
             Forms\Components\Toggle::make('is_active')
                 ->label('نشط')
                 ->default(true),
         ]);
+    }
+
+    /**
+     * Create a system login user for an employee and assign school_employee role.
+     */
+    public static function provisionSystemUser(
+        Employee $employee,
+        string $email,
+        string $password,
+        ?string $phone = null,
+    ): User {
+        $organizationId = (int) $employee->organization_id;
+        $phone = User::normalizePhone($phone ?: $employee->phone);
+
+        $user = User::create([
+            'name'                 => $employee->full_name,
+            'email'                => $email,
+            'phone'                => $phone,
+            'password'             => $password,
+            'organization_id'      => $organizationId,
+            'is_active'            => true,
+            'must_change_password' => true,
+        ]);
+
+        setPermissionsTeamId($organizationId);
+
+        $role = \Spatie\Permission\Models\Role::query()
+            ->where('name', 'موظف مدرسة')
+            ->where('organization_id', $organizationId)
+            ->first();
+
+        if ($role) {
+            $user->assignRole($role);
+        }
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        setPermissionsTeamId(null);
+
+        $employee->update(['user_id' => $user->id]);
+
+        return $user;
     }
 
     /**
@@ -233,10 +302,9 @@ class EmployeeResource extends Resource
                     ->visible(fn (): bool => ! static::isSchoolActor()),
 
                 Tables\Columns\IconColumn::make('user_id')
-                    ->label('موظف نظام')
+                    ->label('حساب دخول')
                     ->boolean()
-                    ->getStateUsing(fn (Employee $record): bool => filled($record->user_id))
-                    ->visible(fn (): bool => static::isSchoolActor()),
+                    ->getStateUsing(fn (Employee $record): bool => filled($record->user_id)),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('نشط')

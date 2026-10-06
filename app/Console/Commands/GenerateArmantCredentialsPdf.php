@@ -33,13 +33,13 @@ class GenerateArmantCredentialsPdf extends Command
                 'org' => $adminName,
                 'role' => 'مدير الإدارة',
                 'email' => 'armant.manager@armant-schools.edu',
-                'email_display' => $this->plainEmail('armant.manager@armant-schools.edu'),
+                'email_display' => 'armant.manager@armant-schools.edu',
             ],
             [
                 'org' => $adminName,
                 'role' => 'مسؤول الإجازات',
                 'email' => 'armant.leaves@armant-schools.edu',
-                'email_display' => $this->plainEmail('armant.leaves@armant-schools.edu'),
+                'email_display' => 'armant.leaves@armant-schools.edu',
             ],
         ];
 
@@ -56,7 +56,7 @@ class GenerateArmantCredentialsPdf extends Command
                     'org' => $school['name'],
                     'role' => $role,
                     'email' => $email,
-                    'email_display' => $this->plainEmail($email),
+                    'email_display' => $email,
                 ];
             }
         }
@@ -94,14 +94,5 @@ class GenerateArmantCredentialsPdf extends Command
         $this->info('Accounts: '.count($rows));
 
         return self::SUCCESS;
-    }
-
-    /**
-     * Insert zero-width spaces so PDF viewers do not treat the address as mailto:.
-     */
-    private function plainEmail(string $email): string
-    {
-        // ZWSP (U+200B) around @ breaks auto-link detection in most PDF viewers.
-        return str_replace('@', "\u{200B}@\u{200B}", $email);
     }
 }

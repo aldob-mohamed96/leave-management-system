@@ -21,6 +21,7 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'organization_id',
         'is_active',
@@ -49,7 +50,7 @@ class User extends Authenticatable implements FilamentUser
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'organization_id', 'is_active', 'must_change_password'])
+            ->logOnly(['name', 'email', 'phone', 'organization_id', 'is_active', 'must_change_password'])
             ->logOnlyDirty()
             ->dontLogIfAttributesChangedOnly(['updated_at', 'remember_token'])
             ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
@@ -92,6 +93,58 @@ class User extends Authenticatable implements FilamentUser
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Normalize a phone number for storage and login lookup.
+     */
+    public static function normalizePhone(?string $phone): ?string
+    {
+        if ($phone === null) {
+            return null;
+        }
+
+        $phone = trim($phone);
+        if ($phone === '') {
+            return null;
+        }
+
+        // Arabic-Indic digits → Western digits
+        $phone = strtr($phone, [
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        ]);
+
+        // Keep leading + and digits only
+        $phone = preg_replace('/[^\d+]/', '', $phone) ?: '';
+
+        return $phone !== '' ? $phone : null;
+    }
+
+    /**
+     * Find an active-eligible user by email or phone for login.
+     */
+    public static function findForLogin(string $login): ?self
+    {
+        $login = trim($login);
+
+        if ($login === '') {
+            return null;
+        }
+
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return static::query()->where('email', $login)->first();
+        }
+
+        $phone = static::normalizePhone($login);
+
+        if (! $phone) {
+            return null;
+        }
+
+        return static::query()->where('phone', $phone)->first();
+    }
 
     /**
      * Set the active team (organization) for permission scoping.

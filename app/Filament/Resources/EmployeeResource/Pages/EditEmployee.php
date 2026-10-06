@@ -6,8 +6,6 @@ use App\Filament\Resources\EmployeeResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 
 class EditEmployee extends EditRecord
 {
@@ -18,6 +16,8 @@ class EditEmployee extends EditRecord
     protected ?string $systemEmail = null;
 
     protected ?string $systemPassword = null;
+
+    protected ?string $systemPhone = null;
 
     protected function getHeaderActions(): array
     {
@@ -31,12 +31,21 @@ class EditEmployee extends EditRecord
         $this->createSystemUser = (bool) ($this->data['is_system_employee'] ?? $data['is_system_employee'] ?? false);
         $this->systemEmail = $this->data['system_email'] ?? $data['system_email'] ?? null;
         $this->systemPassword = $this->data['system_password'] ?? $data['system_password'] ?? null;
+        $this->systemPhone = $this->data['system_phone'] ?? $data['system_phone'] ?? null;
 
-        unset($data['is_system_employee'], $data['system_email'], $data['system_password']);
+        unset(
+            $data['is_system_employee'],
+            $data['system_email'],
+            $data['system_password'],
+            $data['system_phone'],
+        );
 
         if (EmployeeResource::isSchoolActor()) {
             $data['organization_id'] = auth()->user()->organization_id;
-            // لا تسمح المدرسة بتغيير ربط الحساب يدوياً
+            unset($data['user_id']);
+        }
+
+        if ($this->createSystemUser && blank($this->record->user_id)) {
             unset($data['user_id']);
         }
 
@@ -45,8 +54,10 @@ class EditEmployee extends EditRecord
 
     protected function afterSave(): void
     {
-        if (! EmployeeResource::isSchoolActor()) {
-            return;
+        // Sync phone to linked user account
+        if ($this->record->user_id) {
+            $phone = User::normalizePhone($this->record->phone);
+            User::whereKey($this->record->user_id)->update(['phone' => $phone]);
         }
 
         if ($this->record->user_id || ! $this->createSystemUser) {
@@ -57,31 +68,11 @@ class EditEmployee extends EditRecord
             return;
         }
 
-        $organizationId = $this->record->organization_id;
-
-        $user = User::create([
-            'name'                 => $this->record->full_name,
-            'email'                => $this->systemEmail,
-            'password'             => $this->systemPassword,
-            'organization_id'      => $organizationId,
-            'is_active'            => true,
-            'must_change_password' => true,
-        ]);
-
-        setPermissionsTeamId($organizationId);
-
-        $role = Role::query()
-            ->where('name', 'موظف مدرسة')
-            ->where('organization_id', $organizationId)
-            ->first();
-
-        if ($role) {
-            $user->assignRole($role);
-        }
-
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        setPermissionsTeamId(null);
-
-        $this->record->update(['user_id' => $user->id]);
+        EmployeeResource::provisionSystemUser(
+            employee: $this->record,
+            email: $this->systemEmail,
+            password: $this->systemPassword,
+            phone: $this->systemPhone ?: $this->record->phone,
+        );
     }
 }

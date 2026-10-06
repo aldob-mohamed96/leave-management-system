@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
-use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -16,17 +15,17 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $user = User::findForLogin($request->loginIdentifier());
+
+        if (! $user || ! Hash::check($request->input('password'), $user->password)) {
             return $this->error('بيانات الدخول غير صحيحة.', 401);
         }
 
-        $user  = Auth::user();
-        $user->load('organization');
-
         if (! $user->is_active) {
-            Auth::logout();
             return $this->error('حسابك غير مفعّل. تواصل مع المدير.', 403);
         }
+
+        $user->load('organization');
 
         // Revoke old tokens to keep only one active token per user
         $user->tokens()->delete();
@@ -39,6 +38,7 @@ class AuthController extends Controller
                 'id'           => $user->id,
                 'name'         => $user->name,
                 'email'        => $user->email,
+                'phone'        => $user->phone,
                 'organization' => $user->organization ? [
                     'id'         => $user->organization->id,
                     'name'       => $user->organization->name,
@@ -70,6 +70,7 @@ class AuthController extends Controller
             'id'           => $user->id,
             'name'         => $user->name,
             'email'        => $user->email,
+            'phone'        => $user->phone,
             'organization' => $user->organization ? [
                 'id'         => $user->organization->id,
                 'name'       => $user->organization->name,

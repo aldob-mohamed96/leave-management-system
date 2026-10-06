@@ -101,7 +101,6 @@
       <tr>
         <td class="org">{{ $row['org'] }}</td>
         <td class="role">{{ $row['role'] }}</td>
-        {{-- ZWSP around @ prevents PDF viewers from opening mailto:, still mostly copyable --}}
         <td class="email">{{ $row['email_display'] }}</td>
         <td class="pass">12345678</td>
       </tr>
@@ -110,8 +109,7 @@
 </table>
 
 <div class="note">
-  انسخ البريد من العمود الثالث والصقه في صفحة الدخول — لن يفتح برنامج البريد.
-  | {{ $loginUrl }}
+  رابط الدخول: {{ $loginUrl }} — كلمة المرور لجميع الحسابات: 12345678
 </div>
 
 </body>

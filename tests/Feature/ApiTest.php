@@ -110,8 +110,29 @@ describe('API Authentication', function () {
         ]);
 
         $response->assertStatus(422)
-                 ->assertJson(['success' => false])
-                 ->assertJsonPath('errors.email.0', 'البريد الإلكتروني مطلوب.');
+                 ->assertJson(['success' => false]);
+
+        $errors = $response->json('errors');
+        $flat = collect($errors)->flatten()->implode(' ');
+        expect($flat)->toContain('البريد الإلكتروني أو رقم التليفون مطلوب');
+    });
+
+    it('POST /api/auth/login with phone credentials returns token', function () {
+        $orgs = createHierarchy();
+        $user = User::factory()->inOrganization($orgs['school'])->create([
+            'phone'    => '01012345678',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'login'    => '01012345678',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJson(['success' => true]);
+
+        expect($response->json('data.token'))->not->toBeEmpty();
     });
 
     it('GET /api/auth/me without token returns 401', function () {
