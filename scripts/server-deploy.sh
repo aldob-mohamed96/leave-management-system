@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Manual deploy on the server: ssh in, then run:
+# Run on the Namecheap server:
 #   bash ~/leave.rtltec.com/scripts/server-deploy.sh
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-$HOME/leave.rtltec.com}"
 cd "$APP_DIR"
 
-echo "==> Pulling latest from GitHub..."
+echo "==> git pull..."
 git fetch origin main
 git reset --hard origin/main
 
-echo "==> Composer install..."
+echo "==> composer..."
 composer install --no-dev --optimize-autoloader --no-interaction
 
-echo "==> Laravel migrate + caches..."
+echo "==> laravel..."
 php artisan migrate --force
 php artisan storage:link 2>/dev/null || true
 php artisan config:clear
@@ -23,4 +23,4 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "==> Deploy finished at $(date -Is)"
+echo "==> OK $(git rev-parse --short HEAD)"
