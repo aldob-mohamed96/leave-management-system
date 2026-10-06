@@ -94,6 +94,21 @@ class RoleAndPermissionSeeder extends Seeder
                 'view_employees',
             ],
         ],
+        'school_specialist' => [
+            'label'       => 'أخصائي',
+            'org_types'   => [OrganizationType::SCHOOL],
+            'permissions' => [
+                'create_leave_request',
+                'edit_leave_request',
+                'submit_leave_request',
+                'cancel_leave_request',
+                'view_leave_requests',
+                'view_all_leave_requests',
+                'create_employee',
+                'edit_employee',
+                'view_employees',
+            ],
+        ],
         // ========= إدارة تعليمية =========
         'leaves_officer' => [
             'label'       => 'مسؤول الإجازات',

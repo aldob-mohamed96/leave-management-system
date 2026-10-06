@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Resources\UserResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+
+class AuthController extends Controller
+{
+    use ApiResponse;
+
+    public function login(LoginRequest $request): JsonResponse
+    {
+        if (! Auth::attempt($request->only('email', 'password'))) {
+            return $this->error('بيانات الدخول غير صحيحة.', 401);
+        }
+
+        $user  = Auth::user();
+        $user->load('organization');
+
+        if (! $user->is_active) {
+            Auth::logout();
+            return $this->error('حسابك غير مفعّل. تواصل مع المدير.', 403);
+        }
+
+        // Revoke old tokens to keep only one active token per user
+        $user->tokens()->delete();
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return $this->success([
+            'token' => $token,
+            'user'  => [
+                'id'           => $user->id,
+                'name'         => $user->name,
+                'email'        => $user->email,
+                'organization' => $user->organization ? [
+                    'id'         => $user->organization->id,
+                    'name'       => $user->organization->name,
+                    'type'       => $user->organization->type->value,
+                    'type_label' => $user->organization->type->label(),
+                ] : null,
+            ],
+        ], 'تم تسجيل الدخول بنجاح.');
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        // Delete current token if available, otherwise delete all tokens
+        $token = $request->user()->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        } else {
+            $request->user()->tokens()->delete();
+        }
+        return $this->success(null, 'تم تسجيل الخروج بنجاح.');
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user()->load('organization');
+        $user->setOrganizationTeam();
+
+        return $this->success([
+            'id'           => $user->id,
+            'name'         => $user->name,
+            'email'        => $user->email,
+            'organization' => $user->organization ? [
+                'id'         => $user->organization->id,
+                'name'       => $user->organization->name,
+                'type'       => $user->organization->type->value,
+                'type_label' => $user->organization->type->label(),
+            ] : null,
+            'roles'        => $user->getRoleNames(),
+            'permissions'  => $user->getAllPermissions()->pluck('name'),
+            'is_active'    => $user->is_active,
+        ]);
+    }
+}

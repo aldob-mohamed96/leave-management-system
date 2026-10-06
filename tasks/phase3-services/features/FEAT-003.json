@@ -1,0 +1,36 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "LeaveRequestResource — the most complex resource. Integrates LeaveRequestService (create/submit/approve/reject/return/cancel) and LeaveBalanceService. Depends on FEAT-001 and FEAT-002.",
+  "status": "completed",
+  "steps": [
+    "1. Create app/Filament/Resources/LeaveRequestResource.php with navigationGroup('طلبات الإجازات'), navigationLabel('طلبات الإجازة'), navigationIcon('heroicon-o-clipboard-document-list'), navigationBadge() that returns the count of pending requests the user can see (LeaveRequest::pending()->count()).",
+
+    "2. Table columns (ListLeaveRequests page): number (copyable), employee->full_name, leaveType->name, start_date (DateColumn), end_date (DateColumn), days (numeric), status (BadgeColumn using $state->label() and $state->color()), current_stage, organization->name. Default sort: created_at descending. Include bulk action: BulkAction 'تصدير' (placeholder). Filters: SelectFilter status (LeaveStatus cases with Arabic labels), SelectFilter leave_type_id, SelectFilter organization_id (withoutGlobalScopes), DateRangeFilter on start_date (using built-in Filter with DatePicker from/to).",
+
+    "3. Create form (used by CreateLeaveRequest and EditLeaveRequest): Section 'بيانات الطلب' with: Select employee_id (required, Employee::active() options, searchable, shows full_name), Select leave_type_id (required, LeaveType::active() options, reactive afterStateUpdated to refresh balance display), DatePicker start_date (required, reactive), DatePicker end_date (required, reactive), TextInput days (numeric, disabled — auto-calculated via a Placeholder that calls the working-days logic), DatePicker written_at, Select substitute_employee_id (nullable, Employee options excluding selected employee), Textarea reason (nullable). Section 'معلومات الرصيد' (disabled on create, shows balance_entitled/balance_used/balance_remaining from the record on edit). On save, the form data is passed to LeaveRequestService::create($data, Auth::user()) — do this in the create() method override in CreateLeaveRequest page class.",
+
+    "4. ViewLeaveRequest page (custom page extending ViewRecord): shows all request fields in a read-only Infolist using Infolist::make() with TextEntry for each field. Below the infolist, render a Timeline section using the request's steps() relation — for each LeaveRequestStep: show stage, status badge (StepStatus::color()/label()), acted_by->name, acted_at formatted, and note. Use a RepeatableEntry or a custom Blade view at resources/views/filament/leave-request-steps-timeline.blade.php.",
+
+    "5. Actions on ViewLeaveRequest and ListLeaveRequests (as table row actions and header actions): All actions call Auth::user() and inject the services via app(LeaveRequestService::class).\n   a. Action 'تقديم الطلب' (Submit): visible when status is DRAFT or RETURNED and user has submit_leave_request. Calls LeaveRequestService::submit($record, Auth::user()). Shows success/failure notification.\n   b. Action 'اعتماد' (Approve): visible when status is SUBMITTED or IN_REVIEW and user has approve_leave_request. Opens a modal (action form) with an optional Textarea 'ملاحظة'. Gets the current pending step via $record->steps()->where('status', StepStatus::PENDING)->where('stage', $record->current_stage)->first(). Calls LeaveRequestService::approve($record, $step, Auth::user(), $data['note'] ?? null).\n   c. Action 'رفض' (Reject): visible when status is SUBMITTED or IN_REVIEW and user has reject_leave_request. Modal with required Textarea 'سبب الرفض'. Calls LeaveRequestService::reject($record, $step, Auth::user(), $data['reason']).\n   d. Action 'إعادة للتعديل' (Return): visible when status is SUBMITTED or IN_REVIEW and user has return_leave_request. Modal with required Textarea 'الملاحظة'. Calls LeaveRequestService::returnRequest($record, $step, Auth::user(), $data['note']).\n   e. Action 'إلغاء' (Cancel): visible when $record->status->canBeCancelled() and user has cancel_leave_request. Requires confirmation. Calls LeaveRequestService::cancel($record, Auth::user()).\n   Each action catches LeaveRequestException and Illuminate\\Validation\\ValidationException and calls Filament::notify('danger', $e->getMessage()) on failure.",
+
+    "6. Override the table query in ListLeaveRequests: if the user has view_all_leave_requests, use LeaveRequest::withoutGlobalScopes() scoped to org subtree via a manual whereIn on organization_id using $user->organization->subtreeIds(). If user only has view_leave_requests, scope to their own organization_id only. This overrides the default OrganizationScope behavior with explicit permission-aware scoping.",
+
+    "7. Create the dedicated EditLeaveRequest page that is only accessible when $record->status->canBeEdited(). Override authorizeAccess() to check the LeaveRequestPolicy update gate. Re-use the same form schema from step 3. On save, call LeaveRequestService::create($data, Auth::user()) only if status is DRAFT; if RETURNED, patch the record fields directly and keep status as RETURNED (do NOT re-run LeaveRequestService::create which would make a new record — instead update the existing record's fields directly via $record->update($validated))."
+  ],
+  "acceptance_criteria": [
+    "php artisan route:list | grep filament shows /admin/leave-requests routes",
+    "Navigating to /admin/leave-requests in browser shows the list with all columns",
+    "Creating a leave request via the form calls LeaveRequestService::create and persists a DRAFT",
+    "Submit action transitions status to SUBMITTED",
+    "Approve/Reject/Return/Cancel actions call through to the correct LeaveRequestService methods",
+    "php artisan test --stop-on-failure passes"
+  ],
+  "verification": [
+    "php artisan config:clear && php artisan route:clear",
+    "php artisan route:list | grep leave-request",
+    "php artisan test --stop-on-failure"
+  ],
+  "blocked_reason": null,
+  "findings": "1) LeaveRequestResource created with full form, table, infolist, and workflow actions (submit/approve/reject/return/cancel). 2) All actions use app(LeaveRequestService::class) inside action closures — no constructor injection. 3) CreateLeaveRequest overrides handleRecordCreation() to call LeaveRequestService::create() and return ->request. 4) EditLeaveRequest overrides handleRecordUpdate() to update fields directly (no re-run of service for RETURNED requests). 5) ViewLeaveRequest page includes all 5 header actions with correct visibility guards using LeaveRequestPolicy. 6) getEloquentQuery() applies permission-aware scoping: view_all_leave_requests uses subtreeIds(), view_leave_requests scopes to own organization. 7) Working days auto-calculation uses WorkingDaysRule in a reactive afterStateUpdated closure. 8) Balance info section is read-only (disabled, dehydrated=false) and hidden on create. 9) All actions wrap in try/catch for LeaveRequestException and ValidationException with Notification::make()->danger() on failure. 10) Routes confirmed: /admin/leave-requests index/create/view/edit. 11) All 95 existing tests pass."
+}

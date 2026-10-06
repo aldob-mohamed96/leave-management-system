@@ -69,6 +69,11 @@ class UserResource extends Resource
                 ->label('نشط')
                 ->default(true),
 
+            Forms\Components\Toggle::make('must_change_password')
+                ->label('يجب تغيير كلمة المرور عند الدخول')
+                ->default(false)
+                ->helperText('عند التفعيل يُطلب من المستخدم تغيير كلمة المرور قبل استخدام النظام.'),
+
             Forms\Components\Select::make('roles')
                 ->label('الأدوار')
                 ->multiple()
@@ -123,6 +128,11 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('نشط')
                     ->boolean(),
+
+                Tables\Columns\IconColumn::make('must_change_password')
+                    ->label('تغيير كلمة المرور')
+                    ->boolean()
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('roles_list')
                     ->label('الأدوار')

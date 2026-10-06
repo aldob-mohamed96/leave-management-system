@@ -66,7 +66,7 @@ class DashboardStatsService
      */
     public function employeeBalanceSummary(Organization $org): array
     {
-        return LeaveBalance::query()
+        return LeaveBalance::withoutGlobalScopes()
             ->join('employees', 'employees.id', '=', 'leave_balances.employee_id')
             ->join('leave_types', 'leave_types.id', '=', 'leave_balances.leave_type_id')
             ->whereIn('employees.organization_id', $org->subtreeIds())

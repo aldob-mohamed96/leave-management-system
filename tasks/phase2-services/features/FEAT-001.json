@@ -1,0 +1,42 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Foundation layer: LeaveRequestException, config/leave.php, and LeaveBalanceService. These are depended on by all other Phase 2 files so they must land first.",
+  "status": "completed",
+  "steps": [
+    "Create app/Exceptions/LeaveRequestException.php — extends \\RuntimeException. Add static factories: `invalidTransition(LeaveStatus $from, LeaveStatus $to): self` sets Arabic message 'لا يمكن الانتقال من {$from->label()} إلى {$to->label()}'; `insufficientBalance(float $remaining, float $requested): self` sets Arabic message 'الرصيد المتبقي ({$remaining} يوم) أقل من المطلوب ({$requested} يوم)'. Both accept an optional `?string $detail = null` appended to message.",
+
+    "Create config/leave.php returning an array with keys: `warn_only_insufficient_balance` => true, `casual_before_regular_warning` => true, `carry_over_max_days` => null (null = carry all remaining), `working_week_off_days` => [5, 6] (Carbon dayOfWeek, Fri=5 Sat=6), `email_notifications` => false.",
+
+    "Create app/Services/LeaveBalanceService.php. Inject nothing via constructor (stateless service). All public methods open a DB::transaction() and call lockForUpdate() on the LeaveBalance row before mutating. Method `getOrCreateBalance(Employee $employee, LeaveType $leaveType, int $year): LeaveBalance` — uses firstOrCreate on [employee_id, leave_type_id, year]; when creating, sets entitled to $employee->regularLeaveEntitlement() for regular leave type (code='regular'), else to $leaveType->yearly_entitlement; carried_over and used default to 0.",
+
+    "Add `deduct(LeaveBalance $balance, float $days, LeaveRequest $request, User $actedBy): LeaveBalanceTransaction` — inside DB::transaction() lock balance row, insert LeaveBalanceTransaction(type=TransactionType::DEDUCTION, days=$days, leave_request_id=$request->id, leave_balance_id=$balance->id, created_by=$actedBy->id), then call $balance->increment('used', $days). Return transaction.",
+
+    "Add `refund(LeaveBalance $balance, float $days, LeaveRequest $request, User $actedBy): LeaveBalanceTransaction` — lock balance, insert transaction(type=REFUND, days=$days), then $balance->update(['used' => max(0.0, (float)$balance->used - $days)]). Return transaction.",
+
+    "Add `adjust(LeaveBalance $balance, float $days, string $note, User $actedBy): LeaveBalanceTransaction` — lock balance, insert transaction(type=ADJUSTMENT, days=$days, note=$note). If $days > 0: $balance->increment('entitled', $days). If $days < 0: $balance->update(['used' => max(0.0, (float)$balance->used - abs($days))]). Return transaction.",
+
+    "Add `carryOver(Employee $employee, int $fromYear, int $toYear): void` — load all LeaveBalance rows for employee in fromYear where leaveType->deducts_balance=true AND remaining > 0 (eager load leaveType). For each: compute carryDays = min($bal->remaining, config('leave.carry_over_max_days') ?? PHP_INT_MAX). Call getOrCreateBalance for toYear. Inside that outer DB::transaction(): lock toBalance, insert transaction(type=CARRYOVER, days=carryDays) on toBalance, then $toBalance->increment('carried_over', carryDays).",
+
+    "Add `accrueAnnual(Employee $employee, int $year): void` — load all active LeaveType where yearly_entitlement > 0. For each: compute $days as $employee->regularLeaveEntitlement() if code='regular', else $leaveType->yearly_entitlement. Call getOrCreateBalance. Lock balance inside DB::transaction(). Insert transaction(type=ACCRUAL, days=$days). Call $balance->update(['entitled' => $days]) (full reset, not increment).",
+
+    "Register LeaveBalanceService as singleton in AppServiceProvider::register(): `$this->app->singleton(LeaveBalanceService::class);`"
+  ],
+  "acceptance_criteria": [
+    "LeaveBalanceService::deduct() increments leave_balances.used by exact amount and writes a deduction transaction row",
+    "LeaveBalanceService::refund() decrements used floored at 0 and writes a refund transaction row",
+    "LeaveBalanceService::adjust(+5) increments entitled by 5",
+    "LeaveBalanceService::adjust(-3) decrements used by 3",
+    "LeaveBalanceService::carryOver() creates a carried_over entry in the next year balance equal to prior year's remaining",
+    "LeaveBalanceService::accrueAnnual() sets entitled to regularLeaveEntitlement() for regular leave type",
+    "All mutations are inside DB transactions; concurrent calls do not double-deduct (lockForUpdate enforces this)",
+    "config('leave.warn_only_insufficient_balance') returns true",
+    "LeaveRequestException::invalidTransition() constructs with Arabic message containing both status labels"
+  ],
+  "verification": [
+    "./vendor/bin/pest tests/Feature/Phase2ServicesTest.php --no-coverage --filter balance",
+    "./vendor/bin/pest --no-coverage (all prior tests still pass)"
+  ],
+  "blocked_reason": null,
+  "findings": "LeaveBalanceTransaction.created_by is nullable in the model fillable (no NOT NULL constraint noted) — carryOver() and accrueAnnual() omit created_by since no acting User is available in those batch operations; FEAT-002/003 should ensure LeaveRequestService always provides $actedBy when calling deduct/refund. LeaveBalance uses strict mode (Model::shouldBeStrict) in non-production — always load balance with proper relationships before passing to service methods. config('leave.carry_over_max_days') = null means carry-all; PHP_INT_MAX is the sentinel used to represent infinity. All three files (LeaveRequestException, config/leave.php, LeaveBalanceService) are created and singleton is registered in AppServiceProvider. Tests: 58 deprecated (PDO noise), 1 passed, exit code 0."
+}

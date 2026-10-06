@@ -52,6 +52,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ---------------------------------------------------------------
+        // Preserve float precision in JSON responses (30.0 stays 30.0).
+        // ---------------------------------------------------------------
+        $this->app->resolving(\Illuminate\Http\JsonResponse::class, function (\Illuminate\Http\JsonResponse $response) {
+            $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        });
+
+        // ---------------------------------------------------------------
         // Strict mode in non-production environments:
         // prevents lazy loading, silently discarded attributes, etc.
         // ---------------------------------------------------------------

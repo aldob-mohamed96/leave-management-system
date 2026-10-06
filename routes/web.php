@@ -40,6 +40,29 @@ Route::get('/leave-export', function (\Illuminate\Http\Request $request) {
 // Authenticated report PDF download route
 Route::get('/report-pdf', function (\Illuminate\Http\Request $request) {
     $filters = $request->only(['status', 'organization_id', 'leave_type_id', 'from', 'to']);
+
+    // Enforce org-scope authorization: if an organization_id is supplied it must belong
+    // to the authenticated user's own org or one of its descendants.
+    if (! empty($filters['organization_id'])) {
+        $user = auth()->user();
+        $userOrg = $user->organization;
+
+        if ($userOrg) {
+            // Build the set of org IDs the user is allowed to see (own org + subtree).
+            $allowedIds = \App\Models\Organization::withoutGlobalScopes()
+                ->where('path', 'like', $userOrg->path . '%')
+                ->pluck('id')
+                ->all();
+
+            if (! in_array((int) $filters['organization_id'], $allowedIds)) {
+                abort(403, 'غير مصرح لك بتصدير بيانات هذه الجهة.');
+            }
+        } else {
+            // User has no org — deny scoped access entirely.
+            abort(403, 'غير مصرح لك بتصدير بيانات هذه الجهة.');
+        }
+    }
+
     $content = app(\App\Services\ReportPdfService::class)->generateSummary($filters);
     return response()->streamDownload(
         fn () => print($content),

@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Panel bootstrap: configure AdminPanelProvider for Arabic RTL, add FilamentUser to User model, create all four Policies, and register them. This is the foundation everything else builds on.",
+  "status": "completed",
+  "steps": [
+    "1. Modify app/Providers/Filament/AdminPanelProvider.php: change primary color from Color::Amber to Color::Blue; add ->locale('ar') for Arabic; add ->brandName('نظام إدارة الإجازات — مديرية الأقصر'); add ->font('Tajawal', provider: \\Filament\\FontProviders\\GoogleFontProvider::class) for RTL Tajawal font; add ->navigationGroups([NavigationGroup::make('المؤسسات والمستخدمون')->icon('heroicon-o-building-office'), NavigationGroup::make('الموظفون')->icon('heroicon-o-users'), NavigationGroup::make('طلبات الإجازات')->icon('heroicon-o-calendar-days'), NavigationGroup::make('الإعدادات')->icon('heroicon-o-cog-6-tooth')]); keep discoverResources/Pages/Widgets as-is; remove FilamentInfoWidget from widgets array (security); add ->authMiddleware([Authenticate::class]) already present — no change needed.",
+    "2. Add FilamentUser interface to app/Models/User.php: implement \\Filament\\Models\\Contracts\\FilamentUser; add canAccessPanel(Panel $panel): bool method that returns $this->is_active && ($this->hasRole(['مدير المديرية', 'وكيل المديرية', 'مدير الإدارة', 'مسؤول الإجازات', 'كاتب الإدارة', 'مدير مدرسة', 'وكيل مدرسة']) || $this->hasPermissionTo('manage_organization')) — note: setOrganizationTeam() must be called first inside canAccessPanel; add use Filament\\Models\\Contracts\\FilamentUser and use Filament\\Panel imports.",
+    "3. Create app/Policies/OrganizationPolicy.php: methods viewAny (requires manage_organization or view_employees), view (same), create (manage_organization), update (manage_organization), delete (manage_organization). Each method calls $user->setOrganizationTeam() first then checks hasPermissionTo().",
+    "4. Create app/Policies/UserPolicy.php: viewAny/view require manage_users; create/update/delete require manage_users. Same setOrganizationTeam() pattern.",
+    "5. Create app/Policies/EmployeePolicy.php: viewAny/view require view_employees; create requires create_employee; update requires edit_employee; delete requires delete_employee.",
+    "6. Create app/Policies/LeaveRequestPolicy.php: viewAny/view require view_leave_requests; create requires create_leave_request; update checks $user->hasPermissionTo('edit_leave_request') && $leaveRequest->status->canBeEdited(); delete requires manage_organization (admin only); approve requires approve_leave_request; reject requires reject_leave_request; return requires return_leave_request; cancel checks cancel_leave_request permission && $leaveRequest->status->canBeCancelled().",
+    "7. Register all four policies in app/Providers/AppServiceProvider.php by adding a $policies property array mapping Model class to Policy class, then calling Gate::policy() for each in the boot() method. Import Illuminate\\Support\\Facades\\Gate and all four Policy classes."
+  ],
+  "acceptance_criteria": [
+    "php artisan route:list | grep filament returns routes including /admin/login",
+    "php artisan test --stop-on-failure passes with no new failures",
+    "User model implements FilamentUser interface (class implements check via php artisan tinker: app(\\App\\Models\\User::class) instanceof \\Filament\\Models\\Contracts\\FilamentUser)",
+    "All four Policy files exist at app/Policies/ with the correct class signatures"
+  ],
+  "verification": [
+    "php artisan config:clear && php artisan route:clear && php artisan optimize:clear",
+    "php artisan route:list | grep filament",
+    "php artisan test --stop-on-failure"
+  ],
+  "blocked_reason": null,
+  "findings": "1) Filament v3.3.56 does NOT have a Panel::locale() method — the FEAT-001 spec listed ->locale('ar') which was removed; Arabic locale should be set via app()->setLocale('ar') in a middleware or AppServiceProvider. 2) The Filament directory app/Filament/{Resources,Pages,Widgets} must exist before artisan commands can boot without errors — created empty dirs in this step. 3) All four Policy files are in place and Gate::policy() registration works via the $policies array loop in AppServiceProvider::boot(). 4) For FEAT-002/003: Resources placed in app/Filament/Resources/ are auto-discovered via discoverResources(); no manual registration needed. The OrganizationScope global scope is on Employee, LeaveRequest, Organization — bypass with ::withoutGlobalScopes() in Resource queries if admin needs cross-org visibility. The setOrganizationTeam() helper must always be called before any Spatie permission/role check inside Resource/Policy methods."
+}

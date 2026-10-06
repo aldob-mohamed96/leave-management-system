@@ -1,0 +1,7 @@
+{
+  "task_id": "task-phase2-services",
+  "task_description": "Implement Phase 2 of the Leave Management System: LeaveBalanceService (atomic balance mutations with DB locking), five validation rules, LeaveRequestService (full lifecycle with workflow step advancement), notification channel abstraction, and Pest feature tests.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

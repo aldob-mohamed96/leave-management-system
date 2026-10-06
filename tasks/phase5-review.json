@@ -1,0 +1,24 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "id": 1,
+      "label": "Report PDF route — missing org-scope authorization",
+      "severity": "blocking",
+      "description": "GET /report-pdf accepts an arbitrary organization_id query parameter and filters by that org's subtree without verifying the requesting user belongs to that org or a parent of it. Any authenticated user can export data from any org. Add a Gate::authorize check or restrict organization_id to Auth::user()->organization->subtreeIds() before building the query."
+    },
+    {
+      "id": 2,
+      "label": "employeeBalanceSummary — missing withoutGlobalScopes() on base query",
+      "severity": "non-blocking",
+      "description": "All other service methods start with Model::withoutGlobalScopes(). employeeBalanceSummary starts with LeaveBalance::query(). LeaveBalance has no global scope today so behavior is identical, but the inconsistency is a latent bug. Change to LeaveBalance::withoutGlobalScopes() for consistency."
+    },
+    {
+      "id": 3,
+      "label": "Directorate canView() untested",
+      "severity": "non-blocking",
+      "description": "Tests cover SchoolStatusOverview and AvgResponseTimeWidget across school/administration org types but no test asserts directorate-level widgets (MonthlyTrendWidget, YearlyComparisonWidget) return false for school/admin users, or that administration widgets return true for directorate users. The logic is correct in code; this is a test coverage gap."
+    }
+  ],
+  "reviewDoc": "/Users/mohamedgaber/projects/vaccancy/leave-management-system/.agents/tasks/phase5-review.md"
+}

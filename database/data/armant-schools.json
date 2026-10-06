@@ -1,0 +1,1332 @@
+{
+  "directorate": "مديرية التربية والتعليم بالأقصر",
+  "administration": "إدارة أرمنت التعليمية",
+  "generated_at": "2026-10-06",
+  "total_schools": 63,
+  "email_domain": "armant-schools.edu",
+  "schools": [
+    {
+      "code": "arm001",
+      "name": "مدرسة أبو بكر الصديق الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm001.manager@armant-schools.edu",
+          "password": "HpjAPyJfBwmh",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm001.specialist@armant-schools.edu",
+          "password": "f2yFGNkjfd6G",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm002",
+      "name": "مدرسة أرمنت الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm002.manager@armant-schools.edu",
+          "password": "3SmY5ac2YxxP",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm002.specialist@armant-schools.edu",
+          "password": "TjtrjV3cMvgS",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm003",
+      "name": "مدرسة أرمنت الابتدائية بنات",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm003.manager@armant-schools.edu",
+          "password": "5ZmwpbxKcaBF",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm003.specialist@armant-schools.edu",
+          "password": "UkEJjEcPwyH6",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm004",
+      "name": "مدرسة أرمنت الابتدائية بنين",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm004.manager@armant-schools.edu",
+          "password": "c2dJEgVF6DUZ",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm004.specialist@armant-schools.edu",
+          "password": "AuLSKupp3QQk",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm005",
+      "name": "مدرسة أرمنت الإعدادية الحديثة",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm005.manager@armant-schools.edu",
+          "password": "LaZSvq39xq7z",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm005.specialist@armant-schools.edu",
+          "password": "tUD8chVUJnQg",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm006",
+      "name": "مدرسة أرمنت الإعدادية بنات",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm006.manager@armant-schools.edu",
+          "password": "KxTh9DMnjUUj",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm006.specialist@armant-schools.edu",
+          "password": "mBdZF6AjgGMk",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm007",
+      "name": "مدرسة أرمنت الثانوية الزخرفية بنين",
+      "category": "ثانوي فني",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm007.manager@armant-schools.edu",
+          "password": "NXwyHC4NfnRB",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm007.specialist@armant-schools.edu",
+          "password": "PBSFLcWNq6Rc",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm008",
+      "name": "مدرسة أرمنت الثانوية الزراعية",
+      "category": "ثانوي فني",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm008.manager@armant-schools.edu",
+          "password": "qkBEELddCppZ",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm008.specialist@armant-schools.edu",
+          "password": "NhWr9wNFbBPr",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm009",
+      "name": "مدرسة أرمنت الثانوية الفنية بنات",
+      "category": "ثانوي فني",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm009.manager@armant-schools.edu",
+          "password": "uu9JKMBWzRTR",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm009.specialist@armant-schools.edu",
+          "password": "PzStftavaLrF",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm010",
+      "name": "مدرسة أرمنت الثانوية الميكانيكية بنين",
+      "category": "ثانوي فني",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm010.manager@armant-schools.edu",
+          "password": "4D6qzVAHhex7",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm010.specialist@armant-schools.edu",
+          "password": "jHb2MfcXS38w",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm011",
+      "name": "مدرسة أرمنت الثانوية بنات",
+      "category": "ثانوي عام",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm011.manager@armant-schools.edu",
+          "password": "n449ZAXkLtgY",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm011.specialist@armant-schools.edu",
+          "password": "Tna8qRJLntyf",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm012",
+      "name": "مدرسة أرمنت الثانوية بنين",
+      "category": "ثانوي عام",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm012.manager@armant-schools.edu",
+          "password": "p3LQwHdrmzRF",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm012.specialist@armant-schools.edu",
+          "password": "m34pMHqGteCD",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm013",
+      "name": "مدرسة أرمنت الحائط الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm013.manager@armant-schools.edu",
+          "password": "SBVnd44YLe9n",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm013.specialist@armant-schools.edu",
+          "password": "BCh8ccDATBHs",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm014",
+      "name": "مدرسة أرمنت الحيط الإعدادية بنات",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm014.manager@armant-schools.edu",
+          "password": "JU9xZRZSjG28",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm014.specialist@armant-schools.edu",
+          "password": "GrDtpZMs3Mh5",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm015",
+      "name": "مدرسة أرمنت الحيط الإعدادية بنين",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm015.manager@armant-schools.edu",
+          "password": "xQrwGcSxaSSB",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm015.specialist@armant-schools.edu",
+          "password": "wehCtNAJb6fm",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm016",
+      "name": "مدرسة التربية الفكرية الابتدائية",
+      "category": "تربية فكرية",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm016.manager@armant-schools.edu",
+          "password": "EpD7fMBpShCq",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm016.specialist@armant-schools.edu",
+          "password": "efknL6gst8hL",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm017",
+      "name": "مدرسة الجروف",
+      "category": "غير محدد",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm017.manager@armant-schools.edu",
+          "password": "yBU2U98TLNCy",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm017.specialist@armant-schools.edu",
+          "password": "bUFzFS5Bratm",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm018",
+      "name": "مدرسة الحرية الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm018.manager@armant-schools.edu",
+          "password": "gAqL8r4bVaFL",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm018.specialist@armant-schools.edu",
+          "password": "br9tG86kaPS9",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm019",
+      "name": "مدرسة الحوزة الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm019.manager@armant-schools.edu",
+          "password": "JrFd3QUVHdB5",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm019.specialist@armant-schools.edu",
+          "password": "bujkZNVN6YXb",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm020",
+      "name": "مدرسة الديمقراط الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm020.manager@armant-schools.edu",
+          "password": "37VuffW4RPXf",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm020.specialist@armant-schools.edu",
+          "password": "3NeYG5AJ7feh",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm021",
+      "name": "مدرسة الديمقراط الإعدادية المهنية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm021.manager@armant-schools.edu",
+          "password": "wRNw8pm5xEVA",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm021.specialist@armant-schools.edu",
+          "password": "C7wm9cfFXS6Z",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm022",
+      "name": "مدرسة الرزيقات قبلي الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm022.manager@armant-schools.edu",
+          "password": "FARaYVhS3CNJ",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm022.specialist@armant-schools.edu",
+          "password": "Jwym7AddmnJa",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm023",
+      "name": "مدرسة الرزيقات بحري الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm023.manager@armant-schools.edu",
+          "password": "8MAZgmWSM8Aa",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm023.specialist@armant-schools.edu",
+          "password": "XphvmVrCPHfD",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm024",
+      "name": "مدرسة الرياينة الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm024.manager@armant-schools.edu",
+          "password": "qKn6VZkmUr8B",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm024.specialist@armant-schools.edu",
+          "password": "aZNzd3nJjBpK",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm025",
+      "name": "مدرسة السادات الابتدائية (أرمنت الحيط)",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm025.manager@armant-schools.edu",
+          "password": "K6cVHH37h6K8",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm025.specialist@armant-schools.edu",
+          "password": "9xzPtbKMsWcr",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm026",
+      "name": "مدرسة السادات الابتدائية (أرمنت الوابورات)",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm026.manager@armant-schools.edu",
+          "password": "G9WVqRThKEn3",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm026.specialist@armant-schools.edu",
+          "password": "RN74MfhN5mCd",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm027",
+      "name": "مدرسة السلام الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm027.manager@armant-schools.edu",
+          "password": "Az89SuMDRYYs",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm027.specialist@armant-schools.edu",
+          "password": "z988x4G3ujnN",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm028",
+      "name": "مدرسة الشهيد أحمد محمد الأمير الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm028.manager@armant-schools.edu",
+          "password": "RMUZfvaLUkLs",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm028.specialist@armant-schools.edu",
+          "password": "XGdPsNgNEXpc",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm029",
+      "name": "مدرسة الشهيد عبد الرازق الفرشوطي الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm029.manager@armant-schools.edu",
+          "password": "dZmXMTyaA5VJ",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm029.specialist@armant-schools.edu",
+          "password": "GJ6TsybzdezG",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm030",
+      "name": "مدرسة الشهيد عبد الرحمن أبو الحجاج الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm030.manager@armant-schools.edu",
+          "password": "FMjpssuQ4ThK",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm030.specialist@armant-schools.edu",
+          "password": "XsTyUThs3Fbe",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm031",
+      "name": "مدرسة الشهيد عثمان مكي الإعدادية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm031.manager@armant-schools.edu",
+          "password": "DQrt7TQv5ukx",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm031.specialist@armant-schools.edu",
+          "password": "79sPvgNzaqAP",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm032",
+      "name": "مدرسة الصف الإعدادية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm032.manager@armant-schools.edu",
+          "password": "YKYQEwnGV23S",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm032.specialist@armant-schools.edu",
+          "password": "gzPBTG5zAN8c",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm033",
+      "name": "مدرسة الغرز الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm033.manager@armant-schools.edu",
+          "password": "BBWpvnrFVzKv",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm033.specialist@armant-schools.edu",
+          "password": "hc58MV4tPcx6",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm034",
+      "name": "مدرسة المحاميد الثانوية المشتركة",
+      "category": "ثانوي عام",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm034.manager@armant-schools.edu",
+          "password": "RNg6JJBRymuR",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm034.specialist@armant-schools.edu",
+          "password": "CwTXzR2BpXq5",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm035",
+      "name": "مدرسة المحاميد بحري الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm035.manager@armant-schools.edu",
+          "password": "N8tCE8vgxe7s",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm035.specialist@armant-schools.edu",
+          "password": "dwRLYz7sSEt5",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm036",
+      "name": "مدرسة المحاميد بحري الإعدادية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm036.manager@armant-schools.edu",
+          "password": "HhRgPBE43Rtd",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm036.specialist@armant-schools.edu",
+          "password": "9MJeJhbPgB2D",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm037",
+      "name": "مدرسة المريس الابتدائية الجديدة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm037.manager@armant-schools.edu",
+          "password": "GCmDDdfKsXEz",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm037.specialist@armant-schools.edu",
+          "password": "CQxD4ZQmST4D",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm038",
+      "name": "مدرسة النصر الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm038.manager@armant-schools.edu",
+          "password": "VbLEvwDtgt4w",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm038.specialist@armant-schools.edu",
+          "password": "WwPqtQhybdzH",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm039",
+      "name": "مدرسة أم المؤمنين الإعدادية المشتركة",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm039.manager@armant-schools.edu",
+          "password": "HgG8saJdyaY2",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm039.specialist@armant-schools.edu",
+          "password": "hmrjDwkeVpda",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm040",
+      "name": "مدرسة أولاد دهمش الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm040.manager@armant-schools.edu",
+          "password": "ZNBZK97yWLdv",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm040.specialist@armant-schools.edu",
+          "password": "bBv5Vs7C9psw",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm041",
+      "name": "مدرسة حاجر أرمنت الحيط الإعدادية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm041.manager@armant-schools.edu",
+          "password": "LRTYZLPYBVyz",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm041.specialist@armant-schools.edu",
+          "password": "qYuWjez9xAdJ",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm042",
+      "name": "مدرسة حاجر أرمنت الحيط الشرقي",
+      "category": "غير محدد",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm042.manager@armant-schools.edu",
+          "password": "8xZZvFw6JLzm",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm042.specialist@armant-schools.edu",
+          "password": "BJmwCHnPVWdD",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm043",
+      "name": "مدرسة حاجر أرمنت الغربي الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm043.manager@armant-schools.edu",
+          "password": "hWMBfxpDEkZd",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm043.specialist@armant-schools.edu",
+          "password": "vvwwHsPKuaRQ",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm044",
+      "name": "مدرسة حاجر الحيط الشرقي الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm044.manager@armant-schools.edu",
+          "password": "t6xT2HdTpgUT",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm044.specialist@armant-schools.edu",
+          "password": "kvxa2RwXCBQw",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm045",
+      "name": "مدرسة حاجر الرزيقات بحري الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm045.manager@armant-schools.edu",
+          "password": "sQHe6yTTXCcV",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm045.specialist@armant-schools.edu",
+          "password": "JWkSbsQDw9gv",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm046",
+      "name": "مدرسة حاجر الرياينة الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm046.manager@armant-schools.edu",
+          "password": "jLqbD4yRSy3K",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm046.specialist@armant-schools.edu",
+          "password": "gDDZUKK9kq3e",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm047",
+      "name": "مدرسة حاجر الرياينة الإعدادية",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm047.manager@armant-schools.edu",
+          "password": "cTFaXEe9LaGb",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm047.specialist@armant-schools.edu",
+          "password": "EGUeyyt2RQD8",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm048",
+      "name": "مدرسة حاجر المحاميد بحري الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm048.manager@armant-schools.edu",
+          "password": "dcGeFub9x288",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm048.specialist@armant-schools.edu",
+          "password": "J7Dz2AH4ncgz",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm049",
+      "name": "مدرسة حاجر المحاميد قبلي الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm049.manager@armant-schools.edu",
+          "password": "JCXRhBRjHyKV",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm049.specialist@armant-schools.edu",
+          "password": "bMgWvzP9fJLY",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm050",
+      "name": "مدرسة خالد بن الوليد الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm050.manager@armant-schools.edu",
+          "password": "s7nsdnS9Yuba",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm050.specialist@armant-schools.edu",
+          "password": "fFtQ67QD4q8v",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm051",
+      "name": "مدرسة عائشة أم المؤمنين الإعدادية بنات",
+      "category": "إعدادي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm051.manager@armant-schools.edu",
+          "password": "EcDXK2Up8VAg",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm051.specialist@armant-schools.edu",
+          "password": "sAyffV53kjrK",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm052",
+      "name": "مدرسة نجع البحر الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm052.manager@armant-schools.edu",
+          "password": "tmReM4fvT4XQ",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm052.specialist@armant-schools.edu",
+          "password": "VyUrmR8w7Wxs",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm053",
+      "name": "مدرسة نجع البقالة",
+      "category": "غير محدد",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm053.manager@armant-schools.edu",
+          "password": "XgGw3WLzP3RG",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm053.specialist@armant-schools.edu",
+          "password": "g7dqdaWyWw6y",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm054",
+      "name": "مدرسة نجع الغوال الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm054.manager@armant-schools.edu",
+          "password": "bx6aR6fEWzEM",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm054.specialist@armant-schools.edu",
+          "password": "6rA9wWCrr4zL",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm055",
+      "name": "مدرسة نجع دنقل الابتدائية",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm055.manager@armant-schools.edu",
+          "password": "JqAkb3qGtPXW",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm055.specialist@armant-schools.edu",
+          "password": "NrVLdDKMVqMh",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm056",
+      "name": "مدرسة العز الابتدائية المشتركة",
+      "category": "ابتدائي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm056.manager@armant-schools.edu",
+          "password": "pXvX6u5vaNPx",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm056.specialist@armant-schools.edu",
+          "password": "5cvKNnPe3P3r",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm057",
+      "name": "مدرسة ترعة السواحل للتعليم الأساسي",
+      "category": "تعليم أساسي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm057.manager@armant-schools.edu",
+          "password": "E5mvvvvqGcGV",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm057.specialist@armant-schools.edu",
+          "password": "qvYVGCYQ28hY",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm058",
+      "name": "مدرسة الفرقان 1 للتعليم المجتمعي",
+      "category": "تعليم مجتمعي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm058.manager@armant-schools.edu",
+          "password": "NjU8Nvu2qEvh",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm058.specialist@armant-schools.edu",
+          "password": "5QesvWJ7cmWK",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm059",
+      "name": "مدرسة الفرقان 2 للتعليم المجتمعي",
+      "category": "تعليم مجتمعي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm059.manager@armant-schools.edu",
+          "password": "Eb4L35qRSnPM",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm059.specialist@armant-schools.edu",
+          "password": "5gcy2EVBMXas",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm060",
+      "name": "مدرسة عمر بن الخطاب للتعليم المجتمعي",
+      "category": "تعليم مجتمعي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm060.manager@armant-schools.edu",
+          "password": "VYD3W5NNuG4A",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm060.specialist@armant-schools.edu",
+          "password": "WhHpjHTSWRYv",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm061",
+      "name": "مدرسة الرواد للتعليم المجتمعي",
+      "category": "تعليم مجتمعي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm061.manager@armant-schools.edu",
+          "password": "G34b6TbmK4gy",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm061.specialist@armant-schools.edu",
+          "password": "TGdY4nvD73d8",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm062",
+      "name": "مدرسة جيل المستقبل للتعليم المجتمعي",
+      "category": "تعليم مجتمعي",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm062.manager@armant-schools.edu",
+          "password": "ymhHzKr9LEy5",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm062.specialist@armant-schools.edu",
+          "password": "3xjuCfmvPKAE",
+          "must_change_password": true
+        }
+      ]
+    },
+    {
+      "code": "arm063",
+      "name": "مدرسة حاجر الضبعية الصناعية المشتركة",
+      "category": "ثانوي فني",
+      "accounts": [
+        {
+          "role": "manager",
+          "title": "مدير المدرسة",
+          "email": "arm063.manager@armant-schools.edu",
+          "password": "erX9FXNnpzES",
+          "must_change_password": true
+        },
+        {
+          "role": "specialist",
+          "title": "أخصائي",
+          "email": "arm063.specialist@armant-schools.edu",
+          "password": "DJXJAh54cw7P",
+          "must_change_password": true
+        }
+      ]
+    }
+  ]
+}

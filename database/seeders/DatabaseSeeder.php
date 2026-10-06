@@ -80,9 +80,8 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleAndPermissionSeeder::class);
 
         // ------------------------------------------------------------------
-        // 4. System users (one per organization level for testing)
+        // 4. Demo system users skipped — ArmantSchoolsSeeder is the only user source.
         // ------------------------------------------------------------------
-        $this->seedUsers($directorate, $administrations, $schools);
 
         // ------------------------------------------------------------------
         // 5. Employees (3–5 per school = ~24 total)
@@ -139,6 +138,11 @@ class DatabaseSeeder extends Seeder
         // 7. Workflow configurations (needs schools to exist)
         // ------------------------------------------------------------------
         $this->call(WorkflowConfigurationSeeder::class);
+
+        // ------------------------------------------------------------------
+        // 8. Real Armant schools + accounts (63 schools)
+        // ------------------------------------------------------------------
+        $this->call(ArmantSchoolsSeeder::class);
 
         $this->command->newLine();
         $this->command->info('═══════════════════════════════════════════════');

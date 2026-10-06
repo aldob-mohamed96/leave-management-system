@@ -1,0 +1,56 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Validation rules and LeaveRequestService with full workflow lifecycle. Depends on FEAT-001 (LeaveBalanceService, config/leave.php, LeaveRequestException must exist). Independent from FEAT-003 (notifications).",
+  "status": "pending",
+  "steps": [
+    "Create app/Rules/Leave/WorkingDaysRule.php implementing Illuminate\\Contracts\\Validation\\ValidationRule. Constructor: `__construct()` — no args at construction; add `setData(array $data): static` to receive full validated data (called by Laravel automatically for rules that implement DataAwareRule — implement Illuminate\\Contracts\\Validation\\DataAwareRule instead and add `public array $data = []; public function setData(array $data): static { $this->data = $data; return $this; }`). Add `public float $calculatedDays = 0.0;` property. In `validate(string $attribute, mixed $value, Closure $fail)`: parse start_date and end_date from $this->data using Carbon::parse(). Use CarbonPeriod::create($start, $end) to iterate each day. Skip days where $day->dayOfWeek is in config('leave.working_week_off_days'). Query Holiday::whereBetween('date', [$start->toDateString(), $end->toDateString()])->pluck('date')->map(fn($d) => Carbon::parse($d)->toDateString()) to get holiday strings. Skip days matching a holiday. Set $this->calculatedDays = count of remaining days. Do NOT call $fail — this rule only corrects the count.",
+
+    "Create app/Rules/Leave/SufficientBalanceRule.php implementing ValidationRule. Constructor: `__construct(private LeaveBalance $balance)`. In validate($attribute, $value, $fail): compute $remaining = $this->balance->remaining. Add `public ?string $warning = null;`. If $remaining < (float)$value: check config('leave.warn_only_insufficient_balance'). If true: set $this->warning = \"رصيدك المتبقي ({$remaining} يوم) أقل من المطلوب ({$value} يوم). سيستمر الطلب تحت مسؤوليتك.\". If false: call $fail(\"رصيد الإجازة غير كافٍ. المتبقي: {$remaining} يوم، المطلوب: {$value} يوم.\").",
+
+    "Create app/Rules/Leave/NoOverlapRule.php implementing ValidationRule. Constructor: `__construct(private int $employeeId, private string $startDate, private string $endDate, private ?int $excludeRequestId = null)`. In validate($attribute, $value, $fail): use LeaveRequest::withoutGlobalScopes()->overlapping($this->employeeId, $this->startDate, $this->endDate, $this->excludeRequestId)->exists(). If true: $fail('يوجد طلب إجازة آخر للموظف يتداخل مع هذه الفترة.'). Note: pass all date context via constructor so validation is self-contained.",
+
+    "Create app/Rules/Leave/MaxDaysPerRequestRule.php implementing ValidationRule. Constructor: `__construct(private LeaveType $leaveType)`. In validate: if $leaveType->max_days_per_request !== null && (float)$value > $leaveType->max_days_per_request: $fail(\"الحد الأقصى لهذا النوع من الإجازات هو {$this->leaveType->max_days_per_request} يوم في الطلب الواحد.\").",
+
+    "Create app/Rules/Leave/CasualBeforeRegularRule.php implementing ValidationRule. Constructor: `__construct(private Employee $employee, private LeaveType $requestedType, private int $year)`. Add `public ?string $warning = null;`. In validate($attribute, $value, $fail): Only proceed if $requestedType->code === 'regular' AND (float)$value <= 2. Find casual LeaveType: $casualType = LeaveType::where('code', 'casual')->first(). If null, return (no casual type configured). Get balance: $casualBalance = $this->employee->balanceFor($casualType->id, $this->year). If $casualBalance && $casualBalance->remaining > 0 && config('leave.casual_before_regular_warning'): set $this->warning = 'ينبغي استخدام رصيد الإجازة العارضة أولاً قبل الاعتيادية للطلبات التي تبلغ يوم أو يومين.'. Never calls $fail.",
+
+    "Create app/Services/DTO/CreateLeaveRequestResult.php as a readonly class: `readonly class CreateLeaveRequestResult { public function __construct(public readonly LeaveRequest $request, public readonly array $warnings) {} }`.",
+
+    "Create app/Services/LeaveRequestService.php. Constructor: `public function __construct(private LeaveBalanceService $balanceService)`. Register as singleton in AppServiceProvider::register().",
+
+    "Implement `create(array $data, User $createdBy): CreateLeaveRequestResult` in LeaveRequestService: Resolve Employee from $data['employee_id'] (use Employee::withoutGlobalScopes()->findOrFail()). Resolve LeaveType. Run WorkingDaysRule, collect calculatedDays. Override $data['days'] = $workingDaysRule->calculatedDays if > 0. Run NoOverlapRule($employee->id, $data['start_date'], $data['end_date']). Run MaxDaysPerRequestRule($leaveType). Get or create balance: $balance = $balanceService->getOrCreateBalance($employee, $leaveType, now()->year). Run SufficientBalanceRule($balance) and CasualBeforeRegularRule($employee, $leaveType, now()->year). Collect non-null ->warning strings into $warnings[]. Wrap in DB::transaction(): LeaveRequest::create(array_merge($data, ['created_by' => $createdBy->id, 'organization_id' => $employee->organization_id, 'status' => LeaveStatus::DRAFT])). Return new CreateLeaveRequestResult($request, $warnings).",
+
+    "Implement `submit(LeaveRequest $request, User $submittedBy): LeaveRequest` in LeaveRequestService: Guard: if !in_array($request->status, [LeaveStatus::DRAFT, LeaveStatus::RETURNED]) throw LeaveRequestException::invalidTransition($request->status, LeaveStatus::SUBMITTED). DB::transaction(): load employee and leaveType. $balance = $balanceService->getOrCreateBalance($employee, $leaveType, now()->year). Snapshot: $request->balance_entitled = $balance->entitled; $request->balance_used = $balance->used; $request->balance_remaining = $balance->remaining. Load WorkflowConfiguration::where('organization_id', $request->organization_id)->active()->ordered()->get(). If empty: throw new \\RuntimeException('لا يوجد مسار اعتماد مُعرَّف لهذه المؤسسة.'). Delete any existing steps (for re-submit after RETURNED). Create LeaveRequestStep for each workflow config: ['leave_request_id' => $request->id, 'step_order' => $wc->step_order, 'stage' => $wc->stage_name, 'status' => StepStatus::PENDING]. Set $request->current_stage = first WorkflowConfiguration->stage_name. $request->status = LeaveStatus::SUBMITTED. $request->save(). Return $request->fresh(['steps']).",
+
+    "Implement `approve(LeaveRequest $request, LeaveRequestStep $step, User $actedBy, ?string $note): LeaveRequest` in LeaveRequestService: Guards: status must be SUBMITTED or IN_REVIEW; step->status must be PENDING; step->stage must equal $request->current_stage — throw LeaveRequestException::invalidTransition() with detail on any guard fail. DB::transaction(): Update step: status=APPROVED, acted_by=$actedBy->id, acted_at=now(), note=$note. Load WorkflowConfiguration for this org + stage_name to get approval_rule. Count total PENDING+APPROVED steps with same stage (step_order) on this request. Count approved steps in this stage. Evaluate $approvalRule->isStageApproved($approvedCount, $totalInStage). If stage approved: mark remaining PENDING steps in this stage as SKIPPED. Find next WorkflowConfiguration (step_order > current, is_active=true, ordered). If next exists: $request->current_stage = $next->stage_name; $request->status = LeaveStatus::IN_REVIEW; create next stage step if not present. If NO next config: $request->status = LeaveStatus::APPROVED; $request->current_stage = null; $request->decided_by = $actedBy->id; if $request->leaveType->deducts_balance: $this->balanceService->deduct($balance, $request->days, $request, $actedBy) (reload $balance from DB inside transaction with lockForUpdate). If stage NOT yet approved: no request status change. $request->save(). Return $request->fresh().",
+
+    "Implement `reject(LeaveRequest $request, LeaveRequestStep $step, User $actedBy, string $reason): LeaveRequest` in LeaveRequestService: Guards: same as approve. DB::transaction(): step->update([status=REJECTED, acted_by, acted_at, note=$reason]). Mark ALL other steps with status=PENDING as SKIPPED via $request->steps()->where('status', StepStatus::PENDING->value)->update(['status' => StepStatus::SKIPPED]). $request->update([status=REJECTED, rejection_reason=$reason, current_stage=null, decided_by=$actedBy->id]). Return $request->fresh().",
+
+    "Implement `return(LeaveRequest $request, LeaveRequestStep $step, User $actedBy, string $note): LeaveRequest` in LeaveRequestService: Guards: status must be SUBMITTED or IN_REVIEW; step->status must be PENDING. DB::transaction(): step->update([status=RETURNED, acted_by, acted_at, note]). Mark all other PENDING steps as SKIPPED. $request->update([status=RETURNED, current_stage=null]). Return $request->fresh(). (Method name 'return' is a PHP reserved word — name the method `returnRequest` instead, matching the plan item.)",
+
+    "Implement `cancel(LeaveRequest $request, User $cancelledBy): LeaveRequest` in LeaveRequestService: Guard: if !$request->status->canBeCancelled() throw LeaveRequestException::invalidTransition($request->status, LeaveStatus::CANCELLED). DB::transaction(): $wasApproved = ($request->status === LeaveStatus::APPROVED). $request->steps()->where('status', StepStatus::PENDING->value)->update(['status' => StepStatus::SKIPPED]). $request->update([status=CANCELLED, current_stage=null]). If $wasApproved AND $request->leaveType->deducts_balance: load balance and call $this->balanceService->refund($balance, $request->days, $request, $cancelledBy). Return $request->fresh()."
+  ],
+  "acceptance_criteria": [
+    "WorkingDaysRule correctly counts only Mon-Thu working days and excludes holidays from the holidays table",
+    "SufficientBalanceRule sets ->warning (not fail) when warn_only=true; calls $fail when warn_only=false",
+    "NoOverlapRule blocks when an active overlapping request exists; passes when only rejected/cancelled overlap",
+    "MaxDaysPerRequestRule blocks when days > max_days_per_request on the LeaveType",
+    "CasualBeforeRegularRule sets ->warning for 1-2 day regular request when casual balance exists",
+    "create() returns CreateLeaveRequestResult with DRAFT request and warnings array",
+    "submit() creates LeaveRequestStep rows matching WorkflowConfiguration and snapshots balance columns",
+    "approve() with ANY rule advances to next stage after single approval",
+    "approve() with ALL rule waits until all steps in stage are approved before advancing",
+    "approve() on final stage sets status=APPROVED and calls balanceService->deduct() when deducts_balance=true",
+    "reject() sets status=REJECTED and marks all pending steps as SKIPPED",
+    "returnRequest() sets status=RETURNED and marks all pending steps as SKIPPED",
+    "cancel() on non-cancellable status throws LeaveRequestException",
+    "cancel() on previously-APPROVED request calls balanceService->refund()"
+  ],
+  "verification": [
+    "./vendor/bin/pest tests/Feature/Phase2ServicesTest.php --no-coverage --filter rules",
+    "./vendor/bin/pest tests/Feature/Phase2ServicesTest.php --no-coverage --filter service",
+    "./vendor/bin/pest --no-coverage"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

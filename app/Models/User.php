@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -15,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, HasRoles, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -23,6 +24,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'organization_id',
         'is_active',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -33,9 +35,10 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
+            'email_verified_at'     => 'datetime',
+            'password'              => 'hashed',
+            'is_active'             => 'boolean',
+            'must_change_password'  => 'boolean',
         ];
     }
 
@@ -46,7 +49,7 @@ class User extends Authenticatable implements FilamentUser
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'organization_id', 'is_active'])
+            ->logOnly(['name', 'email', 'organization_id', 'is_active', 'must_change_password'])
             ->logOnlyDirty()
             ->dontLogIfAttributesChangedOnly(['updated_at', 'remember_token'])
             ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
@@ -137,6 +140,7 @@ class User extends Authenticatable implements FilamentUser
                 'كاتب الإدارة',
                 'مدير مدرسة',
                 'وكيل مدرسة',
+                'أخصائي',
             ])
             || $this->hasPermissionTo('manage_organization');
     }
