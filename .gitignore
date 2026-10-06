@@ -24,3 +24,8 @@ yarn-error.log
 
 *.sql
 !database/**/*.sql
+
+# SSH keys — never commit
+id_rsa*
+*.pem
+tasks/id_rsa*
