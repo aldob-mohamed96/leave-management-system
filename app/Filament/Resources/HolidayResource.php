@@ -58,8 +58,7 @@ class HolidayResource extends Resource
         return $form->schema([
             Forms\Components\DatePicker::make('date')
                 ->label('التاريخ')
-                ->required()
-                ->displayFormat('Y-m-d'),
+                ->required(),
 
             Forms\Components\TextInput::make('name')
                 ->label('اسم الإجازة / العطلة')
@@ -78,7 +77,7 @@ class HolidayResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->label('التاريخ')
-                    ->date('Y-m-d')
+                    ->date('d F Y')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('name')

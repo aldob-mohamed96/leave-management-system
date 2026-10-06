@@ -17,7 +17,10 @@ use App\Policies\UserPolicy;
 use App\Services\LeaveBalanceService;
 use App\Services\LeaveRequestService;
 use App\Services\ReportPdfService;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -57,6 +60,23 @@ class AppServiceProvider extends ServiceProvider
         $this->app->resolving(\Illuminate\Http\JsonResponse::class, function (\Illuminate\Http\JsonResponse $response) {
             $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         });
+
+        // ---------------------------------------------------------------
+        // Arabic locale for dates everywhere (Carbon + Filament pickers)
+        // ---------------------------------------------------------------
+        $locale = config('app.locale', 'ar') ?: 'ar';
+        Carbon::setLocale($locale);
+
+        $configureArabicDatePicker = function (DateTimePicker $component) use ($locale): void {
+            $component
+                ->locale($locale)
+                ->native(false)
+                ->displayFormat('d F Y')
+                ->firstDayOfWeek(6); // السبت
+        };
+
+        DateTimePicker::configureUsing($configureArabicDatePicker);
+        DatePicker::configureUsing($configureArabicDatePicker);
 
         // ---------------------------------------------------------------
         // Strict mode in non-production environments:
