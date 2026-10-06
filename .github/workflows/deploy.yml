@@ -1,0 +1,49 @@
+name: Deploy to Namecheap
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull & build on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            APP_DIR="$HOME/leave.rtltec.com"
+            cd "$APP_DIR"
+
+            if [ ! -d .git ]; then
+              echo "ERROR: $APP_DIR is not a git repository."
+              echo "Complete the one-time server git setup first."
+              exit 1
+            fi
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            php artisan migrate --force
+            php artisan storage:link 2>/dev/null || true
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "Deploy OK: $(git rev-parse --short HEAD)"
