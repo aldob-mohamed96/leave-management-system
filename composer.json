@@ -6,7 +6,11 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
+        "ext-calendar": "*",
+        "ext-gd": "*",
+        "ext-intl": "*",
+        "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^2.0",
         "filament/filament": "^3.0",
         "khaled.alshamaa/ar-php": "^7.0",
