@@ -54,3 +54,4 @@ Config and application cache cleared successfully.
 ## Issues encountered
 
 None. Implementation applied cleanly on first attempt.
+Added إضافة موظف nav item (heroicon-o-user-plus, group=الموظفون, sort=1) to AdminPanelProvider.

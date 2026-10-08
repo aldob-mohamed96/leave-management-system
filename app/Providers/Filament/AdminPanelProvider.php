@@ -53,6 +53,13 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => \App\Filament\Resources\LeaveRequestResource\Pages\CreateLeaveRequest::getUrl())
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.leave-requests.create'))
                     ->visible(fn (): bool => auth()->check() && auth()->user()->can('create', \App\Models\LeaveRequest::class)),
+                NavigationItem::make('إضافة موظف')
+                    ->icon('heroicon-o-user-plus')
+                    ->group('الموظفون')
+                    ->sort(1)
+                    ->url(fn (): string => \App\Filament\Resources\EmployeeResource\Pages\CreateEmployee::getUrl())
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.employees.create'))
+                    ->visible(fn (): bool => auth()->check() && auth()->user()->can('create', \App\Models\Employee::class)),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
