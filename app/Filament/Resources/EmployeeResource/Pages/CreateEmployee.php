@@ -75,7 +75,7 @@ class CreateEmployee extends CreateRecord
 
         // Apply initial legacy balance days to carried_over
         if ($this->initialBalanceDays > 0) {
-            $regularType = LeaveType::where('code', 'regular')->first();
+            $regularType = LeaveType::where('code', 'regular')->active()->first();
 
             if (! $regularType) {
                 Log::warning('Initial balance not applied: no active LeaveType with code=regular', [

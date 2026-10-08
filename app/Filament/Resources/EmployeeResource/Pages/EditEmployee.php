@@ -89,7 +89,7 @@ class EditEmployee extends EditRecord
 
         // Apply additional legacy balance days to carried_over (additive)
         if ($this->additionalBalanceDays > 0) {
-            $regularType = LeaveType::where('code', 'regular')->first();
+            $regularType = LeaveType::where('code', 'regular')->active()->first();
 
             if (! $regularType) {
                 Log::warning('Additional balance not applied: no active LeaveType with code=regular', [

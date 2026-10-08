@@ -146,9 +146,9 @@ class EmployeeResource extends Resource
                     : 'اتركها فارغة إذا لم ترد تعديل الرصيد المُرحَّل. أي قيمة مُدخلة ستُضاف للرصيد الحالي.'
                 )
                 ->numeric()
+                ->integer()
                 ->minValue(0)
                 ->maxValue(365)
-                ->step(0.5)
                 ->nullable()
                 ->default(null)
                 ->dehydrated(false)
