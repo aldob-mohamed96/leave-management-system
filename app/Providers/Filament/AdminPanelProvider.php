@@ -40,12 +40,27 @@ class AdminPanelProvider extends PanelProvider
             ->font('Tajawal', provider: GoogleFontProvider::class)
             ->navigationGroups([
                 // Icons belong on items, not groups (Filament forbids both).
-                NavigationGroup::make('المؤسسات والمستخدمون'),
+                NavigationGroup::make('المدارس'),
+                NavigationGroup::make('المستخدمون'),
                 NavigationGroup::make('الموظفون'),
                 NavigationGroup::make('طلبات الإجازات'),
                 NavigationGroup::make('الإعدادات'),
             ])
             ->navigationItems([
+                NavigationItem::make('إضافة مدرسة')
+                    ->icon('heroicon-o-building-office-2')
+                    ->group('المدارس')
+                    ->sort(1)
+                    ->url(fn (): string => \App\Filament\Resources\OrganizationResource\Pages\CreateOrganization::getUrl())
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.organizations.create'))
+                    ->visible(fn (): bool => auth()->check() && auth()->user()->can('create', \App\Models\Organization::class)),
+                NavigationItem::make('إضافة مستخدم')
+                    ->icon('heroicon-o-user-plus')
+                    ->group('المستخدمون')
+                    ->sort(1)
+                    ->url(fn (): string => \App\Filament\Resources\UserResource\Pages\CreateUser::getUrl())
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.users.create'))
+                    ->visible(fn (): bool => auth()->check() && auth()->user()->can('create', \App\Models\User::class)),
                 NavigationItem::make('طلب إجازة جديدة')
                     ->icon('heroicon-o-document-plus')
                     ->group('طلبات الإجازات')

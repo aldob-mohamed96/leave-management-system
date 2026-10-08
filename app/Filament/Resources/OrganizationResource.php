@@ -18,11 +18,11 @@ class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
 
-    protected static ?string $navigationGroup = 'المؤسسات والمستخدمون';
+    protected static ?string $navigationGroup = 'المدارس';
     protected static ?string $navigationIcon  = 'heroicon-o-building-office-2';
-    protected static ?string $navigationLabel = 'المؤسسات';
+    protected static ?string $navigationLabel = 'المدارس';
     protected static ?string $modelLabel      = 'مؤسسة';
-    protected static ?string $pluralModelLabel = 'المؤسسات';
+    protected static ?string $pluralModelLabel = 'المدارس';
 
     public static function canViewAny(): bool
     {
