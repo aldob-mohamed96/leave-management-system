@@ -131,6 +131,20 @@ class RoleAndPermissionSeeder extends Seeder
                 'export_reports',
             ],
         ],
+        'hr_affairs' => [
+            'label'       => 'شؤون عاملين',
+            'org_types'   => [OrganizationType::ADMINISTRATION],
+            'permissions' => [
+                'approve_leave_request',
+                'reject_leave_request',
+                'return_leave_request',
+                'view_leave_requests',
+                'view_all_leave_requests',
+                'view_employees',
+                'view_reports',
+                'export_reports',
+            ],
+        ],
         'admin_manager' => [
             'label'       => 'مدير الإدارة',
             'org_types'   => [OrganizationType::ADMINISTRATION],

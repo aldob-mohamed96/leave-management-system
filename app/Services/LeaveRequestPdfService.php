@@ -181,7 +181,8 @@ class LeaveRequestPdfService
     {
         $defaults = [
             'school_principal' => 'مدير المدرسة (توقيع إلكتروني)',
-            'leaves_officer'   => 'مسؤول الإجازات / شؤون العاملين',
+            'leaves_officer'   => 'مسؤول الإجازات',
+            'hr_affairs'       => 'شؤون عاملين',
             'admin_manager'    => 'مدير الإدارة',
         ];
 

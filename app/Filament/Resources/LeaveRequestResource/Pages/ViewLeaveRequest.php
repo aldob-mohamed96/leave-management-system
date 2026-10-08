@@ -235,7 +235,8 @@ class ViewLeaveRequest extends ViewRecord
                     'number' => $this->getRecord()->number,
                     'autoprint' => 1,
                 ]))
-                ->openUrlInNewTab(),
+                ->openUrlInNewTab()
+                ->visible(fn(): bool => $this->getRecord()->status === LeaveStatus::APPROVED),
 
             // Download PDF
             Action::make('downloadPdf')
@@ -243,7 +244,8 @@ class ViewLeaveRequest extends ViewRecord
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('gray')
                 ->url(fn(): string => route('leave.pdf.download', ['number' => $this->getRecord()->number]))
-                ->openUrlInNewTab(),
+                ->openUrlInNewTab()
+                ->visible(fn(): bool => $this->getRecord()->status === LeaveStatus::APPROVED),
         ];
     }
 }

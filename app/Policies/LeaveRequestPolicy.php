@@ -105,8 +105,19 @@ class LeaveRequestPolicy
             return $this->isSchoolPrincipalActor($user, $leaveRequest);
         }
 
-        return $this->isAdministrationActor($user)
-            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
+        $allowedStages = ['leaves_officer', 'hr_affairs', 'admin_manager'];
+
+        if (! $this->isAdministrationActor($user)) {
+            return false;
+        }
+
+        if (! in_array($leaveRequest->current_stage, $allowedStages, true)) {
+            return false;
+        }
+
+        $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
+
+        return $requiredRole === null || $user->hasRole($requiredRole);
     }
 
     /**
@@ -117,9 +128,23 @@ class LeaveRequestPolicy
     {
         $user->setOrganizationTeam();
 
-        return $this->isAdministrationActor($user)
-            && $user->hasPermissionTo('reject_leave_request')
-            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
+        if (! $user->hasPermissionTo('reject_leave_request')) {
+            return false;
+        }
+
+        $allowedStages = ['leaves_officer', 'hr_affairs', 'admin_manager'];
+
+        if (! $this->isAdministrationActor($user)) {
+            return false;
+        }
+
+        if (! in_array($leaveRequest->current_stage, $allowedStages, true)) {
+            return false;
+        }
+
+        $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
+
+        return $requiredRole === null || $user->hasRole($requiredRole);
     }
 
     /**
@@ -137,8 +162,33 @@ class LeaveRequestPolicy
             return $this->isSchoolPrincipalActor($user, $leaveRequest);
         }
 
-        return $this->isAdministrationActor($user)
-            && in_array($leaveRequest->current_stage, ['leaves_officer', 'admin_manager'], true);
+        $allowedStages = ['leaves_officer', 'hr_affairs', 'admin_manager'];
+
+        if (! $this->isAdministrationActor($user)) {
+            return false;
+        }
+
+        if (! in_array($leaveRequest->current_stage, $allowedStages, true)) {
+            return false;
+        }
+
+        $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
+
+        return $requiredRole === null || $user->hasRole($requiredRole);
+    }
+
+    /**
+     * Map stage name to the required Arabic role name for that stage.
+     * Returns null when no role restriction applies.
+     */
+    private function resolveStageRole(string $stage): ?string
+    {
+        return match ($stage) {
+            'leaves_officer' => 'مسؤول الإجازات',
+            'hr_affairs'     => 'شؤون عاملين',
+            'admin_manager'  => 'مدير الإدارة',
+            default          => null,
+        };
     }
 
     private function isAdministrationActor(User $user): bool

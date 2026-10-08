@@ -14,7 +14,8 @@ class WorkflowConfigurationSeeder extends Seeder
      * مسار الاعتماد للمدرسة:
      * 1) مدير المدرسة (توقيع إلكتروني)
      * 2) مسؤول الإجازات بالإدارة
-     * 3) مدير الإدارة
+     * 3) شؤون عاملين
+     * 4) مدير الإدارة
      */
     private const SCHOOL_STAGES = [
         [
@@ -32,8 +33,15 @@ class WorkflowConfigurationSeeder extends Seeder
             'label'         => 'رأي مسؤول الإجازات',
         ],
         [
-            'stage_name'    => 'admin_manager',
+            'stage_name'    => 'hr_affairs',
             'step_order'    => 3,
+            'approval_rule' => ApprovalRule::ANY,
+            'required_role' => 'شؤون عاملين',
+            'label'         => 'رأي شؤون العاملين',
+        ],
+        [
+            'stage_name'    => 'admin_manager',
+            'step_order'    => 4,
             'approval_rule' => ApprovalRule::ANY,
             'required_role' => 'مدير الإدارة',
             'label'         => 'رأي مدير الإدارة',
@@ -75,6 +83,6 @@ class WorkflowConfigurationSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ School workflow configured for {$schools->count()} schools (principal → leaves officer → admin manager).");
+        $this->command->info("✓ School workflow configured for {$schools->count()} schools (principal → leaves officer → hr affairs → admin manager).");
     }
 }

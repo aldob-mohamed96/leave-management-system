@@ -187,7 +187,8 @@ class LeaveRequest extends Model
         return match ($stage) {
             'direct_manager', 'school_principal' => 'مدير المدرسة',
             'leaves_officer' => 'مسؤول الإجازات',
-            'admin_manager' => 'مدير الإدارة',
+            'hr_affairs'     => 'شؤون عاملين',
+            'admin_manager'  => 'مدير الإدارة',
             default => $stage ? str_replace('_', ' ', $stage) : '—',
         };
     }
