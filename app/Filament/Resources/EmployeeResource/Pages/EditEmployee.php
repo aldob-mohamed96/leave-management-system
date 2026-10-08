@@ -2,10 +2,17 @@
 
 namespace App\Filament\Resources\EmployeeResource\Pages;
 
+use App\Enums\TransactionType;
 use App\Filament\Resources\EmployeeResource;
+use App\Models\LeaveBalance;
+use App\Models\LeaveBalanceTransaction;
+use App\Models\LeaveType;
 use App\Models\User;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EditEmployee extends EditRecord
 {
@@ -18,6 +25,8 @@ class EditEmployee extends EditRecord
     protected ?string $systemPassword = null;
 
     protected ?string $systemPhone = null;
+
+    protected int $additionalBalanceDays = 0;
 
     protected function getHeaderActions(): array
     {
@@ -33,11 +42,18 @@ class EditEmployee extends EditRecord
         $this->systemPassword = $this->data['system_password'] ?? $data['system_password'] ?? null;
         $this->systemPhone = $this->data['system_phone'] ?? $data['system_phone'] ?? null;
 
+        // Capture additional legacy balance days before stripping from form data
+        $this->additionalBalanceDays = max(
+            0,
+            (int) ($this->data['initial_balance_days'] ?? $data['initial_balance_days'] ?? 0)
+        );
+
         unset(
             $data['is_system_employee'],
             $data['system_email'],
             $data['system_password'],
             $data['system_phone'],
+            $data['initial_balance_days'],
         );
 
         if (EmployeeResource::isSchoolActor()) {
@@ -60,19 +76,50 @@ class EditEmployee extends EditRecord
             User::whereKey($this->record->user_id)->update(['phone' => $phone]);
         }
 
-        if ($this->record->user_id || ! $this->createSystemUser) {
-            return;
+        if (! $this->record->user_id && $this->createSystemUser) {
+            if ($this->systemEmail && $this->systemPassword && $this->record->organization_id) {
+                EmployeeResource::provisionSystemUser(
+                    employee: $this->record,
+                    email: $this->systemEmail,
+                    password: $this->systemPassword,
+                    phone: $this->systemPhone ?: $this->record->phone,
+                );
+            }
         }
 
-        if (! $this->systemEmail || ! $this->systemPassword || ! $this->record->organization_id) {
-            return;
-        }
+        // Apply additional legacy balance days to carried_over (additive)
+        if ($this->additionalBalanceDays > 0) {
+            $regularType = LeaveType::where('code', 'regular')->first();
 
-        EmployeeResource::provisionSystemUser(
-            employee: $this->record,
-            email: $this->systemEmail,
-            password: $this->systemPassword,
-            phone: $this->systemPhone ?: $this->record->phone,
-        );
+            if (! $regularType) {
+                Log::warning('Additional balance not applied: no active LeaveType with code=regular', [
+                    'employee_id'           => $this->record->id,
+                    'additional_balance_days' => $this->additionalBalanceDays,
+                ]);
+
+                Notification::make()
+                    ->warning()
+                    ->title('تحذير: لم يُطبَّق الرصيد المُرحَّل')
+                    ->body('لا يوجد نوع إجازة اعتيادية (regular) نشط في النظام. الرجاء إضافته ثم تعديل رصيد الموظف يدوياً.')
+                    ->send();
+            } else {
+                $service = app(\App\Services\LeaveBalanceService::class);
+                $balance = $service->getOrCreateBalance($this->record, $regularType, now()->year);
+
+                DB::transaction(function () use ($balance) {
+                    $balance = LeaveBalance::lockForUpdate()->findOrFail($balance->id);
+
+                    LeaveBalanceTransaction::create([
+                        'leave_balance_id' => $balance->id,
+                        'type'             => TransactionType::CARRYOVER,
+                        'days'             => $this->additionalBalanceDays,
+                        'note'             => "رصيد مُرحَّل مُعدَّل يدوياً: {$this->additionalBalanceDays} يوم",
+                        'created_by'       => auth()->id(),
+                    ]);
+
+                    $balance->increment('carried_over', $this->additionalBalanceDays);
+                });
+            }
+        }
     }
 }

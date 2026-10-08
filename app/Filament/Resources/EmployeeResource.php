@@ -140,16 +140,19 @@ class EmployeeResource extends Resource
                 ->helperText('تُدار الدرجات من الإعدادات ← الدرجات الوظيفية'),
 
             Forms\Components\TextInput::make('initial_balance_days')
-                ->label('رصيد إجازات اعتيادي سابق (أيام)')
-                ->helperText('أدخل عدد الأيام التي يمتلكها الموظف من سنوات سابقة. سيُضاف إلى رصيد الترحيل للسنة الحالية.')
+                ->label('رصيد إجازات اعتيادية مُرحَّل (أيام)')
+                ->helperText(fn (?Employee $record): string => $record === null
+                    ? 'أدخل عدد الأيام التي يمتلكها الموظف من سنوات سابقة. سيُضاف إلى رصيد الترحيل للسنة الحالية.'
+                    : 'اتركها فارغة إذا لم ترد تعديل الرصيد المُرحَّل. أي قيمة مُدخلة ستُضاف للرصيد الحالي.'
+                )
                 ->numeric()
-                ->integer()
                 ->minValue(0)
                 ->maxValue(365)
+                ->step(0.5)
                 ->nullable()
                 ->default(null)
                 ->dehydrated(false)
-                ->visibleOn('create'),
+                ->placeholder('0'),
 
             // الإدارة: ربط بحساب موجود (بدل إنشاء جديد)
             Forms\Components\Select::make('user_id')

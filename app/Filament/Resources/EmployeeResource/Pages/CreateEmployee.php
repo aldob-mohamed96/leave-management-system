@@ -7,8 +7,10 @@ use App\Filament\Resources\EmployeeResource;
 use App\Models\LeaveBalance;
 use App\Models\LeaveBalanceTransaction;
 use App\Models\LeaveType;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CreateEmployee extends CreateRecord
 {
@@ -75,7 +77,18 @@ class CreateEmployee extends CreateRecord
         if ($this->initialBalanceDays > 0) {
             $regularType = LeaveType::where('code', 'regular')->first();
 
-            if ($regularType) {
+            if (! $regularType) {
+                Log::warning('Initial balance not applied: no active LeaveType with code=regular', [
+                    'employee_id'          => $this->record->id,
+                    'initial_balance_days' => $this->initialBalanceDays,
+                ]);
+
+                Notification::make()
+                    ->warning()
+                    ->title('تحذير: لم يُطبَّق الرصيد المُرحَّل')
+                    ->body('لا يوجد نوع إجازة اعتيادية (regular) نشط في النظام. الرجاء إضافته ثم تعديل رصيد الموظف يدوياً.')
+                    ->send();
+            } else {
                 // The observer has already run accrueAnnual(), so the balance row
                 // should exist. Use firstOrCreate as a safety net.
                 $balance = LeaveBalance::firstOrCreate(
@@ -96,7 +109,7 @@ class CreateEmployee extends CreateRecord
 
                     LeaveBalanceTransaction::create([
                         'leave_balance_id' => $balance->id,
-                        'type'             => TransactionType::ADJUSTMENT,
+                        'type'             => TransactionType::CARRYOVER,
                         'days'             => $this->initialBalanceDays,
                         'note'             => "رصيد مبدئي قديم: {$this->initialBalanceDays} يوم",
                         'created_by'       => auth()->id(),
