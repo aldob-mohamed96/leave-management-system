@@ -193,6 +193,17 @@ class LeaveRequest extends Model
         };
     }
 
+    public static function pendingApprovalLabel(?string $stage): string
+    {
+        return match ($stage) {
+            'leaves_officer'  => 'بانتظار اعتماد مسؤول الإجازات',
+            'hr_affairs'      => 'بانتظار اعتماد شؤون العاملين',
+            'admin_manager'   => 'بانتظار اعتماد مدير الإدارة',
+            'school_principal', 'direct_manager' => 'بانتظار اعتماد مدير المدرسة',
+            default => $stage ? str_replace('_', ' ', $stage) : '—',
+        };
+    }
+
     // -------------------------------------------------------------------------
     // Computed Attributes
     // -------------------------------------------------------------------------

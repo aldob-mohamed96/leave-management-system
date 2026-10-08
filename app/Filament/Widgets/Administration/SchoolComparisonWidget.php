@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SchoolComparisonWidget extends Widget
 {
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
     protected static ?string $heading = 'مقارنة المدارس';
     protected int | string | array $columnSpan = 'full';
     protected static string $view = 'filament.widgets.school-comparison';

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AvgResponseTimeWidget extends StatsOverviewWidget
 {
-    protected static ?int $sort = 6;
+    protected static ?int $sort = 7;
 
     public static function canView(): bool
     {

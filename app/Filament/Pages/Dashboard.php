@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\OrganizationType;
 use App\Filament\Widgets\Administration\AvgResponseTimeWidget;
+use App\Filament\Widgets\Administration\PendingMyApprovalWidget;
 use App\Filament\Widgets\Administration\SchoolComparisonWidget;
 use App\Filament\Widgets\Administration\TopLeaveTakersWidget;
 use App\Filament\Widgets\Directorate\AdministrationComparisonWidget;
@@ -69,7 +70,8 @@ class Dashboard extends \Filament\Pages\Dashboard
             SchoolStatusOverview::class,
             OnLeaveTodayWidget::class,
             PendingRequestsWidget::class,
-            // Administration level (sort 4-6)
+            // Administration level (sort 4-7)
+            PendingMyApprovalWidget::class,
             SchoolComparisonWidget::class,
             TopLeaveTakersWidget::class,
             AvgResponseTimeWidget::class,

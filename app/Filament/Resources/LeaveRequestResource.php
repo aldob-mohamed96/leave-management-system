@@ -225,7 +225,7 @@ class LeaveRequestResource extends Resource
 
                     Infolists\Components\TextEntry::make('current_stage')
                         ->label('المرحلة الحالية')
-                        ->formatStateUsing(fn (?string $state): string => LeaveRequest::stageLabel($state))
+                        ->formatStateUsing(fn (?string $state): string => LeaveRequest::pendingApprovalLabel($state))
                         ->placeholder('—'),
 
                     Infolists\Components\TextEntry::make('reason')
@@ -338,7 +338,7 @@ class LeaveRequestResource extends Resource
 
                 Tables\Columns\TextColumn::make('current_stage')
                     ->label('المرحلة الحالية')
-                    ->formatStateUsing(fn (?string $state): string => LeaveRequest::stageLabel($state))
+                    ->formatStateUsing(fn (?string $state): string => LeaveRequest::pendingApprovalLabel($state))
                     ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('organization.name')

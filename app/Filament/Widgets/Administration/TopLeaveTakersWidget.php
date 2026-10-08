@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TopLeaveTakersWidget extends Widget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 6;
     protected static ?string $heading = 'أعلى موظفين استهلاكاً للإجازات';
     protected int | string | array $columnSpan = 'full';
     protected static string $view = 'filament.widgets.top-leave-takers';
