@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AdministrationComparisonWidget extends Widget
 {
-    protected static ?int $sort = 8;
+    protected static ?int $sort = 9;
     protected static ?string $heading = 'مقارنة الإدارات';
     protected int | string | array $columnSpan = 'full';
     protected static string $view = 'filament.widgets.administration-comparison';

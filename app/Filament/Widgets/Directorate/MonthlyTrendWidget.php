@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MonthlyTrendWidget extends ChartWidget
 {
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 8;
     protected static ?string $heading = 'اتجاه الطلبات الشهري';
     protected int | string | array $columnSpan = 'full';
 

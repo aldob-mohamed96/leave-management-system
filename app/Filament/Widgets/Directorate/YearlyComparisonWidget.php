@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class YearlyComparisonWidget extends ChartWidget
 {
-    protected static ?int $sort = 9;
+    protected static ?int $sort = 10;
     protected static ?string $heading = 'مقارنة الطلبات السنوية';
 
     public static function canView(): bool
