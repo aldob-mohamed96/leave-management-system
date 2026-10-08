@@ -61,7 +61,7 @@ class PendingApprovalPage extends Page implements HasTable
      * Build the pending-approval query for the given user.
      * Called both from getTableQuery() and getNavigationBadge().
      */
-    protected static function buildPendingQuery(\App\Models\User $user): Builder
+    public static function buildPendingQuery(\App\Models\User $user): Builder
     {
         $user->setOrganizationTeam();
 
@@ -178,10 +178,10 @@ class PendingApprovalPage extends Page implements HasTable
                     ->dateTime('Y-m-d H:i')
                     ->sortable(),
             ])
-            ->emptyStateHeading('لا توجد طلبات')
-            ->emptyStateDescription('لا توجد طلبات بانتظار اعتمادك')
+            ->emptyStateHeading('لا توجد طلبات بانتظار اعتمادك')
+            ->emptyStateDescription('لا توجد طلبات في انتظار اعتمادك حالياً')
             ->actions([
-                // --- اعتماد (Fix #5: no modal, fires immediately) ---
+                // --- اعتماد ---
                 Tables\Actions\Action::make('approve')
                     ->label('اعتماد')
                     ->icon('heroicon-o-check-circle')
@@ -190,7 +190,12 @@ class PendingApprovalPage extends Page implements HasTable
                         in_array($record->status, [LeaveStatus::SUBMITTED, LeaveStatus::IN_REVIEW])
                         && (bool) Auth::user()?->can('approve', $record)
                     )
-                    ->action(function (LeaveRequest $record): void {
+                    ->form([
+                        Forms\Components\Textarea::make('note')
+                            ->label('ملاحظة (اختيارية)')
+                            ->nullable(),
+                    ])
+                    ->action(function (LeaveRequest $record, array $data): void {
                         try {
                             $step = $record->steps()
                                 ->where('status', StepStatus::PENDING->value)
@@ -203,7 +208,7 @@ class PendingApprovalPage extends Page implements HasTable
                             }
 
                             app(\App\Services\LeaveRequestService::class)->approve(
-                                $record, $step, Auth::user(), null
+                                $record, $step, Auth::user(), $data['note'] ?? null
                             );
 
                             Notification::make()->success()->title('تم الاعتماد')->send();
