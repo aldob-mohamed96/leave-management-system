@@ -139,6 +139,18 @@ class EmployeeResource extends Resource
                 ->searchable()
                 ->helperText('تُدار الدرجات من الإعدادات ← الدرجات الوظيفية'),
 
+            Forms\Components\TextInput::make('initial_balance_days')
+                ->label('رصيد إجازات اعتيادي سابق (أيام)')
+                ->helperText('أدخل عدد الأيام التي يمتلكها الموظف من سنوات سابقة. سيُضاف إلى رصيد الترحيل للسنة الحالية.')
+                ->numeric()
+                ->integer()
+                ->minValue(0)
+                ->maxValue(365)
+                ->nullable()
+                ->default(null)
+                ->dehydrated(false)
+                ->visibleOn('create'),
+
             // الإدارة: ربط بحساب موجود (بدل إنشاء جديد)
             Forms\Components\Select::make('user_id')
                 ->label('ربط بحساب موجود')
