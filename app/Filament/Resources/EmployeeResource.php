@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\LeaveStatus;
 use App\Enums\OrganizationType;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Models\Employee;
@@ -11,6 +12,8 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -340,7 +343,244 @@ class EmployeeResource extends Resource
                     ->openUrlInNewTab(false),
                 Tables\Actions\DeleteAction::make(),
             ])
-            ->defaultSort('full_name');
+            ->defaultSort('full_name')
+            ->recordUrl(fn (Employee $record): string => EmployeeResource::getUrl('view', ['record' => $record]));
+    }
+
+    // -------------------------------------------------------------------------
+    // Infolist (View page)
+    // -------------------------------------------------------------------------
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Tabs::make('employee_tabs')
+                    ->tabs([
+
+                        // =====================================================
+                        // Tab 1: البيانات الأساسية
+                        // =====================================================
+                        Infolists\Components\Tabs\Tab::make('البيانات الأساسية')
+                            ->icon('heroicon-o-user')
+                            ->schema([
+                                Infolists\Components\Section::make('بيانات الموظف')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('full_name')
+                                            ->label('الاسم الكامل')
+                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                            ->size(\Filament\Infolists\Components\TextEntry\TextEntrySize::Large),
+
+                                        Infolists\Components\TextEntry::make('employee_code')
+                                            ->label('كود الموظف')
+                                            ->copyable()
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\IconEntry::make('is_active')
+                                            ->label('الحالة')
+                                            ->boolean()
+                                            ->trueColor('success')
+                                            ->falseColor('danger')
+                                            ->trueIcon('heroicon-o-check-circle')
+                                            ->falseIcon('heroicon-o-x-circle'),
+
+                                        Infolists\Components\TextEntry::make('job_title')
+                                            ->label('المسمى الوظيفي')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('grade')
+                                            ->label('الدرجة (نصية)')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('entitlementGrade.name')
+                                            ->label('درجة الاستحقاق')
+                                            ->placeholder('لا يوجد')
+                                            ->badge()
+                                            ->color('primary'),
+
+                                        Infolists\Components\TextEntry::make('entitlement_yearly_days')
+                                            ->label('الإجازة الاعتيادية المستحقة')
+                                            ->state(fn (Employee $record): string =>
+                                                $record->regularLeaveEntitlement() . ' يوم / سنة'
+                                            ),
+
+                                        Infolists\Components\TextEntry::make('organization.name')
+                                            ->label('الجهة التعليمية')
+                                            ->placeholder('—')
+                                            ->badge()
+                                            ->color('gray'),
+
+                                        Infolists\Components\TextEntry::make('phone')
+                                            ->label('رقم الهاتف')
+                                            ->placeholder('—')
+                                            ->copyable(),
+                                    ]),
+
+                                Infolists\Components\Section::make('التواريخ')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('birth_date')
+                                            ->label('تاريخ الميلاد')
+                                            ->date('d F Y')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('hire_date')
+                                            ->label('تاريخ التعيين')
+                                            ->date('d F Y')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('work_start_date')
+                                            ->label('بداية العمل الفعلي')
+                                            ->date('d F Y')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('years_of_service')
+                                            ->label('سنوات الخدمة')
+                                            ->state(fn (Employee $record): string => (function () use ($record) {
+                                                $start = $record->work_start_date ?? $record->hire_date;
+                                                if (! $start) return '—';
+                                                return \Carbon\Carbon::parse($start)->diffInYears(now()) . ' سنة';
+                                            })()),
+                                    ]),
+                            ]),
+
+                        // =====================================================
+                        // Tab 2: رصيد الإجازات
+                        // =====================================================
+                        Infolists\Components\Tabs\Tab::make('رصيد الإجازات')
+                            ->icon('heroicon-o-calculator')
+                            ->schema([
+                                Infolists\Components\Section::make('رصيد السنة الحالية — ' . now()->year)
+                                    ->schema([
+                                        Infolists\Components\RepeatableEntry::make('currentYearBalances')
+                                            ->label('')
+                                            ->state(fn (Employee $record) =>
+                                                $record->leaveBalances()
+                                                    ->with('leaveType')
+                                                    ->currentYear()
+                                                    ->get()
+                                                    ->map(fn ($b) => [
+                                                        'leave_type' => $b->leaveType?->name ?? '—',
+                                                        'entitled'   => (int) $b->entitled,
+                                                        'carried'    => (int) $b->carried_over,
+                                                        'used'       => (int) $b->used,
+                                                        'remaining'  => max(0, (int) $b->entitled + (int) $b->carried_over - (int) $b->used),
+                                                    ])
+                                                    ->toArray()
+                                            )
+                                            ->columns(5)
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('leave_type')
+                                                    ->label('نوع الإجازة')
+                                                    ->weight(\Filament\Support\Enums\FontWeight::Bold),
+
+                                                Infolists\Components\TextEntry::make('entitled')
+                                                    ->label('المستحق')
+                                                    ->suffix(' يوم')
+                                                    ->color('primary'),
+
+                                                Infolists\Components\TextEntry::make('carried')
+                                                    ->label('المُرحَّل')
+                                                    ->suffix(' يوم')
+                                                    ->color('info'),
+
+                                                Infolists\Components\TextEntry::make('used')
+                                                    ->label('المستخدم')
+                                                    ->suffix(' يوم')
+                                                    ->color('warning'),
+
+                                                Infolists\Components\TextEntry::make('remaining')
+                                                    ->label('المتبقي')
+                                                    ->suffix(' يوم')
+                                                    ->color(fn ($state): string => ((int) $state) > 0 ? 'success' : 'danger')
+                                                    ->weight(\Filament\Support\Enums\FontWeight::Bold),
+                                            ]),
+                                    ]),
+
+                                Infolists\Components\Section::make('الإجازة الاعتيادية — ملخص الاستحقاق')
+                                    ->columns(2)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('regular_entitlement')
+                                            ->label('المستحق النظامي هذه السنة')
+                                            ->state(fn (Employee $record): string =>
+                                                $record->regularLeaveEntitlement() . ' يوم'
+                                            )
+                                            ->badge()
+                                            ->color('success'),
+
+                                        Infolists\Components\TextEntry::make('regular_balance_remaining')
+                                            ->label('المتبقي من الإجازة الاعتيادية')
+                                            ->state(function (Employee $record): string {
+                                                $balance = $record->leaveBalances()
+                                                    ->whereHas('leaveType', fn ($q) => $q->where('code', 'regular'))
+                                                    ->currentYear()
+                                                    ->first();
+                                                if (! $balance) return 'لا يوجد رصيد مسجل';
+                                                $rem = max(0, (int)$balance->entitled + (int)$balance->carried_over - (int)$balance->used);
+                                                return $rem . ' يوم';
+                                            })
+                                            ->badge()
+                                            ->color(fn (string $state): string =>
+                                                str_contains($state, 'لا') ? 'gray' :
+                                                ((int) $state > 0 ? 'success' : 'danger')
+                                            ),
+                                    ]),
+                            ]),
+
+                        // =====================================================
+                        // Tab 3: طلبات الإجازة
+                        // =====================================================
+                        Infolists\Components\Tabs\Tab::make('طلبات الإجازة')
+                            ->icon('heroicon-o-clipboard-document-list')
+                            ->schema([
+                                Infolists\Components\RepeatableEntry::make('leaveRequestsList')
+                                    ->label('')
+                                    ->state(fn (Employee $record) =>
+                                        $record->leaveRequests()
+                                            ->with('leaveType')
+                                            ->latest()
+                                            ->get()
+                                            ->map(fn ($req) => [
+                                                'number'     => $req->number,
+                                                'leave_type' => $req->leaveType?->name ?? '—',
+                                                'start_date' => $req->start_date?->format('d/m/Y') ?? '—',
+                                                'end_date'   => $req->end_date?->format('d/m/Y') ?? '—',
+                                                'days'       => (int) $req->days,
+                                                'status_label' => $req->status->label(),
+                                                'status_color' => $req->status->color(),
+                                            ])
+                                            ->toArray()
+                                    )
+                                    ->columns(6)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('number')
+                                            ->label('رقم الطلب')
+                                            ->fontFamily(\Filament\Support\Enums\FontFamily::Mono)
+                                            ->size(\Filament\Infolists\Components\TextEntry\TextEntrySize::Small),
+
+                                        Infolists\Components\TextEntry::make('leave_type')
+                                            ->label('نوع الإجازة'),
+
+                                        Infolists\Components\TextEntry::make('start_date')
+                                            ->label('من'),
+
+                                        Infolists\Components\TextEntry::make('end_date')
+                                            ->label('إلى'),
+
+                                        Infolists\Components\TextEntry::make('days')
+                                            ->label('الأيام')
+                                            ->suffix(' يوم'),
+
+                                        Infolists\Components\TextEntry::make('status_label')
+                                            ->label('الحالة')
+                                            ->badge()
+                                            ->color(fn ($state, array $record): string => $record['status_color'] ?? 'gray'),
+                                    ]),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 
     // -------------------------------------------------------------------------
@@ -352,6 +592,7 @@ class EmployeeResource extends Resource
         return [
             'index'         => Pages\ListEmployees::route('/'),
             'create'        => Pages\CreateEmployee::route('/create'),
+            'view'          => Pages\ViewEmployee::route('/{record}'),
             'edit'          => Pages\EditEmployee::route('/{record}/edit'),
             'leave-history' => Pages\ViewEmployeeLeaveHistory::route('/{record}/leave-history'),
         ];
