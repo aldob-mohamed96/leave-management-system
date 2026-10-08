@@ -1,0 +1,9 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    "Clear-filter button doesn't refresh data — wire:click chains three Livewire calls with semicolons but Livewire 3 only dispatches the first; toYear is never cleared and loadData() is never called. Fix: add a resetFilter() method to the PHP class and change the button to wire:click=\"resetFilter\".",
+    "Grade period grouping conflates leave types in fallback path — when no اعتيادية balances exist, all balance rows are grouped by entitled value regardless of leave_type_id, producing fabricated grade periods (e.g., sick-leave entitlement shown as a career grade). Fix: group by leave_type_id first in the fallback, or show a disclaimer that periods are unavailable.",
+    "Non-consecutive year collapse — groupBy('entitled') merges non-adjacent years at the same entitlement level into one period, silently hiding promotions followed by demotions. The inference disclaimer footnote only appears in the non-empty table path, not in the fallback empty-state. Fix: surface the disclaimer unconditionally or detect and split non-contiguous year gaps."
+  ],
+  "reviewDoc": "/Users/mohamedgaber/projects/vaccancy/leave-management-system/.agents/tasks/leave-history-review.md"
+}

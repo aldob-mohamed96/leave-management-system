@@ -74,7 +74,7 @@
             </x-filament::button>
             @if ($fromYear !== null || $toYear !== null)
                 <x-filament::button
-                    wire:click="$set('fromYear', null); $set('toYear', null); applyFilter()"
+                    wire:click="resetFilter"
                     color="gray"
                     icon="heroicon-o-x-mark"
                 >
@@ -141,10 +141,11 @@
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                * مستنتج من بيانات الأرصدة — لا يعكس تغييرات الدرجة الرسمية بالضرورة
-            </p>
         @endif
+        {{-- Disclaimer shown unconditionally so users always know periods are inferred --}}
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            * مستنتج من بيانات أرصدة الإجازة الاعتيادية — لا يعكس تغييرات الدرجة الرسمية بالضرورة
+        </p>
     </x-filament::section>
 
     {{-- ============================

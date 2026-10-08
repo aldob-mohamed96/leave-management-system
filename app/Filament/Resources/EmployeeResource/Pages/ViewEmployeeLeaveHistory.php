@@ -80,6 +80,18 @@ class ViewEmployeeLeaveHistory extends Page
         $this->loadData();
     }
 
+    /**
+     * Livewire action: clear both year filters and reload data.
+     * Using a dedicated method instead of chaining wire:click calls because
+     * Livewire 3 only dispatches the first method in a semicolon-separated chain.
+     */
+    public function resetFilter(): void
+    {
+        $this->fromYear = null;
+        $this->toYear   = null;
+        $this->loadData();
+    }
+
     // -------------------------------------------------------------------------
     // Page title
     // -------------------------------------------------------------------------
@@ -148,22 +160,58 @@ class ViewEmployeeLeaveHistory extends Page
             fn ($b) => str_contains($b->leaveType?->name ?? '', 'اعتيادية')
         );
 
-        $sourceForPeriods = $regularBalances->isNotEmpty() ? $regularBalances : $allBalances;
+        // In the fallback path we must restrict to a single leave type to avoid
+        // merging different leave types (e.g., sick + regular) into one period.
+        if ($regularBalances->isNotEmpty()) {
+            $sourceForPeriods = $regularBalances;
+        } else {
+            // No اعتيادية balances: pick the leave_type_id with the most rows
+            $dominantTypeId = $allBalances
+                ->groupBy('leave_type_id')
+                ->sortByDesc(fn ($g) => $g->count())
+                ->keys()
+                ->first();
 
-        // Group consecutive years with the same entitled value
-        $this->gradePeriods = $sourceForPeriods
-            ->groupBy('entitled')
-            ->map(function (Collection $group, int $entitled) {
-                $years = $group->pluck('year');
-                return [
+            $sourceForPeriods = $dominantTypeId !== null
+                ? $allBalances->where('leave_type_id', $dominantTypeId)
+                : collect();
+        }
+
+        // Split into contiguous year spans at the same entitlement level.
+        // A new period starts whenever the year gap > 1 OR the entitled value changes.
+        $sorted = $sourceForPeriods->sortBy('year')->values();
+        $periods = [];
+        $current = null;
+
+        foreach ($sorted as $balance) {
+            $year     = (int) $balance->year;
+            $entitled = (int) $balance->entitled;
+
+            if (
+                $current === null
+                || $current['entitled_days'] !== $entitled
+                || $year - $current['to_year'] > 1          // non-contiguous gap
+            ) {
+                if ($current !== null) {
+                    $periods[] = $current;
+                }
+                $current = [
                     'entitled_days' => $entitled,
-                    'from_year'     => (int) $years->min(),
-                    'to_year'       => (int) $years->max(),
-                    'years_count'   => $years->unique()->count(),
+                    'from_year'     => $year,
+                    'to_year'       => $year,
+                    'years_count'   => 1,
                 ];
-            })
-            ->sortBy('from_year')
-            ->values();
+            } else {
+                $current['to_year']    = $year;
+                $current['years_count']++;
+            }
+        }
+
+        if ($current !== null) {
+            $periods[] = $current;
+        }
+
+        $this->gradePeriods = collect($periods)->values();
 
         // ------- Summary stats -------
         $totalEntitled  = $this->balanceRows->sum('entitled');
