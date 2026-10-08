@@ -164,6 +164,11 @@ class LeaveBalanceService
 
             $toBalance = $this->getOrCreateBalance($employee, $bal->leaveType, $toYear);
 
+            // حارس الإيدمبوتنسي: تخطّى إذا كان الرصيد المُرحَّل للسنة الجديدة مُعبَّأ مسبقاً
+            if ($toBalance->carried_over > 0) {
+                continue;
+            }
+
             DB::transaction(function () use ($toBalance, $carryDays, $bal) {
                 $toBalance = LeaveBalance::lockForUpdate()->findOrFail($toBalance->id);
 
@@ -174,6 +179,11 @@ class LeaveBalanceService
                 ]);
 
                 $toBalance->increment('carried_over', $carryDays);
+
+                // تصفير رصيد سنة المصدر لمنع إعادة الترحيل
+                $bal->refresh();
+                $bal->carried_over = 0;
+                $bal->save();
             });
         }
     }
