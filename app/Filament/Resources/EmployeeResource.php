@@ -332,6 +332,12 @@ class EmployeeResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('leave_history')
+                    ->label('تاريخ الإجازات')
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('info')
+                    ->url(fn (Employee $record): string => EmployeeResource::getUrl('leave-history', ['record' => $record->id]))
+                    ->openUrlInNewTab(false),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->defaultSort('full_name');
@@ -344,9 +350,10 @@ class EmployeeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListEmployees::route('/'),
-            'create' => Pages\CreateEmployee::route('/create'),
-            'edit'   => Pages\EditEmployee::route('/{record}/edit'),
+            'index'         => Pages\ListEmployees::route('/'),
+            'create'        => Pages\CreateEmployee::route('/create'),
+            'edit'          => Pages\EditEmployee::route('/{record}/edit'),
+            'leave-history' => Pages\ViewEmployeeLeaveHistory::route('/{record}/leave-history'),
         ];
     }
 }
