@@ -37,7 +37,7 @@
             </div>
             <div>
                 <span class="font-semibold text-gray-600 dark:text-gray-400">سنوات الخدمة:</span>
-                <span class="mr-1 text-gray-900 dark:text-white">{{ $employeeInfo['years_of_service'] }} سنة</span>
+                <span class="mr-1 text-gray-900 dark:text-white">{{ $employeeInfo['service_label'] }}</span>
             </div>
         </div>
     </x-filament::section>
@@ -90,7 +90,7 @@
     <x-filament::section heading="الإجماليات">
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 text-center">
-                <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $summaryStats['years_of_service'] }}</div>
+                <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $summaryStats['service_label'] }}</div>
                 <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">سنوات الخدمة</div>
             </div>
             <div class="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center">

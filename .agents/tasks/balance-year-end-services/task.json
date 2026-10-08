@@ -1,0 +1,7 @@
+{
+  "task_id": "task-balance-year-end",
+  "task_description": "Implement year-end leave balance rollover: Artisan command, scheduler, carry-over expiry guard, employee observer for new hires, and Filament UI (bulk action + dedicated page).",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

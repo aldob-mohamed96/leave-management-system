@@ -111,17 +111,34 @@ class ViewEmployeeLeaveHistory extends Page
 
         // ------- Employee info -------
         $startDate   = $employee->work_start_date ?? $employee->hire_date;
-        $serviceYears = $startDate ? (int) Carbon::parse($startDate)->diffInYears(now()) : 0;
+
+        $serviceLabel = '—';
+        if ($startDate) {
+            $diff = Carbon::parse($startDate)->diff(now());
+            $parts = [];
+            if ($diff->y > 0) {
+                $parts[] = $diff->y . ' ' . ($diff->y === 1 ? 'سنة' : 'سنوات');
+            }
+            if ($diff->m > 0) {
+                $parts[] = $diff->m . ' ' . ($diff->m === 1 ? 'شهر' : 'أشهر');
+            }
+            if ($diff->d > 0) {
+                $parts[] = $diff->d . ' ' . ($diff->d === 1 ? 'يوم' : 'يوم');
+            }
+            $serviceLabel = $parts ? implode(' و ', $parts) : 'أقل من يوم';
+        }
+        $serviceYears = $startDate ? Carbon::parse($startDate)->diffInYears(now()) : 0;
 
         $this->employeeInfo = [
-            'full_name'        => $employee->full_name,
-            'employee_code'    => $employee->employee_code ?? '—',
-            'job_title'        => $employee->job_title ?? '—',
-            'grade_name'       => $employee->entitlementGrade?->name ?? ($employee->grade ?? '—'),
-            'yearly_days'      => $employee->entitlementGrade?->yearly_days ?? '—',
-            'hire_date'        => $employee->hire_date?->translatedFormat('d F Y') ?? '—',
-            'work_start_date'  => $employee->work_start_date?->translatedFormat('d F Y') ?? '—',
-            'years_of_service' => $serviceYears,
+            'full_name'           => $employee->full_name,
+            'employee_code'       => $employee->employee_code ?? '—',
+            'job_title'           => $employee->job_title ?? '—',
+            'grade_name'          => $employee->entitlementGrade?->name ?? ($employee->grade ?? '—'),
+            'yearly_days'         => $employee->entitlementGrade?->yearly_days ?? '—',
+            'hire_date'           => $employee->hire_date?->translatedFormat('d F Y') ?? '—',
+            'work_start_date'     => $employee->work_start_date?->translatedFormat('d F Y') ?? '—',
+            'years_of_service'    => $serviceYears,
+            'service_label'       => $serviceLabel,
         ];
 
         // ------- Balance rows -------
@@ -225,6 +242,7 @@ class ViewEmployeeLeaveHistory extends Page
 
         $this->summaryStats = [
             'years_of_service'        => $serviceYears,
+            'service_label'           => $serviceLabel,
             'total_entitled'          => (int) $totalEntitled,
             'total_used'              => (int) $totalUsed,
             'total_remaining'         => (int) $totalRemaining,

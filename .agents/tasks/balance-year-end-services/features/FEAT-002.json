@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Frontend year-end triggers: (a) EmployeeObserver auto-accrues balance on employee creation, (b) bulk action on the employees list table, (c) dedicated YearEndRolloverPage Filament page. Depends on FEAT-001 (LeaveBalanceService patches and the Artisan command must exist first).",
+  "status": "pending",
+  "steps": [
+    "Step 1 — Create app/Observers/EmployeeObserver.php. Namespace App\\Observers. No interface to implement. Single method: public function created(Employee $employee): void { try { $service = app(App\\Services\\LeaveBalanceService::class); $service->accrueAnnual($employee, now()->year); } catch (\\Throwable $e) { Log::warning('EmployeeObserver: failed to accrue annual balance for employee '.$employee->id.': '.$e->getMessage()); } } Imports: App\\Models\\Employee, App\\Services\\LeaveBalanceService, Illuminate\\Support\\Facades\\Log.",
+
+    "Step 2 — Register EmployeeObserver in app/Providers/AppServiceProvider.php. Add import at top: use App\\Observers\\EmployeeObserver; In boot() method, after the existing LeaveBalance::observe(LeaveBalanceObserver::class); line, add: Employee::observe(EmployeeObserver::class); The Employee model is already imported at the top of AppServiceProvider.",
+
+    "Step 3 — Add bulk action to app/Filament/Resources/EmployeeResource.php. In the table() method, add ->bulkActions([Tables\\Actions\\BulkAction::make('renewBalances')->label('تجديد الأرصدة السنوية')->icon('heroicon-o-arrow-path')->color('warning')->requiresConfirmation()->action(function (\\Illuminate\\Database\\Eloquent\\Collection $records): void { $service = app(App\\Services\\LeaveBalanceService::class); $year = now()->year; $count = 0; foreach ($records as $emp) { try { DB::transaction(function () use ($service, $emp, $year): void { $service->carryOver($emp, $year - 1, $year); $service->accrueAnnual($emp, $year); }); $count++; } catch (\\Throwable $e) { \\Illuminate\\Support\\Facades\\Log::warning('BulkRenew failed for employee '.$emp->id.': '.$e->getMessage()); } } Notification::make()->title(\"تم تجديد الأرصدة لـ {$count} موظف\")->success()->send(); }),]) after the ->actions([...]) chain. Add imports at top of EmployeeResource.php: use App\\Services\\LeaveBalanceService; use Illuminate\\Support\\Facades\\DB; use Filament\\Notifications\\Notification; (check existing imports first — DB and Notification may already be imported).",
+
+    "Step 4 — Create app/Filament/Pages/YearEndRolloverPage.php. Namespace App\\Filament\\Pages. Extend Filament\\Pages\\Page, implement HasForms, use InteractsWithForms. Properties: protected static ?string $navigationIcon = 'heroicon-o-arrow-path'; protected static ?string $navigationLabel = 'تجديد الأرصدة السنوية'; protected static ?string $navigationGroup = 'الإعدادات'; protected static string $view = 'filament.pages.year-end-rollover-page'; public ?array $data = []; public string $output = ''; public function mount(): void { $this->form->fill(['year' => now()->year]); } public function form(Form $form): Form — schema: Select::make('year')->label('السنة')->options([now()->year - 1 => now()->year - 1, now()->year => now()->year])->default(now()->year)->required(), Select::make('organization_id')->label('المؤسسة (اختياري)')->options(fn() => \\App\\Models\\Organization::withoutGlobalScopes()->orderBy('name')->pluck('name','id')->toArray())->nullable()->placeholder('الكل'), statePath('data'). public function run(): void { $data = $this->form->getState(); $year = (int) $data['year']; \\Illuminate\\Support\\Facades\\Artisan::call('leave:year-end', ['--year' => $year]); $this->output = \\Illuminate\\Support\\Facades\\Artisan::output(); Notification::make()->title('تم تجديد الأرصدة')->success()->send(); } Imports: Filament\\Forms\\Components\\Select, Filament\\Forms\\Concerns\\InteractsWithForms, Filament\\Forms\\Contracts\\HasForms, Filament\\Forms\\Form, Filament\\Notifications\\Notification, Filament\\Pages\\Page, Illuminate\\Support\\Facades\\Artisan.",
+
+    "Step 5 — Create resources/views/filament/pages/year-end-rollover-page.blade.php. Follow the pattern of change-password-page.blade.php exactly: <x-filament-panels::page> <form wire:submit=\"run\"> {{$this->form}} <div class=\"mt-4\"> <x-filament::button type=\"submit\"> تشغيل التجديد </x-filament::button> </div> </form> @if($this->output) <div class=\"mt-6\"> <x-filament::section> <pre class=\"text-sm whitespace-pre-wrap\">{{ $this->output }}</pre> </x-filament::section> </div> @endif <x-filament-actions::modals /> </x-filament-panels::page>"
+  ],
+  "acceptance_criteria": [
+    "php artisan test passes with no regressions after adding the observer",
+    "Employee::observe(EmployeeObserver::class) is registered in AppServiceProvider::boot()",
+    "Employees list table shows 'تجديد الأرصدة السنوية' in bulk actions dropdown when rows are selected",
+    "Navigating to /admin/year-end-rollover (or the Filament-generated slug) shows the form with year selector and run button",
+    "Submitting the form displays the Artisan command output on the same page"
+  ],
+  "verification": [
+    "php artisan test",
+    "php artisan route:list | grep year-end"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

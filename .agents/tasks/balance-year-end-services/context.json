@@ -1,0 +1,29 @@
+{
+  "project_type": "Laravel 11 + Filament 3 admin panel (PHP, Blade, Livewire)",
+  "language": "PHP 8.2+",
+  "build_system": "Composer. No front-end build step needed — Filament uses its own asset pipeline. Run `composer install` if deps missing.",
+  "test_framework": "PHPUnit via `php artisan test`. Main feature tests in tests/Feature/Phase2ServicesTest.php.",
+  "build_command": "php artisan config:clear && php artisan route:clear",
+  "test_command": "php artisan test",
+  "verification_instructions": "1. Run `php artisan test` — all tests must pass. 2. For the command: `php artisan leave:year-end --dry-run --year=2025` must exit 0 and print a preview table. 3. For the scheduler: `php artisan schedule:list` must show `leave:year-end` with yearly trigger. 4. No browser testing required — CLI verification is sufficient.",
+  "snapshot_or_generated_files": null,
+  "environment_constraints": "Do NOT run `php artisan migrate` against production. Tests use an in-memory SQLite DB configured in phpunit.xml. The worktree is at /Users/mohamedgaber/projects/vaccancy/leave-management-system — always use this absolute path.",
+  "contribution_requirements": "Match existing code style: Arabic doc-comments, Arabic string labels, same namespace conventions. Observers in App\\Observers\\. Filament pages in App\\Filament\\Pages\\. Blade views in resources/views/filament/pages/.",
+  "key_patterns": "Commands: extend Illuminate\\Console\\Command, return Command::SUCCESS, per-item try/catch with $this->warn(), final $this->info(). See NotifyOverdueRequests.php. Filament pages: extend Filament\\Pages\\Page, implement HasForms, use InteractsWithForms, protected static string $view points to a blade path. See ChangePasswordPage.php. Observers: plain PHP class with model method hooks (created, updated, etc.), resolved via the container for services. AppServiceProvider::boot() registers observers with Model::observe(). LeaveBalanceService methods: carryOver(Employee, int fromYear, int toYear): void — iterates existing balances, no return value. accrueAnnual(Employee, int year): void — creates/updates balance rows for all active leave types.",
+  "relevant_files": [
+    "app/Console/Commands/NotifyOverdueRequests.php",
+    "app/Console/Commands/AnnualLeaveRollover.php",
+    "app/Services/LeaveBalanceService.php",
+    "app/Observers/LeaveBalanceObserver.php",
+    "app/Observers/EmployeeObserver.php",
+    "app/Providers/AppServiceProvider.php",
+    "app/Filament/Resources/EmployeeResource.php",
+    "app/Filament/Pages/ChangePasswordPage.php",
+    "app/Filament/Pages/YearEndRolloverPage.php",
+    "resources/views/filament/pages/change-password-page.blade.php",
+    "resources/views/filament/pages/year-end-rollover-page.blade.php",
+    "routes/console.php",
+    "tests/Feature/Phase2ServicesTest.php"
+  ],
+  "directory_structure": "app/Console/Commands/ — Artisan commands. app/Services/ — business logic services (LeaveBalanceService is the key one). app/Observers/ — model observers (3 exist: LeaveBalance, LeaveRequest, Organization). app/Providers/AppServiceProvider.php — singleton bindings + observer registration + policy registration. app/Filament/Resources/EmployeeResource.php — employee CRUD + table + infolist (no bulk actions yet). app/Filament/Pages/ — standalone Filament pages (ChangePasswordPage, etc.). resources/views/filament/pages/ — Blade views for Filament pages. routes/console.php — Laravel 11 scheduler entry point (currently only has the inspire command). tests/Feature/ — PHPUnit feature tests."
+}
