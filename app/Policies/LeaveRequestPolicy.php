@@ -117,7 +117,7 @@ class LeaveRequestPolicy
 
         $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
 
-        return $requiredRole === null || $user->hasRole($requiredRole);
+        return $requiredRole !== false && $user->hasRole($requiredRole);
     }
 
     /**
@@ -144,7 +144,7 @@ class LeaveRequestPolicy
 
         $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
 
-        return $requiredRole === null || $user->hasRole($requiredRole);
+        return $requiredRole !== false && $user->hasRole($requiredRole);
     }
 
     /**
@@ -174,20 +174,22 @@ class LeaveRequestPolicy
 
         $requiredRole = $this->resolveStageRole($leaveRequest->current_stage);
 
-        return $requiredRole === null || $user->hasRole($requiredRole);
+        return $requiredRole !== false && $user->hasRole($requiredRole);
     }
 
     /**
      * Map stage name to the required Arabic role name for that stage.
-     * Returns null when no role restriction applies.
+     * Returns false for any unknown stage — fail-closed: unknown stages are denied.
+     *
+     * @return string|false  role name to check, or false to deny access
      */
-    private function resolveStageRole(string $stage): ?string
+    private function resolveStageRole(string $stage): string|false
     {
         return match ($stage) {
             'leaves_officer' => 'مسؤول الإجازات',
             'hr_affairs'     => 'شؤون عاملين',
             'admin_manager'  => 'مدير الإدارة',
-            default          => null,
+            default          => false,
         };
     }
 

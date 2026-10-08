@@ -2,17 +2,14 @@
 
 namespace App\Rules\Leave;
 
-use App\Models\Holiday;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Calculates working days in a date range, excluding:
- *  - Weekly off days (Friday=5, Saturday=6 by default, configurable)
- *  - Official holidays from the `holidays` table
+ * Calculates the total number of calendar days in a date range (inclusive),
+ * counting ALL days regardless of weekends or official holidays.
  *
  * Does NOT call $fail — instead exposes $calculatedDays for the service
  * to overwrite the submitted `days` value.
@@ -46,26 +43,7 @@ class WorkingDaysRule implements ValidationRule, DataAwareRule
             return;
         }
 
-        $offDays = config('leave.working_week_off_days', [5, 6]);
-
-        // Fetch holidays in range as a Set for O(1) lookup
-        $holidays = Holiday::whereBetween('date', [
-            $start->toDateString(),
-            $end->toDateString(),
-        ])->pluck('date')->map(fn($d) => Carbon::parse($d)->toDateString())->flip()->all();
-
-        $count = 0;
-        foreach (CarbonPeriod::create($start, $end) as $day) {
-            /** @var Carbon $day */
-            if (in_array($day->dayOfWeek, $offDays)) {
-                continue;
-            }
-            if (isset($holidays[$day->toDateString()])) {
-                continue;
-            }
-            $count++;
-        }
-
-        $this->calculatedDays = max(0, $count);
+        // Count all calendar days inclusive (no exclusions for weekends or holidays)
+        $this->calculatedDays = (int) $start->diffInDays($end) + 1;
     }
 }

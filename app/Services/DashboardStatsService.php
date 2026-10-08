@@ -95,11 +95,12 @@ class DashboardStatsService
                 ->pluck('cnt', 'status')
                 ->toArray();
 
-            $total    = array_sum($requests);
             $pending  = ($requests[LeaveStatus::SUBMITTED->value] ?? 0)
-                      + ($requests[LeaveStatus::IN_REVIEW->value] ?? 0);
-            $approved = $requests[LeaveStatus::APPROVED->value] ?? 0;
-            $rejected = $requests[LeaveStatus::REJECTED->value] ?? 0;
+                      + ($requests[LeaveStatus::IN_REVIEW->value] ?? 0)
+                      + ($requests[LeaveStatus::RETURNED->value]  ?? 0);
+            $approved = $requests[LeaveStatus::APPROVED->value]   ?? 0;
+            $rejected = $requests[LeaveStatus::REJECTED->value]   ?? 0;
+            $total    = $pending + $approved + $rejected;
 
             $rejectionRate = $total > 0
                 ? round($rejected / $total * 100, 1)
