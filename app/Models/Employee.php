@@ -26,6 +26,7 @@ class Employee extends Model
         'employee_code',
         'full_name',
         'job_title',
+        'approval_role',
         'grade',
         'entitlement_grade',
         'birth_date',
@@ -56,6 +57,7 @@ class Employee extends Model
         'hire_date'       => 'date',
         'work_start_date' => 'date',
         'is_active'       => 'boolean',
+        'approval_role'   => \App\Enums\ApprovalRole::class,
         // entitlement_grade is a string code referencing entitlement_grades.code
     ];
 

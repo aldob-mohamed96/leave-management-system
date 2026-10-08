@@ -78,6 +78,40 @@ class EmployeeResource extends Resource
                 ->label('المسمى الوظيفي')
                 ->maxLength(255),
 
+            Forms\Components\Select::make('approval_role')
+                ->label('دور الاعتماد')
+                ->options(function (callable $get): array {
+                    $orgId = $get('organization_id');
+                    if (! $orgId) return [];
+
+                    $org = \App\Models\Organization::withoutGlobalScopes()->find($orgId);
+                    if (! $org) return [];
+
+                    return match(true) {
+                        $org->type === \App\Enums\OrganizationType::SCHOOL => [
+                            \App\Enums\ApprovalRole::SCHOOL_PRINCIPAL->value => \App\Enums\ApprovalRole::SCHOOL_PRINCIPAL->label(),
+                        ],
+                        $org->type === \App\Enums\OrganizationType::ADMINISTRATION => [
+                            \App\Enums\ApprovalRole::LEAVES_OFFICER->value => \App\Enums\ApprovalRole::LEAVES_OFFICER->label(),
+                            \App\Enums\ApprovalRole::HR_AFFAIRS->value     => \App\Enums\ApprovalRole::HR_AFFAIRS->label(),
+                            \App\Enums\ApprovalRole::ADMIN_MANAGER->value  => \App\Enums\ApprovalRole::ADMIN_MANAGER->label(),
+                        ],
+                        default => [],
+                    };
+                })
+                ->reactive()
+                ->hidden(function (callable $get): bool {
+                    $orgId = $get('organization_id');
+                    if (! $orgId) return true;
+                    $org = \App\Models\Organization::withoutGlobalScopes()->find($orgId);
+                    return ! $org || ! in_array($org->type, [
+                        \App\Enums\OrganizationType::SCHOOL,
+                        \App\Enums\OrganizationType::ADMINISTRATION,
+                    ]);
+                })
+                ->nullable()
+                ->placeholder('اختر دور الاعتماد'),
+
             Forms\Components\Select::make('organization_id')
                 ->label('المؤسسة')
                 ->options(fn (): array => static::organizationOptions())
@@ -236,8 +270,16 @@ class EmployeeResource extends Resource
 
         setPermissionsTeamId($organizationId);
 
+        $spatieRoleName = match($employee->approval_role) {
+            \App\Enums\ApprovalRole::SCHOOL_PRINCIPAL => 'مدير مدرسة',
+            \App\Enums\ApprovalRole::LEAVES_OFFICER   => 'مسؤول الإجازات',
+            \App\Enums\ApprovalRole::HR_AFFAIRS       => 'شؤون عاملين',
+            \App\Enums\ApprovalRole::ADMIN_MANAGER    => 'مدير الإدارة',
+            default                                   => 'موظف مدرسة',
+        };
+
         $role = \Spatie\Permission\Models\Role::query()
-            ->where('name', 'موظف مدرسة')
+            ->where('name', $spatieRoleName)
             ->where('organization_id', $organizationId)
             ->first();
 
@@ -312,6 +354,19 @@ class EmployeeResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('نشط')
                     ->boolean(),
+
+                Tables\Columns\TextColumn::make('approval_role')
+                    ->label('دور الاعتماد')
+                    ->formatStateUsing(fn($state) => $state?->label() ?? '—')
+                    ->badge()
+                    ->color(fn($state) => match($state) {
+                        \App\Enums\ApprovalRole::SCHOOL_PRINCIPAL => 'success',
+                        \App\Enums\ApprovalRole::ADMIN_MANAGER    => 'danger',
+                        \App\Enums\ApprovalRole::LEAVES_OFFICER   => 'warning',
+                        \App\Enums\ApprovalRole::HR_AFFAIRS       => 'info',
+                        default => 'gray',
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\ViewColumn::make('balance_badge')
                     ->label('رصيد الإجازات')
