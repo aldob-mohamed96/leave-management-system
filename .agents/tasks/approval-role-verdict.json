@@ -1,0 +1,8 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "استعلام مزدوج عن Organization في النموذج — دالتا options و hidden تستعلمان كلتاهما عن Organization::withoutGlobalScopes()->find($orgId) بشكل مستقل في كل تحديث تفاعلي. حلّه بنقل الاستعلام إلى متغير مشترك أو الاعتماد على once().",
+    "إسناد دور Spatie صامت عند الفشل — إذا لم يُوجد دور Spatie المطابق لـ approval_role في المؤسسة، يمر الكود بهدوء دون إسناد دور أو تسجيل تحذير. يجب إضافة Log::warning(...) على الأقل أو رفع استثناء في بيئة التطوير."
+  ],
+  "reviewDoc": "/Users/mohamedgaber/projects/vaccancy/leave-management-system/.agents/tasks/approval-role-review.md"
+}

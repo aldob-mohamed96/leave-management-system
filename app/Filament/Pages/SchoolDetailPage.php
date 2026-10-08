@@ -9,39 +9,16 @@ use App\Models\LeaveRequest;
 use App\Models\Organization;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 
 class SchoolDetailPage extends Page
 {
-    protected static bool   $shouldRegisterNavigation = false;
-    protected static string $view = 'filament.pages.school-detail-page';
-    protected static ?string $slug = 'school-database/{schoolId}';
+    protected static bool    $shouldRegisterNavigation = false;
+    protected static string  $view = 'filament.pages.school-detail-page';
+    protected static ?string $slug = 'school-detail';
 
     public int    $schoolId     = 0;
     public string $activeTab    = 'info';
     public string $statusFilter = '';
-
-    // -------------------------------------------------------------------------
-    // Route — custom slug with {schoolId} parameter
-    // -------------------------------------------------------------------------
-
-    public static function getSlug(): string
-    {
-        return 'school-database/{schoolId}';
-    }
-
-    public static function getRouteName(?string $panel = null): string
-    {
-        return 'filament.admin.pages.school-database.detail';
-    }
-
-    public static function getRoutes(): \Closure
-    {
-        return function () {
-            Route::get('/school-database/{schoolId}', static::class)
-                ->name('filament.admin.pages.school-database.detail');
-        };
-    }
 
     // -------------------------------------------------------------------------
     // Access control
@@ -58,14 +35,14 @@ class SchoolDetailPage extends Page
     }
 
     // -------------------------------------------------------------------------
-    // Lifecycle
+    // Lifecycle — read schoolId from query string: ?school=123
     // -------------------------------------------------------------------------
 
     public function mount(): void
     {
         abort_unless(static::canAccess(), 403);
 
-        $this->schoolId = (int) request()->route('schoolId');
+        $this->schoolId = (int) request()->query('school', 0);
 
         abort_if(! $this->schoolId, 404);
     }
@@ -81,7 +58,7 @@ class SchoolDetailPage extends Page
     }
 
     // -------------------------------------------------------------------------
-    // Tab switching action
+    // Tab switching
     // -------------------------------------------------------------------------
 
     public function switchTab(string $tab): void

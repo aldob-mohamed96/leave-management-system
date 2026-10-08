@@ -86,7 +86,7 @@ class SchoolDatabasePage extends Page implements HasTable
                     ->boolean(),
             ])
             ->recordUrl(fn (Organization $record): string =>
-                SchoolDetailPage::getUrl(['schoolId' => $record->id])
+                SchoolDetailPage::getUrl() . '?school=' . $record->id
             )
             ->emptyStateHeading('لا توجد مدارس');
     }
