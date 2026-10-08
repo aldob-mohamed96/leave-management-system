@@ -6,6 +6,7 @@ use App\Enums\EntitlementGrade as EntitlementGradeEnum;
 use App\Models\Employee;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 
 class EmployeeFactory extends Factory
 {
@@ -81,6 +82,20 @@ class EmployeeFactory extends Factory
             'phone'             => '01'.$this->faker->numerify('#########'),
             'is_active'         => true,
         ];
+    }
+
+    /**
+     * Override store() to suppress model observers when creating via factory.
+     *
+     * The EmployeeObserver fires accrueAnnual on every created event. Test
+     * fixtures set up their own balance state explicitly, so the observer
+     * must not run during factory-driven employee creation.
+     */
+    protected function store(Collection $results): void
+    {
+        Employee::withoutEvents(function () use ($results) {
+            parent::store($results);
+        });
     }
 
     // -------------------------------------------------------------------------

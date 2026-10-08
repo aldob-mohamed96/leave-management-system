@@ -7,6 +7,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\Organization;
 use App\Models\User;
+use App\Observers\EmployeeObserver;
 use App\Observers\LeaveBalanceObserver;
 use App\Observers\LeaveRequestObserver;
 use App\Observers\OrganizationObserver;
@@ -90,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         Organization::observe(OrganizationObserver::class);
         LeaveRequest::observe(LeaveRequestObserver::class);
         LeaveBalance::observe(LeaveBalanceObserver::class);
+        Employee::observe(EmployeeObserver::class);
 
         // ---------------------------------------------------------------
         // Policy registration

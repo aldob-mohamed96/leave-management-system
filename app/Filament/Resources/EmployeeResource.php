@@ -14,9 +14,11 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Unique;
 
 /**
@@ -397,6 +399,38 @@ class EmployeeResource extends Resource
                     ->url(fn (Employee $record): string => EmployeeResource::getUrl('leave-history', ['record' => $record->id]))
                     ->openUrlInNewTab(false),
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkAction::make('renewBalances')
+                    ->label('تجديد الأرصدة السنوية')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('تجديد الأرصدة السنوية')
+                    ->modalDescription('سيتم تجديد أرصدة الإجازات للموظفين المحددين للسنة الحالية. هل أنت متأكد؟')
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        $service = app(\App\Services\LeaveBalanceService::class);
+                        $year = now()->year;
+                        $count = 0;
+                        foreach ($records as $employee) {
+                            try {
+                                DB::transaction(function () use ($service, $employee, $year) {
+                                    $service->carryOver($employee, $year - 1, $year);
+                                    $service->accrueAnnual($employee, $year);
+                                });
+                                $count++;
+                            } catch (\Throwable $e) {
+                                \Illuminate\Support\Facades\Log::warning('Balance renewal failed', [
+                                    'employee_id' => $employee->id,
+                                    'error' => $e->getMessage(),
+                                ]);
+                            }
+                        }
+                        Notification::make()
+                            ->success()
+                            ->title("تم تجديد أرصدة {$count} موظف بنجاح")
+                            ->send();
+                    }),
             ])
             ->defaultSort('full_name')
             ->recordUrl(fn (Employee $record): string => EmployeeResource::getUrl('view', ['record' => $record]));
