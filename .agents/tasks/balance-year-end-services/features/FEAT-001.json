@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Backend year-end rollover: (a) patch LeaveBalanceService::carryOver() with idempotency guard and source-year zeroing, (b) create AnnualLeaveRollover Artisan command, (c) register it in the scheduler.",
+  "status": "completed",
+  "steps": [
+    "Step 1 — Patch app/Services/LeaveBalanceService.php::carryOver(). Inside the foreach loop that iterates $balances, add an idempotency guard at the top of the loop body: if ($toBalance->carried_over > 0) { continue; } — skip if destination already has carry-over for this year. Then inside the existing DB::transaction closure, after $toBalance->increment('carried_over', $carryDays), add: $bal->refresh(); $bal->carried_over = 0; $bal->save(); — this zeros out the source-year balance's carried_over so it cannot be re-rolled forward. The $toBalance lockForUpdate line already exists; $bal is the source balance from the foreach iteration (it's the LeaveBalance model for fromYear). No new imports needed.",
+
+    "Step 2 — Create app/Console/Commands/AnnualLeaveRollover.php. Namespace: App\\Console\\Commands. Extend Illuminate\\Console\\Command. Signature: 'leave:year-end {--year= : السنة المستهدفة (افتراضي: السنة الحالية)} {--dry-run : معاينة بدون حفظ}'. Description: 'تجديد أرصدة الإجازات السنوية لجميع الموظفين النشطين'. Constructor injects App\\Services\\LeaveBalanceService via type-hint. handle() method: (1) resolve year from option or now()->year; (2) load all active employees with(['leaveBalances', 'entitlementGrade']); (3) if --dry-run, wrap entire loop in DB::beginTransaction() with DB::rollBack() at end; (4) use $this->withProgressBar($employees, function ($emp) use (&$count, $year, $service) { ... }); (5) inside closure: wrap carryOver($emp, $year-1, $year) + accrueAnnual($emp, $year) in DB::transaction(); (6) per-employee try/catch(\\Throwable $e) that calls Log::warning() and $this->warn(); (7) $count++ on success; (8) after loop: $this->info(\"تم تجديد أرصدة {$count} موظف لسنة {$year} بنجاح.\"); (9) return Command::SUCCESS. Follow NotifyOverdueRequests.php style exactly. Imports needed: App\\Models\\Employee, App\\Services\\LeaveBalanceService, Illuminate\\Console\\Command, Illuminate\\Support\\Facades\\DB, Illuminate\\Support\\Facades\\Log.",
+
+    "Step 3 — Modify routes/console.php. Add 'use Illuminate\\Support\\Facades\\Schedule;' after the existing use statements at the top of the file. After the existing Artisan::command('inspire', ...) block, add: Schedule::command('leave:year-end')->yearlyOn(1, 1, '00:01')->withoutOverlapping()->runInBackground()->appendOutputTo(storage_path('logs/year-end-rollover.log')); The file currently only has the inspire command and two use statements (Artisan and Inspiring)."
+  ],
+  "acceptance_criteria": [
+    "php artisan leave:year-end --dry-run --year=2025 exits 0 and prints a summary without writing any leave_balance rows",
+    "php artisan schedule:list shows leave:year-end scheduled yearlyOn(1, 1, 00:01)",
+    "php artisan test --filter=Phase2ServicesTest passes with no regressions — the carryOver() guard must not break the normal first-run path (carried_over was 0 before the call)",
+    "Calling carryOver() a second time for the same year pair returns immediately without duplicating carried_over"
+  ],
+  "verification": [
+    "php artisan test --filter=Phase2ServicesTest",
+    "php artisan leave:year-end --dry-run --year=2025",
+    "php artisan schedule:list"
+  ],
+  "blocked_reason": null,
+  "findings": "carryOver() idempotency guard checks $toBalance->carried_over > 0 before entering the transaction — first run always proceeds (value is 0). Source-year carried_over is zeroed inside the same DB::transaction after increment. AnnualLeaveRollover command is registered and visible in schedule:list at cron '1 0 1 1 *'. The 3 pre-existing test failures (WorkingDaysRule Fri/Sat exclusion + LeaveRequestService auto-calculation) are UNRELATED to this feature and were already failing on the base commit (0a132c4). FEAT-002 (UI page or additional testing) should note: active employee count in the dev DB is 214; dry-run completes in under 2 seconds."
+}
