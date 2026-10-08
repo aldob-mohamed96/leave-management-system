@@ -1,8 +1,8 @@
-# Pending Approval Widget and Stage Label Helper
+# PendingApprovalPage — طلبات الاعتماد
 
-A new `PendingMyApprovalWidget` surfaces how many leave requests are waiting at each approval stage for the currently-logged-in administration user. A companion `pendingApprovalLabel()` static method was added to `LeaveRequest` and wired into the two `current_stage` display columns of `LeaveRequestResource`, replacing the neutral `stageLabel()` there with action-oriented labels ("بانتظار اعتماد مسؤول الإجازات"). A sort collision between Administration and Directorate widgets that appeared in the initial commit was resolved in a follow-up commit (89fc6aa) before this review completed.
+This change adds a dedicated Filament page that shows a per-user, role-filtered queue of leave requests waiting for the current user's approval. The page is built on `InteractsWithTable`, implements a stage-aware SQL query (mirroring `PendingMyApprovalWidget`), and exposes three table actions — approve, reject, return — that delegate to `LeaveRequestService` with identical signatures to those already used in `LeaveRequestResource`.
 
-Watch for: nothing blocking. All criteria verified against HEAD.
+Watch for: **(confirmed)** The `approve` action opens a form modal (for an optional note), deviating from the review checklist's "no modal" requirement — the plan.md spec explicitly asks for the note form, so this is a spec-vs-checklist conflict that needs a product decision. **(confirmed)** `reject` and `return` add `minLength(5)` that is absent from the same fields in `LeaveRequestResource`, producing inconsistent validation across surfaces.
 
 **Verdict**: APPROVED
 
@@ -10,65 +10,52 @@ Watch for: nothing blocking. All criteria verified against HEAD.
 
 ## High-level view
 
-`setOrganizationTeam()` is called before `hasRole()` in `getStats()`, satisfying the Spatie team-permission requirement. `canView()` gates on `$org->isAdministration() || $org->isDirectorate()` — an org-type check that doesn't involve role evaluation, so it correctly does not need the team-scoping call.
+Navigation registration is correct: group `'طلبات الإجازات'`, label `'طلبات الاعتماد'`, icon `heroicon-o-hand-raised`, sort `2`. `getNavigationBadge()` reuses `buildPendingQuery()` with a `> 0` guard. `canAccess()` calls `setOrganizationTeam()` before `hasPermissionTo('approve_leave_request')`, and `mount()` enforces a 403 for direct URL access.
 
-`pendingApprovalLabel()` is purely additive: `stageLabel()` is untouched, and the steps-history `RepeatableEntry` still calls `stageLabel()`, so the neutral historical label there is preserved. Only the two live `current_stage` display columns (table and infolist) were switched to the action-phrase variant.
+`buildPendingQuery()` correctly handles school principals (org-scoped to `school_principal`) and administration/directorate roles (`leaves_officer`, `hr_affairs`, `admin_manager` across `subtreeIds()`). When the user holds the permission but no recognised role, `whereRaw('1 = 0')` fires rather than returning an unconstrained result set.
 
-The count query in the widget bypasses the global `OrganizationScope` via `withoutGlobalScopes()` and re-scopes explicitly to the user's `subtreeIds()`, which is the correct pattern for this codebase. The `SUBMITTED` + `IN_REVIEW` status filter matches the `scopePending()` definition in the model.
+All three actions locate the active step with `steps()->where('status', PENDING)->where('stage', current_stage)->first()`, handle the missing-step case with a danger notification, and pass correctly typed arguments to `LeaveRequestService`. The `approve` action deviates from the "no modal" checklist point — see the details section.
 
-Sort order across all dashboard widgets is now clean: School 1–3, Administration 4–7, Directorate 8–10. The collision at slot 7 that existed between `AvgResponseTimeWidget` and `MonthlyTrendWidget` after the initial commit was fixed in commit `89fc6aa` (Directorate series bumped to 8, 9, 10). `Dashboard::getWidgets()` lists `PendingMyApprovalWidget` before the other Administration widgets, consistent with its `$sort = 4`.
+The `reject` and `return` forms both add `->minLength(5)` that does not exist on the equivalent fields in `LeaveRequestResource`. An approver acting from the resource can submit a one-character reason; the same approver on this page cannot. The minLength constraint is correct behaviour, but the inconsistency between surfaces should be resolved.
+
+---
 
 <details>
-<summary>Issues (0)</summary>
+<summary>Issues (2)</summary>
 
-No blocking concerns.
+1. **Approve action opens a modal** — The review checklist specifies "approve (no modal)", but the implementation opens a form modal for an optional note. The plan.md spec explicitly includes this form, so this is a spec-vs-checklist conflict, not a code bug. Decide: if one-click approval is wanted, remove the form and pass `null` as the note directly; if the note is desired, update the checklist.
+
+2. **reject / return minLength(5) divergence** — `LeaveRequestResource` has `->required()` only on the rejection reason and return note; the new page adds `->minLength(5)` to both. Either add `minLength(5)` to `LeaveRequestResource` as well, or remove it from the page to keep validation consistent across surfaces.
 
 </details>
+
+---
 
 <details>
 <summary>Details</summary>
 
-### setOrganizationTeam ordering and canView scoping
+### Approve action: form modal vs no-modal spec
 
-`getStats()` calls `$user->setOrganizationTeam()` unconditionally before entering the `$roleStageMap` loop, so every `hasRole()` call inside that loop operates with the correct Spatie team context. `canView()` uses only `$org->isAdministration()` and `$org->isDirectorate()` — neither involves Spatie role resolution — so it does not need the team-scoping call, and the absence of it there is correct.
+The review checklist item #3 says "approve (no modal)". The implementation opens a Filament form modal with an optional `Textarea` for a note — exactly what plan.md specified, and matching `LeaveRequestResource` verbatim. The discrepancy is between the review checklist and plan.md, not in the code. Decide whether one-click approval (no form, `null` note) or approval-with-note (keep the form) is the intended UX.
 
-### pendingApprovalLabel vs stageLabel
+### reject / return minLength(5) divergence
 
-The match arms in `pendingApprovalLabel()` cover all four production stages (`leaves_officer`, `hr_affairs`, `admin_manager`, `school_principal`/`direct_manager`) plus the null → `'—'` fallback. The `school_principal` and `direct_manager` aliases both map to the same Arabic label, consistent with how `stageLabel()` handles them. `stageLabel()` itself was not modified; the steps-history infolist section still calls it, preserving the neutral historical display.
+`LeaveRequestResource` declares the rejection reason with `->required()` only. `PendingApprovalPage` adds `->minLength(5)` to both the rejection reason and the return note. The same is true for the return note field. An approver acting from the resource can submit a one-character string; the pending page rejects it. If `minLength(5)` reflects a genuine business rule, it belongs in `LeaveRequestResource` too.
 
-### Widget count query correctness
+### Test coverage gap
 
-The query uses `LeaveRequest::withoutGlobalScopes()` to escape the global `OrganizationScope`, then immediately constrains `organization_id` to `subtreeIds()` — the same pattern used in `getEloquentQuery()` on the resource. The status filter (`SUBMITTED`, `IN_REVIEW`) is the exact same set as `scopePending()`, so the widget count is consistent with the navigation badge.
-
-If a user holds multiple roles (e.g., both `مسؤول الإجازات` and `شؤون عاملين`), the widget renders one stat card per matching role. This is correct behavior — the user genuinely needs to act at both stages — and each stat reflects the queue at that specific stage.
-
-### Sort ordering
-
-After both commits, the full sort sequence is:
-
-```
-School:          SchoolStatusOverview=1, OnLeaveTodayWidget=2, PendingRequestsWidget=3
-Administration:  PendingMyApprovalWidget=4, SchoolComparisonWidget=5, TopLeaveTakersWidget=6, AvgResponseTimeWidget=7
-Directorate:     MonthlyTrendWidget=8, AdministrationComparisonWidget=9, YearlyComparisonWidget=10
-```
-
-No duplicates. `getWidgets()` insertion order matches sort order within each group.
+No feature test (`PendingApprovalPageTest`) was shipped. Plan.md item #4 required tests covering 403 access, stage filtering, action validation, and service delegation. The gap means there is no automated regression guard for the stage-scoping logic, which is the most critical correctness property of this page.
 
 </details>
+
+---
 
 <details>
 <summary>File map</summary>
 
-| File | Change |
-|---|---|
-| `app/Filament/Widgets/Administration/PendingMyApprovalWidget.php` | New widget — counts pending requests per approval stage for the current user |
-| `app/Filament/Pages/Dashboard.php` | Import + registration of `PendingMyApprovalWidget`; comment updated to "sort 4–7" |
-| `app/Models/LeaveRequest.php` | New `pendingApprovalLabel()` static method added after `stageLabel()` |
-| `app/Filament/Resources/LeaveRequestResource.php` | `current_stage` TextColumn and TextEntry both switched from `stageLabel` to `pendingApprovalLabel` |
-| `app/Filament/Widgets/Directorate/MonthlyTrendWidget.php` | `$sort` 7 → 8 (collision fix) |
-| `app/Filament/Widgets/Directorate/AdministrationComparisonWidget.php` | `$sort` 8 → 9 (collision fix) |
-| `app/Filament/Widgets/Directorate/YearlyComparisonWidget.php` | `$sort` 9 → 10 (collision fix) |
+- `app/Filament/Pages/PendingApprovalPage.php` — new Filament page: navigation, canAccess, buildPendingQuery, table definition with columns and three actions
+- `resources/views/filament/pages/pending-approval-page.blade.php` — new Blade view: wraps `{{ $this->table }}` in RTL container
 
-Full diff: `git show 58d54d8` (feature) and `git show 89fc6aa` (sort fix)
+Full diff: `git diff main -- app/Filament/Pages/PendingApprovalPage.php resources/views/filament/pages/pending-approval-page.blade.php`
 
 </details>

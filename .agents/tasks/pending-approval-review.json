@@ -1,5 +1,9 @@
 {
   "verdict": "APPROVED",
-  "findings": [],
+  "findings": [
+    "Approve action opens a modal — The review checklist specifies 'approve (no modal)', but the implementation opens a form modal for an optional note. plan.md explicitly includes this form, making this a spec-vs-checklist conflict. Decide: remove the form for one-click approval, or update the checklist to accept the modal.",
+    "reject / return minLength(5) divergence — LeaveRequestResource has ->required() only on the rejection reason and return note; the new page adds ->minLength(5) to both. An approver on the resource can submit a one-character string; the pending page rejects it. Add minLength(5) to LeaveRequestResource or remove it from the page.",
+    "Test coverage gap — No PendingApprovalPageTest was shipped. Plan.md item #4 required Pest tests covering 403 access, stage filtering, action validation, and service delegation. No automated regression guard exists for the stage-scoping logic."
+  ],
   "reviewDoc": "/Users/mohamedgaber/projects/vaccancy/leave-management-system/.agents/tasks/pending-approval-review.md"
 }
