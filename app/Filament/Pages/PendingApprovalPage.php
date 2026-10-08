@@ -48,7 +48,6 @@ class PendingApprovalPage extends Page implements HasTable
         }
         $user->setOrganizationTeam();
 
-        // Use a static-context-friendly version of pendingQuery
         $count = static::buildPendingQuery($user)->count();
 
         return $count > 0 ? (string) $count : null;
@@ -91,10 +90,11 @@ class PendingApprovalPage extends Page implements HasTable
             }
         }
 
+        // Fix #4: oldest first (submitted_at asc) so approvers see longest-waiting requests first
         $base = LeaveRequest::withoutGlobalScopes()
-            ->with(['employee', 'leaveType', 'steps'])
+            ->with(['employee', 'leaveType', 'steps', 'organization'])
             ->whereIn('status', [LeaveStatus::SUBMITTED->value, LeaveStatus::IN_REVIEW->value])
-            ->latest('submitted_at');
+            ->oldest('submitted_at');
 
         // No qualifying stages — return empty result
         if (! $schoolOrgId && empty($adminStages)) {
@@ -141,23 +141,36 @@ class PendingApprovalPage extends Page implements HasTable
                     ->searchable()
                     ->sortable(),
 
+                // Fix #2: add organization.name column
+                Tables\Columns\TextColumn::make('organization.name')
+                    ->label('الجهة'),
+
                 Tables\Columns\TextColumn::make('leaveType.name')
                     ->label('نوع الإجازة'),
 
+                // Fix #6: date format d F Y
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('من')
-                    ->date('Y-m-d'),
+                    ->date('d F Y'),
 
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('إلى')
-                    ->date('Y-m-d'),
+                    ->date('d F Y'),
 
                 Tables\Columns\TextColumn::make('days')
                     ->label('الأيام'),
 
+                // Fix #3: add status badge column
+                Tables\Columns\TextColumn::make('status')
+                    ->label('الحالة')
+                    ->formatStateUsing(fn (LeaveRequest $record): string => $record->displayStatusLabel())
+                    ->color(fn (LeaveRequest $record): string => $record->displayStatusColor())
+                    ->badge(),
+
+                // Fix #1: use pendingApprovalLabel instead of stageLabel
                 Tables\Columns\TextColumn::make('current_stage')
                     ->label('المرحلة')
-                    ->formatStateUsing(fn (?string $state) => LeaveRequest::stageLabel($state))
+                    ->formatStateUsing(fn (?string $state) => LeaveRequest::pendingApprovalLabel($state))
                     ->badge(),
 
                 Tables\Columns\TextColumn::make('submitted_at')
@@ -168,7 +181,7 @@ class PendingApprovalPage extends Page implements HasTable
             ->emptyStateHeading('لا توجد طلبات')
             ->emptyStateDescription('لا توجد طلبات بانتظار اعتمادك')
             ->actions([
-                // --- اعتماد ---
+                // --- اعتماد (Fix #5: no modal, fires immediately) ---
                 Tables\Actions\Action::make('approve')
                     ->label('اعتماد')
                     ->icon('heroicon-o-check-circle')
@@ -177,12 +190,7 @@ class PendingApprovalPage extends Page implements HasTable
                         in_array($record->status, [LeaveStatus::SUBMITTED, LeaveStatus::IN_REVIEW])
                         && (bool) Auth::user()?->can('approve', $record)
                     )
-                    ->form([
-                        Forms\Components\Textarea::make('note')
-                            ->label('ملاحظة (اختيارية)')
-                            ->nullable(),
-                    ])
-                    ->action(function (LeaveRequest $record, array $data): void {
+                    ->action(function (LeaveRequest $record): void {
                         try {
                             $step = $record->steps()
                                 ->where('status', StepStatus::PENDING->value)
@@ -195,7 +203,7 @@ class PendingApprovalPage extends Page implements HasTable
                             }
 
                             app(\App\Services\LeaveRequestService::class)->approve(
-                                $record, $step, Auth::user(), $data['note'] ?? null
+                                $record, $step, Auth::user(), null
                             );
 
                             Notification::make()->success()->title('تم الاعتماد')->send();
@@ -245,9 +253,9 @@ class PendingApprovalPage extends Page implements HasTable
                         }
                     }),
 
-                // --- إعادة ---
+                // --- إعادة للتعديل (Fix #7: updated label) ---
                 Tables\Actions\Action::make('return')
-                    ->label('إعادة')
+                    ->label('إعادة للتعديل')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('warning')
                     ->visible(fn (LeaveRequest $record): bool =>

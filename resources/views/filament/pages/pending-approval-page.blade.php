@@ -1,3 +1,5 @@
 <x-filament-panels::page>
-    {{$this->table}}
+    <div dir="rtl">
+        {{$this->table}}
+    </div>
 </x-filament-panels::page>
