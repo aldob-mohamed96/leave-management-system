@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>شرح نظام إدارة الإجازات — مديرية الأقصر</title>
+  <style>
+    :root {
+      --bg: #f3f6f9;
+      --surface: #ffffff;
+      --ink: #15202b;
+      --muted: #5b6b7c;
+      --line: #d7e0ea;
+      --accent: #0d4f8b;
+      --accent-soft: #e7f1fa;
+      --ok: #1b7a4e;
+      --warn: #9a6700;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", Arial, sans-serif;
+      background:
+        radial-gradient(1200px 500px at 100% -10%, #d9eaf8 0%, transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.75;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 64px; }
+    header.hero {
+      background: linear-gradient(135deg, #0d4f8b 0%, #1a6bb5 55%, #2480c9 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 36px 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 30px rgba(13, 79, 139, 0.22);
+    }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; max-width: 46rem; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px;
+    }
+    .chip {
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    nav.toc h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--accent); }
+    nav.toc ol { margin: 0; padding-inline-start: 1.4rem; }
+    nav.toc a { color: var(--ink); text-decoration: none; }
+    nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px 22px 10px;
+      margin-bottom: 18px;
+    }
+    section h2 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent-soft);
+      padding-bottom: 8px;
+    }
+    section h3 { margin: 18px 0 8px; font-size: 1.05rem; }
+    p, li { color: var(--ink); }
+    .muted { color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 18px;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: right;
+      vertical-align: top;
+    }
+    th { background: var(--accent-soft); color: var(--accent); }
+    tr:nth-child(even) td { background: #fafcfe; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 12px 0 18px;
+    }
+    .card {
+      background: var(--accent-soft);
+      border: 1px solid #c9ddf0;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .card strong { display: block; margin-bottom: 4px; color: var(--accent); }
+    code, .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      direction: ltr;
+      unicode-bidi: plaintext;
+      font-size: 0.86em;
+      background: #eef3f8;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .flow {
+      background: #f7fafc;
+      border: 1px dashed #b8c9da;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 12px 0 18px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      direction: ltr;
+      text-align: center;
+      line-height: 1.9;
+      font-size: 0.9rem;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    ul.clean { padding-inline-start: 1.2rem; }
+    @media print {
+      body { background: #fff; }
+      header.hero { box-shadow: none; }
+      section, nav.toc { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>نظام إدارة الإجازات — مديرية التربية والتعليم بالأقصر</h1>
+      <p>
+        وثيقة شرح شاملة للنظام: المميزات، أنواع المستخدمين، مسار اعتماد الإجازات،
+        جداول قاعدة البيانات، وتقنيات الـ Backend المستخدمة في التشغيل.
+      </p>
+      <div class="meta">
+        <span class="chip">Laravel 11</span>
+        <span class="chip">Filament 3</span>
+        <span class="chip">MySQL</span>
+        <span class="chip">واجهة عربية RTL</span>
+        <span class="chip">leave.rtltec.com</span>
+      </div>
+    </header>
+
+    <nav class="toc">
+      <h2>محتويات الشرح</h2>
+      <ol>
+        <li><a href="#overview">نظرة عامة على النظام</a></li>
+        <li><a href="#stack">التقنيات المستخدمة (Backend)</a></li>
+        <li><a href="#users">المستخدمون والأدوار</a></li>
+        <li><a href="#features">المميزات الرئيسية</a></li>
+        <li><a href="#workflow">مسار طلب الإجازة والاعتماد</a></li>
+        <li><a href="#modules">وحدات النظام (الشاشات)</a></li>
+        <li><a href="#database">قاعدة البيانات والجداول</a></li>
+        <li><a href="#api">واجهة الـ API</a></li>
+        <li><a href="#security">الأمان والحسابات</a></li>
+        <li><a href="#deploy">النشر والتشغيل</a></li>
+      </ol>
+    </nav>
+
+    <section id="overview">
+      <h2>1) نظرة عامة على النظام</h2>
+      <p>
+        النظام منصة لإدارة <strong>طلبات الإجازات</strong> داخل مديرية التعليم،
+        وفق تسلسل إداري: <strong>مديرية → إدارة تعليمية → مدرسة</strong>.
+        يتيح تقديم الطلبات، تتبع الأرصدة، الاعتماد متعدد المراحل،
+        طباعة نماذج PDF عربية، وتقارير إحصائية.
+      </p>
+      <div class="grid">
+        <div class="card"><strong>الهدف</strong>رقمنة دورة الإجازة من التقديم حتى الاعتماد أو الرفض</div>
+        <div class="card"><strong>النطاق</strong>مديرية الأقصر — مثال تطبيقي: إدارة أرمنت ومدارسها</div>
+        <div class="card"><strong>الواجهة</strong>لوحة تحكم Filament عربية بالكامل</div>
+        <div class="card"><strong>الدخول</strong>بريد إلكتروني أو رقم تليفون مصري + كلمة مرور</div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>2) التقنيات المستخدمة (Backend)</h2>
+      <table>
+        <thead>
+          <tr><th>المكوّن</th><th>التقنية</th><th>الاستخدام</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>لغة السيرفر</td><td>PHP 8.2+</td><td>تشغيل التطبيق</td></tr>
+          <tr><td>إطار العمل</td><td>Laravel 11</td><td>Routing، Eloquent، Migrations، Queues، Validation</td></tr>
+          <tr><td>لوحة الإدارة</td><td>Filament 3 + Livewire 3</td><td>واجهات CRUD والنماذج والتقارير</td></tr>
+          <tr><td>قاعدة البيانات</td><td>MySQL</td><td>تخزين المستخدمين والطلبات والأرصدة</td></tr>
+          <tr><td>الصلاحيات</td><td>Spatie Laravel Permission (Teams)</td><td>أدوار حسب المؤسسة (organization_id)</td></tr>
+          <tr><td>سجل النشاط</td><td>Spatie Activitylog</td><td>تتبع إنشاء/تعديل السجلات المهمة</td></tr>
+          <tr><td>API Auth</td><td>Laravel Sanctum</td><td>توكنات للوصول عبر API</td></tr>
+          <tr><td>PDF</td><td>DomPDF + حزمة ar-php</td><td>نماذج إجازة وتقارير عربية</td></tr>
+          <tr><td>Excel</td><td>Maatwebsite Excel</td><td>استيراد/تصدير عند الحاجة</td></tr>
+          <tr><td>QR / Barcode</td><td>Simple QrCode + Picqer</td><td>التحقق من الطلبات المطبوعة</td></tr>
+          <tr><td>الواجهة الأمامية للبناء</td><td>Vite + Tailwind CSS</td><td>أصول CSS/JS للوحة</td></tr>
+          <tr><td>الاستضافة الحالية</td><td>Namecheap (cPanel) + Git</td><td>النشر عبر السحب من GitHub</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">الرابط التشغيلي: <span class="mono">https://leave.rtltec.com/admin</span></p>
+    </section>
+
+    <section id="users">
+      <h2>3) المستخدمون والأدوار</h2>
+      <p>كل مستخدم مرتبط بـ <strong>مؤسسة</strong> (مديرية / إدارة / مدرسة)، والأدوار تُطبَّق داخل نطاق هذه المؤسسة.</p>
+
+      <h3>أ) مستوى المدرسة</h3>
+      <table>
+        <thead><tr><th>الدور</th><th>ماذا يفعل عادةً؟</th></tr></thead>
+        <tbody>
+          <tr><td>مدير مدرسة</td><td>اعتماد أولي لطلبات المدرسة، متابعة الموظفين، التوقيع الإلكتروني</td></tr>
+          <tr><td>وكيل مدرسة</td><td>صلاحيات مساعدة على مستوى المدرسة</td></tr>
+          <tr><td>أخصائي</td><td>إدارة طلبات وإجراءات الإجازات داخل المدرسة</td></tr>
+          <tr><td>موظف مدرسة</td><td>دخول للنظام مرتبط بملف موظف (عرض/متابعة حسب الصلاحية)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>ب) مستوى الإدارة التعليمية</h3>
+      <table>
+        <thead><tr><th>الدور</th><th>ماذا يفعل عادةً؟</th></tr></thead>
+        <tbody>
+          <tr><td>مسؤول الإجازات</td><td>مراجعة الطلبات القادمة من المدارس وإبداء الرأي/الاعتماد حسب المسار</td></tr>
+          <tr><td>مدير الإدارة</td><td>الاعتماد النهائي على مستوى الإدارة</td></tr>
+          <tr><td>كاتب الإدارة</td><td>أعمال إدارية مساعدة</td></tr>
+        </tbody>
+      </table>
+
+      <h3>ج) مستوى المديرية</h3>
+      <table>
+        <thead><tr><th>الدور</th><th>ماذا يفعل عادةً؟</th></tr></thead>
+        <tbody>
+          <tr><td>مدير المديرية</td><td>صلاحيات واسعة وإشراف عام</td></tr>
+          <tr><td>وكيل المديرية</td><td>إشراف ومتابعة</td></tr>
+          <tr><td>منسق</td><td>تنسيق ومتابعة تقارير/إجراءات</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        <strong>ملاحظة:</strong> يمكن إنشاء حساب دخول لموظف من شاشة الموظفين
+        (دور افتراضي: موظف مدرسة)، مع إمكانية الدخول لاحقًا بالبريد أو رقم التليفون.
+      </p>
+    </section>
+
+    <section id="features">
+      <h2>4) المميزات الرئيسية</h2>
+      <ul class="clean">
+        <li>تسلسل مؤسسات هرمي: مديرية → إدارة → مدارس.</li>
+        <li>إدارة موظفين مع كود وظيفي، درجة استحقاق، هاتف، وربط اختياري بحساب نظام.</li>
+        <li>أنواع إجازات قابلة للضبط (تخصم من الرصيد / لا تخصم، حد أقصى للطلب…).</li>
+        <li>درجات وظيفية تحدد الاستحقاق السنوي.</li>
+        <li>إجازات رسمية تُستثنى من أيام العمل.</li>
+        <li>أرصدة إجازات سنوية مع خصم/استرداد/ترحيل وسجل معاملات.</li>
+        <li>سير عمل اعتماد متعدد الخطوات حسب إعدادات كل مدرسة/مؤسسة.</li>
+        <li>توقيع إلكتروني لمدير المدرسة على الطلب.</li>
+        <li>طباعة PDF عربي لنموذج الإجازة مع QR/Barcode للتحقق.</li>
+        <li>تقارير وإحصاءات حسب نطاق المؤسسة.</li>
+        <li>صفحة «حسابي» لتغيير الاسم / الإيميل / التليفون / كلمة المرور.</li>
+        <li>إجبار تغيير كلمة المرور عند الحسابات الجديدة عند الحاجة.</li>
+        <li>API جاهز للمصادقة وإدارة الطلبات والموظفين.</li>
+        <li>واجهة عربية كاملة واتجاه RTL.</li>
+      </ul>
+    </section>
+
+    <section id="workflow">
+      <h2>5) مسار طلب الإجازة والاعتماد</h2>
+      <h3>حالات الطلب</h3>
+      <table>
+        <thead><tr><th>الحالة</th><th>المعنى</th></tr></thead>
+        <tbody>
+          <tr><td>مسودة</td><td>الطلب لم يُقدَّم بعد</td></tr>
+          <tr><td>مقدّم</td><td>تم التقديم ودخل المسار</td></tr>
+          <tr><td>قيد المراجعة</td><td>في مراحل الاعتماد</td></tr>
+          <tr><td>مُعاد للتعديل</td><td>يحتاج تصحيح ثم إعادة تقديم</td></tr>
+          <tr><td>معتمد</td><td>اكتمل الاعتماد وخصم الرصيد (إن لزم)</td></tr>
+          <tr><td>مرفوض</td><td>رُفض في إحدى المراحل</td></tr>
+          <tr><td>ملغى / محذوف</td><td>إلغاء الطلب مع استرداد الرصيد إن كان معتمدًا</td></tr>
+        </tbody>
+      </table>
+
+      <h3>مسار الاعتماد النموذجي للمدرسة</h3>
+      <div class="flow">
+        إنشاء الطلب
+        → تقديم
+        → اعتماد مدير المدرسة (توقيع إلكتروني)
+        → مسؤول الإجازات (الإدارة)
+        → مدير الإدارة
+        → معتمد / مرفوض / مُعاد
+      </div>
+      <p class="muted">الخطوات قابلة للضبط عبر جدول إعدادات سير العمل لكل مؤسسة.</p>
+    </section>
+
+    <section id="modules">
+      <h2>6) وحدات النظام (الشاشات)</h2>
+      <table>
+        <thead><tr><th>الوحدة</th><th>المجموعة</th><th>الوظيفة</th></tr></thead>
+        <tbody>
+          <tr><td>لوحة التحكم</td><td>—</td><td>مؤشرات وإحصاءات حسب صلاحية المستخدم</td></tr>
+          <tr><td>طلبات الإجازات</td><td>طلبات الإجازات</td><td>إنشاء، متابعة، اعتماد، رفض، إرجاع، إلغاء، PDF</td></tr>
+          <tr><td>الموظفون</td><td>الموظفون</td><td>بيانات الموظفين + إنشاء حساب دخول اختياري</td></tr>
+          <tr><td>المستخدمون</td><td>المؤسسات والمستخدمون</td><td>إدارة حسابات الدخول والأدوار</td></tr>
+          <tr><td>المؤسسات</td><td>المؤسسات والمستخدمون</td><td>المديرية / الإدارات / المدارس</td></tr>
+          <tr><td>أنواع الإجازات</td><td>الإعدادات</td><td>تعريف أنواع الإجازة وقواعدها</td></tr>
+          <tr><td>الإجازات الرسمية</td><td>الإعدادات</td><td>العطل الرسمية</td></tr>
+          <tr><td>الدرجات الوظيفية</td><td>الإعدادات</td><td>ربط الدرجة بالاستحقاق السنوي</td></tr>
+          <tr><td>التقارير</td><td>—</td><td>تقارير وملخصات قابلة للتصدير PDF</td></tr>
+          <tr><td>حسابي</td><td>—</td><td>تعديل بيانات الحساب وكلمة المرور</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="database">
+      <h2>7) قاعدة البيانات والجداول</h2>
+      <p>المحرك: <strong>MySQL</strong>. أهم جداول الدومين:</p>
+
+      <h3>أ) الهيكل والمستخدمون</h3>
+      <table>
+        <thead><tr><th>الجدول</th><th>أهم الحقول</th><th>الغرض</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">organizations</span></td>
+            <td>parent_id, type, name, code, path, depth, is_active</td>
+            <td>شجرة المؤسسات</td>
+          </tr>
+          <tr>
+            <td><span class="mono">users</span></td>
+            <td>organization_id, name, email, phone, password, is_active, must_change_password</td>
+            <td>حسابات الدخول</td>
+          </tr>
+          <tr>
+            <td><span class="mono">employees</span></td>
+            <td>organization_id, user_id, employee_code, full_name, entitlement_grade, phone, is_active</td>
+            <td>ملفات الموظفين</td>
+          </tr>
+          <tr>
+            <td><span class="mono">entitlement_grades</span></td>
+            <td>code, name, yearly_days, is_active</td>
+            <td>درجات الاستحقاق</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>ب) الإجازات والأرصدة</h3>
+      <table>
+        <thead><tr><th>الجدول</th><th>أهم الحقول</th><th>الغرض</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">leave_types</span></td>
+            <td>code, name, deducts_balance, yearly_entitlement, max_days_per_request</td>
+            <td>أنواع الإجازة</td>
+          </tr>
+          <tr>
+            <td><span class="mono">holidays</span></td>
+            <td>date, name</td>
+            <td>إجازات رسمية</td>
+          </tr>
+          <tr>
+            <td><span class="mono">leave_balances</span></td>
+            <td>employee_id, leave_type_id, year, entitled, carried_over, used</td>
+            <td>رصيد سنوي لكل موظف/نوع</td>
+          </tr>
+          <tr>
+            <td><span class="mono">leave_balance_transactions</span></td>
+            <td>leave_balance_id, leave_request_id, type, days, note, created_by</td>
+            <td>سجل خصم/إضافة/تعديل</td>
+          </tr>
+          <tr>
+            <td><span class="mono">leave_requests</span></td>
+            <td>number, employee_id, organization_id, leave_type_id, dates, days, status, current_stage…</td>
+            <td>طلبات الإجازة</td>
+          </tr>
+          <tr>
+            <td><span class="mono">leave_request_steps</span></td>
+            <td>leave_request_id, step_order, stage, status, acted_by, note</td>
+            <td>خطوات الاعتماد</td>
+          </tr>
+          <tr>
+            <td><span class="mono">leave_request_attachments</span></td>
+            <td>leave_request_id, path, original_name, uploaded_by</td>
+            <td>مرفقات الطلب</td>
+          </tr>
+          <tr>
+            <td><span class="mono">workflow_configurations</span></td>
+            <td>organization_id, stage_name, step_order, approval_rule, required_role, label</td>
+            <td>إعداد مسار الاعتماد</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>ج) جداول البنية التحتية والحزم</h3>
+      <ul class="clean">
+        <li>Laravel: <span class="mono">sessions</span>, <span class="mono">cache</span>, <span class="mono">jobs</span>, <span class="mono">failed_jobs</span>, <span class="mono">notifications</span></li>
+        <li>Sanctum: <span class="mono">personal_access_tokens</span></li>
+        <li>Spatie Permission: <span class="mono">roles</span>, <span class="mono">permissions</span>, وجداول الربط</li>
+        <li>Spatie Activitylog: <span class="mono">activity_log</span></li>
+      </ul>
+
+      <h3>د) علاقات أساسية مبسطة</h3>
+      <div class="flow">
+        Organization
+        ├── Users
+        ├── Employees ── LeaveBalances ── Transactions
+        │                 └── LeaveRequests ── Steps / Attachments
+        └── WorkflowConfigurations
+      </div>
+    </section>
+
+    <section id="api">
+      <h2>8) واجهة الـ API</h2>
+      <p>مصادقة عبر Sanctum. أهم المسارات:</p>
+      <table>
+        <thead><tr><th>Method</th><th>المسار</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td>POST</td><td><span class="mono">/api/auth/login</span></td><td>دخول (بريد أو تليفون + كلمة مرور)</td></tr>
+          <tr><td>POST</td><td><span class="mono">/api/auth/logout</span></td><td>تسجيل خروج</td></tr>
+          <tr><td>GET</td><td><span class="mono">/api/auth/me</span></td><td>بيانات المستخدم الحالي</td></tr>
+          <tr><td>CRUD</td><td><span class="mono">/api/leave-requests</span></td><td>طلبات الإجازة + submit/approve/reject/return/cancel</td></tr>
+          <tr><td>CRUD</td><td><span class="mono">/api/employees</span></td><td>الموظفون + أرصدة</td></tr>
+          <tr><td>GET</td><td><span class="mono">/api/leave-types</span> · <span class="mono">/api/organizations</span></td><td>قوائم مرجعية</td></tr>
+          <tr><td>GET</td><td><span class="mono">/api/dashboard/stats</span></td><td>إحصاءات لوحة التحكم</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="security">
+      <h2>9) الأمان والحسابات</h2>
+      <ul class="clean">
+        <li>كلمات المرور مشفّرة (Hash) داخل قاعدة البيانات.</li>
+        <li>الدخول مرفوض للحساب غير النشط.</li>
+        <li>صلاحيات الأدوار مقيّدة بنطاق المؤسسة (Teams).</li>
+        <li>يمكن فرض تغيير كلمة المرور عند أول دخول.</li>
+        <li>ملف <span class="mono">.env</span> يحتوي أسرار التشغيل ولا يُرفع على Git.</li>
+        <li>التحقق العام من نموذج الإجازة عبر مسار عام للرقم/الرمز المطبوع.</li>
+      </ul>
+    </section>
+
+    <section id="deploy">
+      <h2>10) النشر والتشغيل</h2>
+      <ul class="clean">
+        <li>الكود على GitHub (مستودع عام/خاص حسب الإعداد).</li>
+        <li>على السيرفر: مجلد المشروع هو مستودع Git مرتبط بالـ remote.</li>
+        <li>للتحديث: سحب الكود ثم <span class="mono">composer install</span> و <span class="mono">php artisan migrate</span> وتحديث الكاش.</li>
+        <li>سكربت مساعد: <span class="mono">scripts/server-deploy.sh</span></li>
+        <li>Document Root يشير إلى مجلد <span class="mono">public/</span>.</li>
+      </ul>
+      <p class="muted">
+        خدمات مهمة في الكود:
+        <span class="mono">LeaveRequestService</span>،
+        <span class="mono">LeaveBalanceService</span>،
+        <span class="mono">LeaveRequestPdfService</span>،
+        <span class="mono">ReportPdfService</span>،
+        <span class="mono">DashboardStatsService</span>.
+      </p>
+    </section>
+
+    <footer>
+      تم إعداد هذا الملف كشرح توثيقي لنظام إدارة الإجازات — مديرية الأقصر.
+      يمكن فتحه في أي متصفح أو طباعته PDF من خيار الطباعة.
+    </footer>
+  </div>
+</body>
+</html>
