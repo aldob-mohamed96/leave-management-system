@@ -3,13 +3,9 @@
 namespace Database\Seeders;
 
 use App\Enums\OrganizationType;
-use App\Models\Employee;
-use App\Models\LeaveBalance;
-use App\Models\LeaveType;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -85,80 +81,33 @@ class DatabaseSeeder extends Seeder
         // ------------------------------------------------------------------
 
         // ------------------------------------------------------------------
-        // 5. Employees (3–5 per school = ~24 total)
+        // 5. Employees — created from real data via ArmantSchoolsSeeder only
+        //    (no factories needed in production)
         // ------------------------------------------------------------------
-        $employees = [];
-        foreach ($schools as $school) {
-            $count = rand(3, 5);
-            for ($i = 0; $i < $count; $i++) {
-                $employees[] = Employee::factory()
-                    ->inOrganization($school)
-                    ->create();
-            }
-        }
-        $this->command->info('✓ ' . count($employees) . ' employees seeded across 6 schools.');
 
         // ------------------------------------------------------------------
-        // 6. Opening leave balances for current year
-        //    Regular leave entitlement is calculated from entitlement_grade
-        // ------------------------------------------------------------------
-        $year = now()->year;
-        $balanceCount = 0;
-
-        foreach ($employees as $employee) {
-            foreach ($leaveTypes as $leaveType) {
-                // For regular leave, use the grade-based entitlement
-                $entitled = match($leaveType->code) {
-                    'regular' => $employee->regularLeaveEntitlement(),
-                    default   => $leaveType->yearly_entitlement,
-                };
-
-                // Only create balance records for leave types that have a yearly entitlement
-                if ($entitled == 0 && ! $leaveType->deducts_balance) {
-                    // Event-based leaves (maternity, hajj, etc.) don't need annual balance rows
-                    // They are tracked per-request, not per-year
-                    continue;
-                }
-
-                LeaveBalance::create([
-                    'employee_id'   => $employee->id,
-                    'leave_type_id' => $leaveType->id,
-                    'year'          => $year,
-                    'entitled'      => $entitled,
-                    'carried_over'  => ($leaveType->deducts_balance && $leaveType->code !== 'casual')
-                        ? rand(0, 5)
-                        : 0,
-                    'used'          => 0,
-                ]);
-                $balanceCount++;
-            }
-        }
-        $this->command->info("✓ {$balanceCount} leave balance records seeded for year {$year}.");
-
-        // ------------------------------------------------------------------
-        // 7. Workflow configurations (needs schools to exist)
+        // 6. Workflow configurations (needs schools to exist)
         // ------------------------------------------------------------------
         $this->call(WorkflowConfigurationSeeder::class);
 
         // ------------------------------------------------------------------
-        // 8. Real Armant schools + accounts (63 schools)
+        // 7. Real Armant schools + accounts (63 schools)
         // ------------------------------------------------------------------
         $this->call(ArmantSchoolsSeeder::class);
 
         // ------------------------------------------------------------------
-        // 9. Super admin account
+        // 8. Super admin account
         // ------------------------------------------------------------------
         $this->call(SuperAdminSeeder::class);
 
         $this->command->newLine();
         $this->command->info('═══════════════════════════════════════════════');
-        $this->command->info('  Phase 1 seed complete. Summary:');
-        $this->command->info('  • Leave types : ' . $leaveTypes->count());
+        $this->command->info('  Seed complete. Summary:');
+        $this->command->info('  • Leave types : ' . \App\Models\LeaveType::count());
         $this->command->info('  • Holidays    : ' . \App\Models\Holiday::count());
         $this->command->info('  • Orgs        : ' . Organization::count());
         $this->command->info('  • Users       : ' . User::count());
-        $this->command->info('  • Employees   : ' . count($employees));
-        $this->command->info('  • Balances    : ' . $balanceCount);
+        $this->command->info('  • Employees   : ' . \App\Models\Employee::withoutGlobalScopes()->count());
         $this->command->info('═══════════════════════════════════════════════');
     }
 
