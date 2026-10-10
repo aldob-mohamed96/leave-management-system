@@ -182,6 +182,10 @@ class ArmantSchoolsSeeder extends Seeder
         $leaveTypes = LeaveType::all();
         $year = now()->year;
         $created = 0;
+        $gradesCodes = \App\Models\EntitlementGrade::where('is_active', true)->pluck('code')->toArray();
+        $defaultGrade = $gradesCodes[0] ?? null;
+
+        $jobTitles = ['معلم', 'معلم أول', 'وكيل', 'أمين مكتبة', 'أخصائي اجتماعي'];
 
         foreach ($schools as $school) {
             $existing = Employee::withoutGlobalScopes()
@@ -191,9 +195,16 @@ class ArmantSchoolsSeeder extends Seeder
             $needed = max(0, 3 - $existing);
 
             for ($i = 0; $i < $needed; $i++) {
-                $employee = Employee::factory()
-                    ->inOrganization($school)
-                    ->create();
+                $employee = Employee::create([
+                    'organization_id'   => $school->id,
+                    'employee_code'     => 'EMP-' . strtoupper(substr(md5($school->id . $i . microtime()), 0, 6)),
+                    'full_name'         => 'موظف ' . ($existing + $i + 1) . ' — ' . $school->name,
+                    'job_title'         => $jobTitles[$i % count($jobTitles)],
+                    'entitlement_grade' => $defaultGrade,
+                    'hire_date'         => now()->subYears(rand(1, 15))->toDateString(),
+                    'work_start_date'   => now()->subYears(rand(1, 15))->toDateString(),
+                    'is_active'         => true,
+                ]);
 
                 foreach ($leaveTypes as $leaveType) {
                     $entitled = match ($leaveType->code) {
