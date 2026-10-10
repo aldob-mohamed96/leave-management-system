@@ -7,7 +7,6 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -22,7 +21,14 @@ class SuperAdminSeeder extends Seeder
         // -------------------------------------------------------
         $directorate = Organization::withoutGlobalScopes()
             ->where('type', OrganizationType::DIRECTORATE->value)
+            ->where('code', 'DIR-LXR')
             ->first();
+
+        if (! $directorate) {
+            $directorate = Organization::withoutGlobalScopes()
+                ->where('type', OrganizationType::DIRECTORATE->value)
+                ->first();
+        }
 
         if (! $directorate) {
             $this->command->error('No directorate found. Run DatabaseSeeder first.');
@@ -44,14 +50,8 @@ class SuperAdminSeeder extends Seeder
         );
 
         // -------------------------------------------------------
-        // 3. Give all permissions directly on the user
-        //    (bypasses role-team scoping)
-        // -------------------------------------------------------
-        $allPermissions = Permission::all();
-        $user->syncPermissions($allPermissions);
-
-        // -------------------------------------------------------
-        // 4. Also assign the مدير المديرية role for the directorate
+        // 3. Assign the مدير المديرية role (has all permissions)
+        //    scoped to the directorate team
         // -------------------------------------------------------
         setPermissionsTeamId($directorate->id);
 
@@ -61,6 +61,8 @@ class SuperAdminSeeder extends Seeder
 
         if ($role) {
             $user->syncRoles([$role]);
+        } else {
+            $this->command->warn('Role مدير المديرية not found — user created without role.');
         }
 
         setPermissionsTeamId(null);
