@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,7 +57,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ---------------------------------------------------------------
-        // Preserve float precision in JSON responses (30.0 stays 30.0).
+        // Fix for older MySQL versions: key length limit
+        // ---------------------------------------------------------------
+        Schema::defaultStringLength(191);
+
         // ---------------------------------------------------------------
         $this->app->resolving(\Illuminate\Http\JsonResponse::class, function (\Illuminate\Http\JsonResponse $response) {
             $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
