@@ -22,8 +22,6 @@ class DatabaseSeeder extends Seeder
             EntitlementGradeSeeder::class,
         ]);
 
-        $leaveTypes = LeaveType::all()->keyBy('code');
-
         // ------------------------------------------------------------------
         // 2. Organization hierarchy
         //    مديرية الأقصر → إدارة أرمنت + إدارة الطود → 3 مدارس كل إدارة
