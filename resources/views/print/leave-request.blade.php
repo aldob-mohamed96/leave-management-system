@@ -236,13 +236,13 @@
         <table class="data">
             <tr>
                 <td class="label">الإجازة المستحقة</td>
-                <td class="value">{{ $leaveRequest->balance_entitled !== null ? (int) $leaveRequest->balance_entitled : '—' }} يوم</td>
+                <td class="value">{{ $liveEntitled !== null ? (int) $liveEntitled : '—' }} يوم</td>
                 <td class="label">السابق منحها</td>
-                <td class="value">{{ $leaveRequest->balance_used !== null ? (int) $leaveRequest->balance_used : '—' }} يوم</td>
+                <td class="value">{{ $liveUsed !== null ? (int) $liveUsed : '—' }} يوم</td>
             </tr>
             <tr>
                 <td class="label">الرصيد المتبقي</td>
-                <td class="value">{{ $leaveRequest->balance_remaining !== null ? (int) $leaveRequest->balance_remaining : '—' }} يوم</td>
+                <td class="value">{{ $liveRemaining !== null ? (int) $liveRemaining : '—' }} يوم</td>
                 <td class="label">حالة الطلب</td>
                 <td class="value">{{ $leaveRequest->displayStatusLabel() }}</td>
             </tr>

@@ -51,6 +51,21 @@ class LeaveRequestPdfService
         $showCasualNote = ($request->leaveType?->isRegular() ?? false)
             && (float) $request->days <= 2;
 
+        // Live balance from DB (more accurate than the snapshot stored on the request)
+        $liveBalance = null;
+        if ($employee && $request->leaveType) {
+            $liveBalance = \App\Models\LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_type_id', $request->leaveType->id)
+                ->where('year', $request->start_date?->year ?? now()->year)
+                ->first();
+        }
+
+        $liveEntitled   = $liveBalance?->entitled  ?? $request->balance_entitled;
+        $liveUsed       = $liveBalance?->used       ?? $request->balance_used;
+        $liveRemaining  = $liveBalance
+            ? max(0, (int)$liveBalance->entitled + (int)$liveBalance->carried_over - (int)$liveBalance->used)
+            : $request->balance_remaining;
+
         return [
             'leaveRequest'     => $request,
             'directorate'      => $hierarchy['directorate'],
@@ -65,6 +80,9 @@ class LeaveRequestPdfService
             'employeeGrade'    => $gradeLabel,
             'substituteName'   => $substitute?->full_name,
             'showCasualNote'   => $showCasualNote,
+            'liveEntitled'     => $liveEntitled,
+            'liveUsed'         => $liveUsed,
+            'liveRemaining'    => $liveRemaining,
         ];
     }
 
