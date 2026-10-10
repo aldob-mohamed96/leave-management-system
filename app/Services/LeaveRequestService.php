@@ -295,7 +295,7 @@ class LeaveRequestService
         User $actedBy,
         ?string $note = null
     ): LeaveRequest {
-        $this->guardStepAction($request, $step);
+        $this->guardStepAction($request, $step, $actedBy);
 
         return DB::transaction(function () use ($request, $step, $actedBy, $note) {
             // Mark this step approved
@@ -398,7 +398,7 @@ class LeaveRequestService
             throw new LeaveRequestException('سبب الرفض مطلوب ولا يمكن أن يكون فارغاً.');
         }
 
-        $this->guardStepAction($request, $step);
+        $this->guardStepAction($request, $step, $actedBy);
 
         return DB::transaction(function () use ($request, $step, $actedBy, $reason) {
             $step->update([
@@ -441,7 +441,7 @@ class LeaveRequestService
         User $actedBy,
         string $note
     ): LeaveRequest {
-        $this->guardStepAction($request, $step);
+        $this->guardStepAction($request, $step, $actedBy);
 
         return DB::transaction(function () use ($request, $step, $actedBy, $note) {
             $step->update([
@@ -508,7 +508,7 @@ class LeaveRequestService
     // Guards
     // -------------------------------------------------------------------------
 
-    private function guardStepAction(LeaveRequest $request, LeaveRequestStep $step): void
+    private function guardStepAction(LeaveRequest $request, LeaveRequestStep $step, User $actedBy): void
     {
         $validStatuses = [LeaveStatus::SUBMITTED, LeaveStatus::IN_REVIEW];
 
@@ -526,6 +526,23 @@ class LeaveRequestService
 
         if ($step->stage !== $request->current_stage) {
             throw new LeaveRequestException('هذه المرحلة ليست المرحلة النشطة حالياً.');
+        }
+
+        // التحقق من أن المستخدم يملك الدور المطلوب لهذه المرحلة
+        $stageRoleMap = [
+            'leaves_officer' => 'مسؤول الإجازات',
+            'hr_affairs'     => 'شؤون عاملين',
+            'admin_manager'  => 'مدير الإدارة',
+        ];
+
+        if (isset($stageRoleMap[$step->stage])) {
+            $actedBy->setOrganizationTeam();
+            $requiredRole = $stageRoleMap[$step->stage];
+            if (! $actedBy->hasRole($requiredRole)) {
+                throw new LeaveRequestException(
+                    "ليس لديك صلاحية اتخاذ إجراء في مرحلة «{$requiredRole}»."
+                );
+            }
         }
     }
 
