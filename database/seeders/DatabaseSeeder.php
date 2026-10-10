@@ -145,6 +145,11 @@ class DatabaseSeeder extends Seeder
         // ------------------------------------------------------------------
         $this->call(ArmantSchoolsSeeder::class);
 
+        // ------------------------------------------------------------------
+        // 9. Super admin account
+        // ------------------------------------------------------------------
+        $this->call(SuperAdminSeeder::class);
+
         $this->command->newLine();
         $this->command->info('═══════════════════════════════════════════════');
         $this->command->info('  Phase 1 seed complete. Summary:');
